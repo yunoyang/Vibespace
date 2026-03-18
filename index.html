@@ -6,6 +6,8 @@
 <title>Vibespace - 시공 플래너</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 :root {
   --primary: #3176ff;
@@ -86,10 +88,12 @@ button,input,textarea,select { font-family:var(--font); }
   background:#fff; border-radius:12px; padding:20px;
   border:1px solid var(--border-light);
   box-shadow:0 4px 10.5px rgba(0,0,0,.04);
-  margin-top:0; overflow:hidden;
-  transition: max-height .3s ease, padding .3s ease, opacity .3s ease;
+  margin-top:4px;
+  max-height:400px;
+  overflow:hidden;
+  transition: max-height .3s ease, padding .3s ease, opacity .3s ease, margin .3s ease;
 }
-.summary-card.collapsed { max-height:0!important; padding:0 20px; opacity:0; overflow:hidden; border:0; }
+.summary-card.collapsed { max-height:0!important; padding:0 20px; opacity:0; overflow:hidden; border:0; margin-top:0; }
 .summary-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
 .summary-header span { font-size:14px; font-weight:500; }
 .summary-list { display:flex; flex-direction:column; gap:12px; }
@@ -216,6 +220,13 @@ button,input,textarea,select { font-family:var(--font); }
   padding:12px 16px; background:#fff; border:1px solid var(--border-input);
   border-radius:4px; font-size:16px; color:#222; width:100%; outline:none; font-family:var(--font);
 }
+.addr-search-row { display:flex; gap:8px; }
+.addr-search-btn {
+  padding:12px 16px; background:var(--btn-blue); color:#fff; border:none;
+  border-radius:4px; font-size:14px; font-weight:500; cursor:pointer;
+  white-space:nowrap; font-family:var(--font); flex-shrink:0;
+}
+.addr-search-btn:active { background:#006acc; }
 .textarea-field {
   width:100%; min-height:60px; padding:12px 16px; background:#fff;
   border:1px solid var(--border-input); border-radius:4px;
@@ -273,6 +284,7 @@ button,input,textarea,select { font-family:var(--font); }
 .dropdown button {
   padding:12px 16px; font-size:14px; color:#333; cursor:pointer;
   border-radius:8px; border:none; background:none; text-align:left; font-family:var(--font);
+  display:flex; align-items:center; gap:4px;
 }
 .dropdown button:hover { background:#f5f7fa; }
 
@@ -342,6 +354,21 @@ button,input,textarea,select { font-family:var(--font); }
   padding:2px 0;
 }
 
+/* === Google Login Button === */
+.google-btn {
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  width:100%; padding:14px; background:#fff; border:1px solid #ddd;
+  border-radius:8px; font-size:15px; font-weight:500; cursor:pointer;
+  font-family:var(--font); transition:background .15s;
+}
+.google-btn:hover { background:#f5f5f5; }
+
+/* === Menu badge === */
+.menu-badge {
+  font-size:10px; padding:2px 6px; border-radius:99px;
+  background:#f0f0f0; color:#999; margin-left:4px; flex-shrink:0;
+}
+
 @media(min-width:391px) {
   .app { box-shadow:0 0 40px rgba(0,0,0,.1); }
 }
@@ -386,11 +413,11 @@ button,input,textarea,select { font-family:var(--font); }
 
     <!-- Summary -->
     <div class="summary-wrap" id="summary-section">
+      <div class="summary-toggle-row" onclick="toggleSummary()">
+        <span>시공요약</span>
+        <span class="chevron open" id="summary-chevron">▾</span>
+      </div>
       <div class="summary-card" id="summary-card">
-        <div class="summary-header">
-          <span>시공요약</span>
-          <span style="cursor:pointer;font-size:14px;" onclick="toggleSummary()">∧</span>
-        </div>
         <div class="summary-list" id="summary-list">
           <div class="summary-row"><span class="label">총 예상 비용</span><span class="value" id="sum-cost">0원</span></div>
           <div class="summary-divider"></div>
@@ -430,13 +457,11 @@ button,input,textarea,select { font-family:var(--font); }
 
     <!-- Dropdown Menu -->
     <div class="dropdown" id="main-menu" style="top:105px;right:16px;">
-      <button onclick="goTo('form')">시공 정보 수정</button>
-      <button onclick="goTo('drawings')">내 도면</button>
+      <button onclick="goTo('form');closeAllMenus();">시공정보</button>
+      <button onclick="saveToServer()">시공정보 저장</button>
       <button onclick="openShareDialog()">공유하기</button>
-      <button onclick="openDownloadDialog()">시공 계획 다운로드</button>
-      <button onclick="openExpertDialog()">전문가 피드백 요청</button>
-      <button onclick="goTo('account')">계정 관리</button>
-      <button onclick="doLogout()" style="color:var(--danger);">홈으로</button>
+      <button onclick="openExpertDialog()">전문가 피드백 요청<span class="menu-badge">추후 오픈</span></button>
+      <button id="menu-login-btn" onclick="handleMenuLogin()">로그인</button>
     </div>
   </div>
 
@@ -484,12 +509,16 @@ button,input,textarea,select { font-family:var(--font); }
           </div>
         </div>
         <div class="form-group">
-          <span class="form-label">추소</span>
+          <span class="form-label">메모</span>
           <textarea class="textarea-field" id="f-memo" onchange="saveFormData()"></textarea>
         </div>
         <div class="form-group">
           <span class="form-label">주소</span>
-          <input class="addr-input" id="f-address" value="경기도 수내동 182번지" onchange="saveFormData()">
+          <div class="addr-search-row">
+            <input class="addr-input" id="f-address" placeholder="주소를 검색하세요" onchange="saveFormData()" style="flex:1;">
+            <button type="button" class="addr-search-btn" onclick="searchAddress()">주소 검색</button>
+          </div>
+          <input class="addr-input" id="f-address-detail" placeholder="상세주소 입력 (동, 호수 등)" onchange="saveFormData()" style="margin-top:8px;">
         </div>
       </div>
       <div class="form-footer">
@@ -609,9 +638,11 @@ button,input,textarea,select { font-family:var(--font); }
   <div class="dialog">
     <h3>공유하기</h3>
     <div class="share-options">
+      <div class="share-option" onclick="shareAction('native')"><span class="s-icon">📤</span><span class="s-text">공유하기 (기본)</span></div>
       <div class="share-option" onclick="shareAction('link')"><span class="s-icon">🔗</span><span class="s-text">링크 복사</span></div>
-      <div class="share-option" onclick="shareAction('file')"><span class="s-icon">📄</span><span class="s-text">파일로 공유</span></div>
-      <div class="share-option" onclick="shareAction('kakao')"><span class="s-icon">💬</span><span class="s-text">카카오톡 공유</span></div>
+      <div class="share-option" onclick="shareAction('kakao')"><span class="s-icon">💬</span><span class="s-text">카카오톡</span></div>
+      <div class="share-option" onclick="shareAction('twitter')"><span class="s-icon">🐦</span><span class="s-text">Twitter / X</span></div>
+      <div class="share-option" onclick="shareAction('facebook')"><span class="s-icon">📘</span><span class="s-text">Facebook</span></div>
     </div>
     <div class="dialog-actions"><button class="btn-cancel" onclick="closeDialog('dlg-share')">닫기</button></div>
   </div>
@@ -634,16 +665,36 @@ button,input,textarea,select { font-family:var(--font); }
 <div class="overlay" id="dlg-expert">
   <div class="dialog">
     <h3>전문가 피드백 요청</h3>
-    <p style="font-size:14px;color:#666;line-height:1.5;">인테리어 전문가에게 현재 시공 계획을 보내 검토를 요청합니다.</p>
-    <textarea class="textarea-field" id="expert-msg" placeholder="전문가에게 전달할 메시지 (선택사항)" rows="3"></textarea>
+    <p style="font-size:14px;color:#666;line-height:1.5;">해당 기능은 추후 오픈 예정입니다.<br>인테리어 전문가에게 시공 계획을 검토받을 수 있습니다.</p>
+    <div style="background:#f8f9ff;border-radius:10px;padding:16px;font-size:13px;color:#888;line-height:1.6;">
+      🔔 오픈 알림을 받으시려면 계정을 등록해 두세요.
+    </div>
     <div class="dialog-actions">
-      <button class="btn-cancel" onclick="closeDialog('dlg-expert')">취소</button>
-      <button class="btn-confirm" onclick="sendExpertRequest()">요청 보내기</button>
+      <button class="btn-cancel" onclick="closeDialog('dlg-expert')">닫기</button>
     </div>
   </div>
 </div>
 
+<!-- Login Dialog -->
+<div class="overlay" id="dlg-login">
+  <div class="dialog">
+    <h3>로그인</h3>
+    <p style="font-size:14px;color:#666;line-height:1.5;">시공정보 입력 및 저장을 위해<br>로그인이 필요합니다.</p>
+    <div id="google-signin-btn" style="display:flex;justify-content:center;min-height:48px;margin:4px 0;"></div>
+    <div style="text-align:center;font-size:12px;color:#ccc;margin:-4px 0 0;">또는</div>
+    <button onclick="demoLogin()" class="google-btn" style="background:#f8f9ff;">
+      <span>🔑</span> 데모 로그인 (테스트용)
+    </button>
+    <div class="dialog-actions"><button class="btn-cancel" onclick="closeDialog('dlg-login')">취소</button></div>
+  </div>
+</div>
+
 <script>
+// ===================== CONFIG =====================
+// TODO: Google Cloud Console에서 발급받은 Client ID로 교체하세요
+// https://console.cloud.google.com/ → APIs & Services → Credentials
+const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
+
 // ===================== DATA & STATE =====================
 const PROCESS_TYPES = ['철거','샷시','목공','타일','욕실','도배','가구','전기'];
 const PROCESS_COLORS = { '철거':'c0','샷시':'c1','목공':'c2','타일':'c3','욕실':'c4','도배':'c5','가구':'c6','전기':'c7' };
@@ -656,12 +707,14 @@ let state = {
   summaryOpen: true,
 };
 
+let pendingAction = null;
+
 function getProject() { return state.projects.find(p => p.id === state.currentProjectId); }
 function save() { localStorage.setItem('vibespace', JSON.stringify(state)); }
 function load() {
   const d = localStorage.getItem('vibespace');
-  if (d) { state = JSON.parse(d); }
-  if (!state.projects.length) { initDefaultProject(); }
+  if (d) { try { state = JSON.parse(d); } catch(e) {} }
+  if (!state.projects || !state.projects.length) { initDefaultProject(); }
 }
 
 function initDefaultProject() {
@@ -677,7 +730,7 @@ function createDefaultProject(name) {
     form: {
       type: ['아파트'], size: ['30평대'], method: ['반셀프'],
       startDate: '2025-11-01', endDate: '2025-11-30',
-      memo: '', address: '경기도 수내동 182번지',
+      memo: '', address: '경기도 수내동 182번지', addressDetail: '',
     },
     drawing: null,
     processes: [
@@ -697,11 +750,92 @@ function createDefaultProject(name) {
   };
 }
 
+// ===================== AUTH =====================
+function requireLogin(action) {
+  if (state.loggedIn) { action(); return; }
+  pendingAction = action;
+  openLoginDialog();
+}
+
+function openLoginDialog() {
+  openDialog('dlg-login');
+  setTimeout(() => {
+    const btn = document.getElementById('google-signin-btn');
+    if (!btn) return;
+    btn.innerHTML = '';
+    if (typeof google !== 'undefined' && google.accounts &&
+        GOOGLE_CLIENT_ID !== 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com') {
+      try {
+        google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleGoogleResponse });
+        google.accounts.id.renderButton(btn, { theme: 'outline', size: 'large', text: 'signin_with', width: 280 });
+      } catch(e) {}
+    }
+  }, 150);
+}
+
+function handleGoogleResponse(response) {
+  try {
+    const payload = JSON.parse(atob(response.credential.split('.')[1]));
+    state.loggedIn = true;
+    state.user = { name: payload.name || '사용자', email: payload.email || '' };
+    save();
+    closeDialog('dlg-login');
+    updateLoginUI();
+    if (pendingAction) { const a = pendingAction; pendingAction = null; a(); }
+  } catch(e) { alert('로그인 중 오류가 발생했습니다.'); }
+}
+
+function demoLogin() {
+  state.loggedIn = true;
+  state.user = { name: '테스트 사용자', email: 'demo@vibespace.kr' };
+  save();
+  closeDialog('dlg-login');
+  updateLoginUI();
+  if (pendingAction) { const a = pendingAction; pendingAction = null; a(); }
+}
+
+function handleMenuLogin() {
+  closeAllMenus();
+  if (state.loggedIn) {
+    if (confirm(`${state.user.name || '사용자'}님, 로그아웃 하시겠습니까?`)) doLogout();
+  } else {
+    pendingAction = null;
+    openLoginDialog();
+  }
+}
+
+function updateLoginUI() {
+  const btn = document.getElementById('menu-login-btn');
+  if (btn) {
+    btn.textContent = state.loggedIn
+      ? `로그아웃 (${state.user.name || '사용자'})`
+      : '로그인';
+    btn.style.color = state.loggedIn ? 'var(--danger)' : '';
+  }
+}
+
+function saveToServer() {
+  closeAllMenus();
+  if (!state.loggedIn) {
+    pendingAction = () => { goTo('main'); saveToServer(); };
+    openLoginDialog();
+    return;
+  }
+  const proj = getProject();
+  if (!proj) return;
+  // 실제 서버 연동 시 fetch API 사용
+  const saveData = { user: state.user, project: proj, savedAt: new Date().toISOString() };
+  localStorage.setItem('vibespace_saved_' + proj.id, JSON.stringify(saveData));
+  alert(`✅ "${proj.name}" 시공정보가 저장되었습니다.\n\n저장 계정: ${state.user.email}`);
+}
+
 // ===================== LANDING & NAVIGATION =====================
 let formMode = 'edit'; // 'new' or 'edit'
 
 function startNewProject() {
-  // Create a new empty project and go to form
+  requireLogin(_startNewProject);
+}
+function _startNewProject() {
   const proj = createDefaultProject('새 시공 프로젝트');
   proj.processes = [];
   state.projects.push(proj);
@@ -719,7 +853,6 @@ function loadExistingProjects() {
     alert('저장된 프로젝트가 없습니다. 새 프로젝트를 생성해주세요.');
     return;
   }
-  // If only one project, go straight to main
   if (state.projects.length === 1) {
     state.currentProjectId = state.projects[0].id;
     save();
@@ -727,14 +860,11 @@ function loadExistingProjects() {
     renderAll();
     return;
   }
-  // Multiple projects - show project select dialog
   openProjectSelect();
 }
 
 function formGoBack() {
   if (formMode === 'new') {
-    // If coming from landing with new project, go back to landing
-    // Remove the empty project we just created
     const proj = getProject();
     if (proj && proj.processes.length === 0) {
       state.projects = state.projects.filter(p => p.id !== proj.id);
@@ -753,7 +883,11 @@ function formGoBack() {
 }
 
 function doLogout() {
+  state.loggedIn = false;
+  state.user = { email:'', name:'' };
+  save();
   closeAllMenus();
+  updateLoginUI();
   goTo('landing');
 }
 
@@ -779,9 +913,10 @@ function goTo(screen) {
 // ===================== SUMMARY =====================
 function toggleSummary() {
   state.summaryOpen = !state.summaryOpen;
-  document.getElementById('summary-card').classList.toggle('collapsed', !state.summaryOpen);
+  updateSummary();
   save();
 }
+
 function updateSummary() {
   const proj = getProject(); if (!proj) return;
   let totalCost = 0;
@@ -791,14 +926,17 @@ function updateSummary() {
     if (p.company) companies.add(p.company);
   });
   document.getElementById('sum-cost').textContent = totalCost > 0 ? '약 ' + formatNum(totalCost) + '원' : '0원';
-  // Duration
   if (proj.form.startDate && proj.form.endDate) {
     const s = new Date(proj.form.startDate), e = new Date(proj.form.endDate);
     const months = Math.max(1, Math.round((e - s) / (1000*60*60*24*30)));
     document.getElementById('sum-duration').textContent = '약 ' + months + '개월';
   }
   document.getElementById('sum-companies').textContent = companies.size + '개 업체';
-  document.getElementById('summary-card').classList.toggle('collapsed', !state.summaryOpen);
+
+  const isOpen = state.summaryOpen !== false;
+  document.getElementById('summary-card').classList.toggle('collapsed', !isOpen);
+  const chevron = document.getElementById('summary-chevron');
+  if (chevron) chevron.classList.toggle('open', isOpen);
 }
 
 function formatNum(n) {
@@ -901,6 +1039,9 @@ function deleteProcess(procId) {
 // ===================== ADD PROCESS =====================
 let selectedProcessType = null;
 function openAddProcess() {
+  requireLogin(_openAddProcess);
+}
+function _openAddProcess() {
   selectedProcessType = null;
   document.getElementById('custom-process-input').value = '';
   const grid = document.getElementById('process-grid');
@@ -1021,6 +1162,8 @@ function loadFormData() {
   document.getElementById('f-end').value = f.endDate || '';
   document.getElementById('f-memo').value = f.memo || '';
   document.getElementById('f-address').value = f.address || '';
+  const detailEl = document.getElementById('f-address-detail');
+  if (detailEl) detailEl.value = f.addressDetail || '';
 }
 function saveFormData() {
   const proj = getProject(); if (!proj) return;
@@ -1039,12 +1182,13 @@ function saveFormData() {
   f.endDate = document.getElementById('f-end').value;
   f.memo = document.getElementById('f-memo').value;
   f.address = document.getElementById('f-address').value;
+  const detailEl = document.getElementById('f-address-detail');
+  if (detailEl) f.addressDetail = detailEl.value;
   save();
 }
 function saveFormAndBack() {
   saveFormData();
   if (formMode === 'new') {
-    // After initial form setup, go to main plan screen
     formMode = 'edit';
     document.getElementById('form-title').textContent = '시공 정보';
     document.getElementById('form-submit-btn').textContent = '수정완료';
@@ -1053,6 +1197,23 @@ function saveFormAndBack() {
   } else {
     goTo('main');
   }
+}
+
+// ===================== ADDRESS SEARCH =====================
+function searchAddress() {
+  if (typeof daum === 'undefined' || !daum.Postcode) {
+    alert('주소 검색 서비스를 불러오는 중입니다.\n잠시 후 다시 시도해주세요.');
+    return;
+  }
+  new daum.Postcode({
+    oncomplete: function(data) {
+      const addr = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
+      document.getElementById('f-address').value = addr;
+      const detailEl = document.getElementById('f-address-detail');
+      if (detailEl) detailEl.focus();
+      saveFormData();
+    }
+  }).open();
 }
 
 // ===================== PROJECTS =====================
@@ -1114,13 +1275,29 @@ function openExpertDialog() { closeAllMenus(); openDialog('dlg-expert'); }
 
 function shareAction(type) {
   const proj = getProject();
-  if (type === 'link') {
-    const url = window.location.href + '?project=' + proj.id;
-    navigator.clipboard?.writeText(url).then(() => alert('링크가 복사되었습니다!')).catch(() => alert('링크: ' + url));
-  } else if (type === 'file') {
-    downloadAsJson();
+  const url = window.location.href;
+  const text = `[Vibespace] ${proj ? proj.name : '시공 계획'}`;
+
+  if (type === 'native') {
+    if (navigator.share) {
+      navigator.share({ title: text, url }).catch(() => {});
+    } else {
+      shareAction('link');
+    }
+  } else if (type === 'link') {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(url).then(() => alert('링크가 복사되었습니다!'));
+    } else {
+      alert('링크: ' + url);
+    }
+  } else if (type === 'twitter') {
+    window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url), '_blank');
+  } else if (type === 'facebook') {
+    window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url), '_blank');
   } else if (type === 'kakao') {
-    alert('카카오톡 공유 기능은 추후 업데이트됩니다.');
+    alert('카카오톡 공유는 카카오 SDK 연동 후 이용 가능합니다.\n\n링크를 복사하여 직접 공유해 주세요.');
+    shareAction('link');
+    return;
   }
   closeDialog('dlg-share');
 }
@@ -1144,7 +1321,7 @@ function generatePlanText(proj) {
   txt += `평형: ${proj.form.size.join(', ')}\n`;
   txt += `시공방법: ${proj.form.method.join(', ')}\n`;
   txt += `시공일정: ${proj.form.startDate} ~ ${proj.form.endDate}\n`;
-  txt += `주소: ${proj.form.address}\n\n`;
+  txt += `주소: ${proj.form.address} ${proj.form.addressDetail || ''}\n\n`;
   txt += `${'─'.repeat(40)}\n공정 계획\n${'─'.repeat(40)}\n\n`;
   proj.processes.forEach((p,i) => {
     txt += `${i+1}. ${p.name}\n`;
@@ -1174,12 +1351,6 @@ function downloadBlob(blob, name) {
   URL.revokeObjectURL(a.href);
 }
 
-function sendExpertRequest() {
-  const msg = document.getElementById('expert-msg').value;
-  alert('전문가에게 피드백 요청이 전송되었습니다.\n메시지: ' + (msg || '(없음)'));
-  closeDialog('dlg-expert');
-}
-
 // ===================== DIALOG UTILS =====================
 function openDialog(id) { document.getElementById(id).classList.add('active'); }
 function closeDialog(id) { document.getElementById(id).classList.remove('active'); }
@@ -1203,7 +1374,6 @@ function renderAll() {
     document.getElementById('current-project-name').textContent = proj.name;
     renderWorkCards();
     updateSummary();
-    // Restore drawing
     if (proj.drawing) {
       document.getElementById('upload-preview').src = proj.drawing;
       document.getElementById('upload-preview').style.display = 'block';
@@ -1213,12 +1383,21 @@ function renderAll() {
       document.getElementById('upload-area').style.display = 'flex';
     }
   }
+  updateLoginUI();
 }
 
 // ===================== INIT =====================
 load();
-// Always start at landing screen
 goTo('landing');
+updateLoginUI();
+window.addEventListener('load', function() {
+  if (typeof google !== 'undefined' && google.accounts &&
+      GOOGLE_CLIENT_ID !== 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com') {
+    try {
+      google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleGoogleResponse });
+    } catch(e) {}
+  }
+});
 </script>
 </body>
 </html>
