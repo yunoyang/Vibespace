@@ -163,7 +163,7 @@ button, input, textarea, select { font-family:var(--font); }
   gap:16px;
 }
 .work-card {
-  background:#fff; border-radius:14px; padding:20px;
+  background:#fff; border-radius:14px; padding:24px;
   border:1px solid var(--card-border); box-shadow:var(--card-shadow);
 }
 .work-card-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
@@ -201,9 +201,9 @@ button, input, textarea, select { font-family:var(--font); }
   display:flex; align-items:flex-start; justify-content:space-between;
   padding:9px 0; gap:10px;
 }
-.d-desc { font-size:15px; color:var(--text-secondary); flex:1; line-height:1.4; }
+.d-desc { font-size:16px; color:var(--text-secondary); flex:1; line-height:1.4; }
 .d-right { display:flex; align-items:center; gap:8px; flex-shrink:0; }
-.d-cost { font-size:15px; font-weight:600; white-space:nowrap; }
+.d-cost { font-size:16px; font-weight:600; white-space:nowrap; }
 .detail-del-btn {
   background:none; border:none; cursor:pointer; color:#ccc; padding:2px;
   display:flex; border-radius:4px;
@@ -404,14 +404,14 @@ button, input, textarea, select { font-family:var(--font); }
   background:#fff; align-items:center; justify-content:center;
   gap:28px; padding:48px 32px; overflow-y:auto;
 }
-.landing-logo { font-size:38px; font-weight:800; color:var(--primary); letter-spacing:-1px; }
+.landing-logo { font-size:38px; font-weight:800; color:#333333; letter-spacing:-1px; }
 .landing-subtitle {
   font-size:13px; font-weight:700; color:var(--primary);
   background:var(--primary-bg); padding:6px 16px; border-radius:20px; margin-top:-16px;
 }
 .landing-main-copy {
-  font-size:23px; font-weight:800; color:#111;
-  text-align:center; line-height:1.6; letter-spacing:-.5px;
+  font-size:13pt; font-weight:300; color:#555555;
+  text-align:center; line-height:1.7; letter-spacing:-.2px;
 }
 .landing-cta { width:100%; max-width:360px; display:flex; flex-direction:column; gap:12px; }
 .landing-btn {
@@ -503,12 +503,8 @@ button, input, textarea, select { font-family:var(--font); }
     <!-- Tabs -->
     <div class="tab-section">
       <div class="tab-toggle">
-        <button class="tab-btn active" onclick="switchMainTab('plan',this)">
-          <i data-lucide="list"></i> 공정 계획
-        </button>
-        <button class="tab-btn" onclick="switchMainTab('calendar',this)">
-          <i data-lucide="calendar"></i> 전체일정
-        </button>
+        <button class="tab-btn active" onclick="switchMainTab('plan',this)">공정 계획</button>
+        <button class="tab-btn" onclick="switchMainTab('calendar',this)">전체일정</button>
       </div>
     </div>
 
@@ -1086,12 +1082,9 @@ function renderWorkCards() {
     <div class="work-card">
       <div class="work-card-header">
         <span class="work-card-title">${esc(p.name)}</span>
-        <div class="card-header-right">
-          ${totalCost > 0 ? `<span class="work-card-cost">${totalCost.toLocaleString()}원</span>` : ''}
-          <button class="card-del-btn" onclick="deleteProcess('${p.id}')">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-          </button>
-        </div>
+        <button class="card-del-btn" onclick="deleteProcess('${p.id}')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        </button>
       </div>
       <div class="work-field">
         <span class="f-label">예상견적</span>
