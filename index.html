@@ -2,196 +2,247 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Vibespace - 시공 플래너</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vibespace - 반셀프인테리어 플래닝툴</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <style>
 :root {
   --primary: #3176ff;
-  --primary-bg: #0090ff0f;
-  --primary-border: #0090ff;
-  --bg: #fbfcff;
+  --primary-bg: rgba(49,118,255,0.07);
+  --bg: #f8f9fc;
   --white: #fff;
-  --card-border: #dfe6f0;
-  --card-shadow: 0 8px 10.5px rgba(0,0,0,0.04);
-  --text-primary: #000;
-  --text-secondary: #424242;
-  --text-muted: #7a7a7a;
-  --text-placeholder: #999;
-  --divider: #f6f6f6;
-  --tab-bg: #f2f5f9;
-  --tab-border: #dfe6f0;
+  --card-border: #e4e9f2;
+  --card-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  --text-primary: #111;
+  --text-secondary: #444;
+  --text-muted: #888;
+  --text-placeholder: #bbb;
+  --divider: #eef0f5;
+  --tab-bg: #eef1f7;
+  --tab-border: #dde3ef;
   --tab-inactive: #8e9bcf;
-  --btn-blue: #0088ff;
+  --btn-blue: #2979ff;
   --danger: #ff3b30;
-  --success: #00a053;
-  --border-light: #e6e6e6;
-  --border-input: #dbdbdb;
+  --border-light: #e8ecf2;
+  --border-input: #dde3ef;
   --font: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-body { font-family:var(--font); background:#e8ecf2; display:flex; justify-content:center; min-height:100vh; }
-button,input,textarea,select { font-family:var(--font); }
+html, body { height:100%; }
+body { font-family:var(--font); background:var(--bg); min-height:100vh; }
+button, input, textarea, select { font-family:var(--font); }
 
-.app {
-  width:100%; max-width:1100px; min-height:100vh; height:100vh;
-  background:var(--bg); position:relative; overflow:hidden;
-}
+/* ===== APP ===== */
+.app { width:100%; height:100vh; background:var(--bg); position:relative; overflow:hidden; }
 .screen {
   position:absolute; top:0; left:0; right:0; bottom:0;
   display:flex; flex-direction:column;
-  opacity:0; pointer-events:none; transform:translateX(20px);
-  transition: opacity .25s, transform .25s;
+  opacity:0; pointer-events:none; transform:translateX(16px);
+  transition: opacity .22s, transform .22s;
   overflow:hidden;
 }
-.screen.active {
-  opacity:1; pointer-events:all; transform:translateX(0);
-  z-index:2;
-}
+.screen.active { opacity:1; pointer-events:all; transform:translateX(0); z-index:2; }
 .screen-scroll { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; }
 .screen-scroll::-webkit-scrollbar { display:none; }
 
-/* === Header === */
-.header { display:flex; align-items:center; justify-content:space-between; padding:60px 16px 0; flex-shrink:0; }
-.header.compact { padding-top:20px; }
-
+/* ===== HEADER ===== */
+.header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:20px 20px 14px;
+  padding-top: max(env(safe-area-inset-top, 0px), 20px);
+  flex-shrink:0; background:var(--white);
+  border-bottom:1px solid var(--divider);
+  position:relative; z-index:10;
+}
+.project-selector { position:relative; flex:1; min-width:0; }
 .project-badge {
-  display:flex; align-items:center; gap:6px;
-  background:var(--primary-bg); border-radius:12px; padding:12px 14px; cursor:pointer;
+  display:inline-flex; align-items:center; gap:6px;
+  background:var(--primary-bg); border-radius:10px; padding:8px 12px;
+  cursor:pointer; border:none; font-family:var(--font); max-width:260px;
 }
-.project-badge .name { color:var(--primary); font-size:17px; font-weight:700; letter-spacing:-.34px; }
-.project-badge .arrow { color:var(--primary); font-size:10px; }
+.project-badge .name {
+  color:var(--primary); font-size:16px; font-weight:700;
+  letter-spacing:-.4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.project-badge .pchev { color:var(--primary); transition:transform .2s; display:flex; }
+.project-badge.open .pchev { transform:rotate(180deg); }
 
-.header-actions { display:flex; align-items:center; gap:8px; }
+/* Project dropdown */
+.project-dropdown {
+  position:absolute; top:calc(100% + 8px); left:0;
+  min-width:260px; max-width:340px;
+  background:#fff; border-radius:14px;
+  box-shadow:0 8px 28px rgba(0,0,0,0.13), 0 2px 6px rgba(0,0,0,0.07);
+  padding:6px; z-index:50; display:none;
+}
+.project-dropdown.active { display:block; }
+.pd-item {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 12px; border-radius:8px; cursor:pointer; transition:background .15s;
+}
+.pd-item:hover { background:#f5f7fc; }
+.pd-item.current { background:var(--primary-bg); }
+.pd-item .pd-name { font-size:14px; font-weight:600; color:var(--text-primary); }
+.pd-item.current .pd-name { color:var(--primary); }
+.pd-del { color:#ccc; cursor:pointer; padding:3px; border-radius:4px; display:flex; line-height:1; }
+.pd-del:hover { background:#fee; color:var(--danger); }
+.pd-divider { height:1px; background:#f0f2f5; margin:4px 0; }
+.pd-new {
+  display:flex; align-items:center; gap:8px;
+  padding:10px 12px; border-radius:8px; cursor:pointer;
+  color:var(--primary); font-size:14px; font-weight:600; transition:background .15s;
+}
+.pd-new:hover { background:var(--primary-bg); }
+
+.header-actions { display:flex; align-items:center; gap:8px; flex-shrink:0; }
 .icon-btn {
-  width:40px; height:40px; border-radius:999px; background:#fff; border:none;
-  display:flex; align-items:center; justify-content:center; cursor:pointer;
-  box-shadow:0 1px 1.75px rgba(0,0,0,.12), 0 1px 1.75px rgba(0,0,0,.14);
+  width:40px; height:40px; border-radius:10px; background:#fff;
+  border:1px solid var(--border-light);
+  display:flex; align-items:center; justify-content:center; cursor:pointer; color:#555;
 }
-.icon-btn svg { width:16px; height:16px; }
+.icon-btn:hover { background:#f5f7fa; }
+.icon-btn svg { width:18px; height:18px; }
 
-/* === Summary Card === */
-.summary-wrap { padding:0 16px; margin-top:16px; }
+/* ===== AUTOSAVE ===== */
+.autosave-toast {
+  position:fixed; bottom:80px; left:50%; transform:translateX(-50%);
+  background:rgba(30,30,30,0.8); color:#fff; font-size:12px; font-weight:600;
+  padding:7px 16px; border-radius:20px; z-index:300;
+  opacity:0; transition:opacity .3s; pointer-events:none; white-space:nowrap;
+}
+.autosave-toast.show { opacity:1; }
+
+/* ===== SUMMARY ===== */
+.summary-wrap { padding:16px 20px 0; }
 .summary-toggle-row {
   display:flex; align-items:center; justify-content:space-between;
-  padding:12px 20px; background:#fff; border-radius:12px;
+  padding:11px 16px; background:#fff; border-radius:10px;
   border:1px solid var(--border-light); cursor:pointer;
 }
-.summary-toggle-row span { font-size:14px; font-weight:500; }
-.summary-toggle-row .chevron { font-size:12px; transition:transform .3s; }
-.summary-toggle-row .chevron.open { transform:rotate(180deg); }
-
+.summary-toggle-row span { font-size:14px; font-weight:600; }
+.sum-chev { transition:transform .3s; display:flex; }
+.sum-chev.open { transform:rotate(180deg); }
 .summary-card {
-  background:#fff; border-radius:12px; padding:20px;
+  background:#fff; border-radius:10px; padding:16px 20px;
   border:1px solid var(--border-light);
-  box-shadow:0 4px 10.5px rgba(0,0,0,.04);
-  margin-top:4px;
-  max-height:400px;
-  overflow:hidden;
+  margin-top:4px; max-height:400px; overflow:hidden;
   transition: max-height .3s ease, padding .3s ease, opacity .3s ease, margin .3s ease;
 }
-.summary-card.collapsed { max-height:0!important; padding:0 20px; opacity:0; overflow:hidden; border:0; margin-top:0; }
-.summary-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
-.summary-header span { font-size:14px; font-weight:500; }
-.summary-list { display:flex; flex-direction:column; gap:12px; }
-.summary-row { display:flex; align-items:center; justify-content:space-between; height:32px; }
+.summary-card.collapsed { max-height:0!important; padding:0 20px; opacity:0; border:0; margin-top:0; }
+.summary-list { display:flex; flex-direction:column; gap:10px; }
+.summary-row { display:flex; align-items:center; justify-content:space-between; height:28px; }
 .summary-row .label { font-size:14px; color:var(--text-muted); }
-.summary-row .value { font-size:16px; font-weight:600; }
+.summary-row .value { font-size:16px; font-weight:700; }
 .summary-divider { height:1px; background:var(--divider); }
 
-/* === Tabs === */
-.tab-section { padding:0 16px; margin-top:16px; display:flex; align-items:center; gap:10px; flex-shrink:0; }
+/* ===== TABS ===== */
+.tab-section { padding:14px 20px 0; display:flex; align-items:center; gap:10px; }
 .tab-toggle {
-  flex:1; display:flex; height:48px; background:var(--tab-bg);
-  border-radius:12px; border:1px solid var(--tab-border); overflow:hidden;
+  flex:1; display:flex; height:44px; background:var(--tab-bg);
+  border-radius:10px; border:1px solid var(--tab-border); overflow:hidden;
 }
-.tab-toggle .tab-btn {
-  flex:1; display:flex; align-items:center; justify-content:center;
-  font-size:15px; font-weight:500; color:var(--tab-inactive);
+.tab-btn {
+  flex:1; display:flex; align-items:center; justify-content:center; gap:6px;
+  font-size:14px; font-weight:500; color:var(--tab-inactive);
   cursor:pointer; border:none; background:none; transition:all .2s;
 }
-.tab-toggle .tab-btn.active {
-  background:#fff; color:#000; font-weight:600; border-radius:12px;
-  border:1px solid #dbdfe8;
-}
-.tab-close-btn {
-  width:32px; height:32px; border-radius:50%; border:none; background:none;
-  cursor:pointer; font-size:18px; color:#999;
+.tab-btn svg { width:15px; height:15px; }
+.tab-btn.active {
+  background:#fff; color:#111; font-weight:700; border-radius:10px;
+  border:1px solid #d8dff0;
 }
 
-/* === Work Cards === */
-.cards-area { padding:16px; display:flex; flex-direction:column; gap:16px; }
-
-/* PC: 2열 그리드 */
-@media(min-width:768px) {
-  .cards-area { display:grid; grid-template-columns:1fr 1fr; gap:16px; padding:16px; }
-  /* 카드 1개면 풀 width */
-  .cards-area > :only-child { grid-column: 1 / -1; }
+/* ===== CARDS ===== */
+.cards-area {
+  padding:16px 20px;
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap:16px;
 }
-
 .work-card {
-  background:#fff; border-radius:12px; padding:20px;
+  background:#fff; border-radius:14px; padding:20px;
   border:1px solid var(--card-border); box-shadow:var(--card-shadow);
 }
-.work-card-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.work-card-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
 .work-card-title { font-size:18px; font-weight:700; }
-.work-card-cost { font-size:16px; font-weight:600; color:var(--primary); }
-.work-field { display:flex; align-items:center; justify-content:space-between; padding:10px 0; }
-.work-field .f-label { font-size:14px; color:#666; flex-shrink:0; }
-.work-field .f-value {
-  display:flex; align-items:center; gap:4px; font-size:14px; color:var(--text-placeholder); cursor:pointer;
+.card-header-right { display:flex; align-items:center; gap:8px; }
+.work-card-cost { font-size:15px; font-weight:700; color:var(--primary); }
+.card-del-btn { background:none; border:none; cursor:pointer; color:#ccc; padding:2px; display:flex; border-radius:4px; }
+.card-del-btn:hover { color:var(--danger); background:#fff0f0; }
+.card-del-btn svg { width:16px; height:16px; }
+
+.work-field { display:flex; align-items:center; justify-content:space-between; padding:9px 0; }
+.f-label { font-size:14px; color:#888; flex-shrink:0; }
+.f-value {
+  display:flex; align-items:center; gap:5px; font-size:14px;
+  color:var(--text-placeholder); cursor:pointer;
 }
-.work-field .f-value.filled { color:var(--text-secondary); }
-.work-field .f-value .edit-icon { color:var(--primary); font-size:12px; }
-.field-divider { height:1px; background:#f0f0f0; }
+.f-value.filled { color:var(--text-secondary); }
+.f-value.readonly { color:var(--primary); font-weight:700; cursor:default; }
+.f-value svg { width:13px; height:13px; color:var(--primary); flex-shrink:0; }
+.field-divider { height:1px; background:#f0f2f5; }
 
 .detail-header {
   display:flex; align-items:center; justify-content:space-between;
-  padding:10px 0; border-bottom:1px solid #000; margin-top:4px;
+  padding:10px 0; border-bottom:1.5px solid #111; margin-top:6px;
 }
-.detail-header .d-label { font-size:14px; font-weight:600; }
-.detail-actions { display:flex; gap:8px; }
-.detail-actions button { background:none; border:none; font-size:16px; cursor:pointer; color:#666; padding:4px; }
+.detail-header .d-label { font-size:14px; font-weight:700; }
+.detail-add-btn {
+  background:none; border:none; cursor:pointer; color:#888; padding:3px;
+  display:flex; border-radius:4px;
+}
+.detail-add-btn:hover { background:#f0f0f0; color:var(--primary); }
+.detail-add-btn svg { width:17px; height:17px; }
 
 .detail-item {
   display:flex; align-items:flex-start; justify-content:space-between;
-  padding:8px 0; gap:8px;
+  padding:9px 0; gap:10px;
 }
-.detail-item .d-desc { font-size:14px; color:var(--text-secondary); flex:1; line-height:1.4; }
-.detail-item .d-cost { font-size:17px; font-weight:600; white-space:nowrap; }
-.detail-empty { text-align:center; padding:20px 0; font-size:14px; color:#999; }
-
-/* 상세내역 삭제 버튼 */
+.d-desc { font-size:15px; color:var(--text-secondary); flex:1; line-height:1.4; }
+.d-right { display:flex; align-items:center; gap:8px; flex-shrink:0; }
+.d-cost { font-size:15px; font-weight:600; white-space:nowrap; }
 .detail-del-btn {
-  background:var(--danger); color:#fff; border:none; border-radius:4px;
-  font-size:11px; padding:2px 6px; cursor:pointer; line-height:1.4;
-  flex-shrink:0;
+  background:none; border:none; cursor:pointer; color:#ccc; padding:2px;
+  display:flex; border-radius:4px;
 }
-.detail-del-btn:hover { background:#cc2d24; }
+.detail-del-btn:hover { background:#fff0f0; color:var(--danger); }
+.detail-del-btn svg { width:14px; height:14px; }
+.detail-empty { text-align:center; padding:16px 0; font-size:14px; color:#ccc; }
 
-/* === Floating Buttons === */
-.floating-group {
-  position:absolute; bottom:20px; right:16px; display:flex; flex-direction:column; gap:12px; z-index:5;
-}
+/* ===== FLOATING ===== */
+.floating-group { position:absolute; bottom:24px; right:20px; z-index:5; }
 .floating-btn {
-  display:flex; align-items:center; justify-content:center; gap:6px;
-  padding:14px 18px; border-radius:26px; background:#fff;
-  box-shadow:0 4px 10.5px rgba(0,0,0,.24); border:none; cursor:pointer;
-  font-size:15px; font-weight:600; letter-spacing:-.3px; white-space:nowrap;
+  display:flex; align-items:center; justify-content:center; gap:7px;
+  padding:13px 22px; border-radius:26px; background:#fff;
+  box-shadow:0 4px 18px rgba(0,0,0,0.15); border:1px solid var(--border-light);
+  cursor:pointer; font-size:15px; font-weight:700; color:#333;
+  letter-spacing:-.3px;
 }
-.floating-btn.primary { background:var(--btn-blue); color:#fff; }
+.floating-btn svg { width:18px; height:18px; }
+.floating-btn:hover { box-shadow:0 6px 22px rgba(0,0,0,0.2); }
 
-/* === Calendar === */
-.cal-month-title { text-align:center; font-size:20px; font-weight:700; margin:16px 0 8px; }
-.cal-weekdays { display:grid; grid-template-columns:repeat(7,1fr); text-align:center; font-size:11px; color:#999; padding:4px 0; }
+/* ===== ADD BTN BOTTOM ===== */
+.add-btn-bottom {
+  display:flex; align-items:center; justify-content:center; gap:7px;
+  margin:0 20px 24px; height:46px;
+  background:#fff; border-radius:10px; border:1.5px dashed #ccc;
+  cursor:pointer; color:#aaa; font-size:14px; font-weight:600;
+}
+.add-btn-bottom svg { width:16px; height:16px; }
+.add-btn-bottom:hover { border-color:var(--primary); color:var(--primary); }
+
+/* ===== CALENDAR ===== */
+.cal-month-title { text-align:center; font-size:18px; font-weight:700; margin:16px 0 8px; }
+.cal-weekdays { display:grid; grid-template-columns:repeat(7,1fr); text-align:center; font-size:11px; color:#aaa; padding:4px 0; }
 .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; margin-bottom:20px; }
-.cal-cell { display:flex; flex-direction:column; align-items:center; padding:4px 1px; min-height:50px; font-size:12px; }
-.cal-cell .day-num { font-size:12px; color:#333; margin-bottom:2px; }
+.cal-cell { display:flex; flex-direction:column; align-items:center; padding:4px 1px; min-height:50px; }
+.cal-cell .day-num { font-size:12px; color:#444; margin-bottom:2px; }
 .cal-cell.empty .day-num { color:transparent; }
-.cal-tag { font-size:8px; padding:1px 3px; border-radius:3px; margin-top:1px; white-space:nowrap; line-height:1.3; }
-.cal-tag.c0 { background:#dbeafe; color:#3176ff; }
+.cal-tag { font-size:9px; padding:1px 4px; border-radius:4px; margin-top:1px; white-space:nowrap; line-height:1.5; font-weight:700; }
+.cal-tag.c0 { background:#dbeafe; color:#2563eb; }
 .cal-tag.c1 { background:#dcfce7; color:#16a34a; }
 .cal-tag.c2 { background:#fff3e0; color:#f57c00; }
 .cal-tag.c3 { background:#f3e8ff; color:#9333ea; }
@@ -199,423 +250,418 @@ button,input,textarea,select { font-family:var(--font); }
 .cal-tag.c5 { background:#e0f7fa; color:#00838f; }
 .cal-tag.c6 { background:#fff8e1; color:#ff8f00; }
 .cal-tag.c7 { background:#efebe9; color:#6d4c41; }
+#calendar-container { padding:0 20px; }
+@media(min-width:768px) { #calendar-container { max-width:680px; margin:0 auto; } }
 
-/* === Form Screen === */
-.form-screen-inner { padding:20px 0 0; display:flex; flex-direction:column; height:100%; }
-.form-header { display:flex; align-items:center; gap:8px; padding:0 18px 16px; flex-shrink:0; }
-.form-header .back-btn { background:none; border:none; font-size:18px; cursor:pointer; padding:4px; }
-.form-header h2 { font-size:18px; font-weight:600; }
-.form-body { flex:1; overflow-y:auto; padding:0 18px 20px; display:flex; flex-direction:column; gap:32px; }
-.form-group { display:flex; flex-direction:column; gap:10px; }
-.form-label { font-size:13px; color:#000; letter-spacing:-.26px; }
-.checkbox-row { display:flex; gap:20px; flex-wrap:wrap; }
-.chk-item { display:flex; align-items:center; gap:8px; cursor:pointer; }
-.chk-item input[type="checkbox"] { width:20px; height:20px; accent-color:#222; cursor:pointer; flex-shrink:0; }
-.chk-item input[type="radio"] { width:20px; height:20px; accent-color:#222; cursor:pointer; flex-shrink:0; }
-.chk-item label { font-size:16px; color:#999; cursor:pointer; }
-.chk-item input:checked + label { color:#242424; }
-/* 비활성화 스타일 */
-.chk-item input[disabled] + label { color:#ccc; cursor:not-allowed; }
-.chk-item input[disabled] { cursor:not-allowed; opacity:0.4; }
-.date-row { display:flex; align-items:center; gap:4px; }
-.date-input {
-  flex:1; display:flex; align-items:center; justify-content:space-between;
-  padding:12px 16px; background:#fff; border:1px solid var(--border-input);
-  border-radius:8px; font-size:15px; color:#222; cursor:pointer;
-}
-.date-input input { border:none; outline:none; font-size:15px; font-family:var(--font); width:100%; background:transparent; }
-.date-sep { font-size:14px; color:#999; padding:0 2px; }
-.addr-input {
-  padding:12px 16px; background:#fff; border:1px solid var(--border-input);
-  border-radius:4px; font-size:16px; color:#222; width:100%; outline:none; font-family:var(--font);
-}
-.addr-search-row { display:flex; gap:8px; }
-.addr-search-btn {
-  padding:12px 16px; background:var(--btn-blue); color:#fff; border:none;
-  border-radius:4px; font-size:14px; font-weight:500; cursor:pointer;
-  white-space:nowrap; font-family:var(--font); flex-shrink:0;
-}
-.addr-search-btn:active { background:#006acc; }
-.textarea-field {
-  width:100%; min-height:60px; padding:12px 16px; background:#fff;
-  border:1px solid var(--border-input); border-radius:4px;
-  font-size:15px; color:#222; resize:vertical; font-family:var(--font); outline:none;
-}
-.form-footer { padding:16px 18px; flex-shrink:0; }
-.btn-primary {
-  width:100%; height:46px; background:var(--btn-blue); color:#fff; border:none;
-  border-radius:8px; font-size:16px; font-weight:600; cursor:pointer; letter-spacing:-.32px;
-}
-.btn-primary:active { background:#006acc; }
-
-/* === Upload Area === */
-.upload-area {
-  background:#fff; border:1px solid #acacac; border-radius:8px;
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  gap:12px; padding:40px 24px; cursor:pointer; min-height:200px;
-}
-.upload-area .up-icon { font-size:40px; color:#ccc; }
-.upload-area p { font-size:14px; color:#999; text-align:center; line-height:1.5; }
-.upload-preview { width:100%; border-radius:8px; border:1px solid #ddd; max-height:300px; object-fit:contain; }
-
-/* === Dialogs === */
-.overlay {
-  position:fixed; top:0; left:0; right:0; bottom:0;
-  background:rgba(0,0,0,.5); display:none; align-items:center; justify-content:center;
-  z-index:100; padding:20px;
-}
-.overlay.active { display:flex; }
-.dialog {
-  background:#fff; border-radius:16px; padding:24px; width:100%; max-width:340px;
-  display:flex; flex-direction:column; gap:16px;
-}
-.dialog h3 { font-size:18px; font-weight:600; }
-.dialog-input {
-  width:100%; padding:12px 16px; border:1px solid #ddd; border-radius:8px;
-  font-size:15px; font-family:var(--font); outline:none;
-}
-.dialog-input:focus { border-color:var(--primary); }
-.dialog-actions { display:flex; gap:8px; justify-content:flex-end; }
-.dialog-actions button {
-  padding:10px 20px; border-radius:8px; border:none;
-  font-size:14px; font-weight:500; cursor:pointer; font-family:var(--font);
-}
-.btn-cancel { background:#f0f0f0; color:#333; }
-.btn-confirm { background:var(--primary); color:#fff; }
-
-/* === Dropdown === */
+/* ===== DROPDOWN MENU ===== */
 .dropdown {
-  position:absolute; background:#fff; border-radius:12px;
-  box-shadow:0 6px 10.5px rgba(0,0,0,.12), 0 2px 3.5px rgba(0,0,0,.1);
-  padding:4px; z-index:20; min-width:200px; display:none;
+  position:absolute; background:#fff; border-radius:14px;
+  box-shadow:0 8px 28px rgba(0,0,0,0.13);
+  padding:6px; z-index:30; min-width:220px; display:none;
 }
 .dropdown.active { display:flex; flex-direction:column; }
-.dropdown button {
-  padding:12px 16px; font-size:14px; color:#333; cursor:pointer;
-  border-radius:8px; border:none; background:none; text-align:left; font-family:var(--font);
-  display:flex; align-items:center; gap:4px;
+.dropdown-item {
+  display:flex; align-items:center; gap:10px; padding:11px 14px;
+  font-size:14px; color:#333; cursor:pointer; border-radius:8px;
+  border:none; background:none; text-align:left; font-family:var(--font); width:100%;
 }
-.dropdown button:hover { background:#f5f7fa; }
+.dropdown-item:hover { background:#f5f7fc; }
+.dropdown-item svg { width:16px; height:16px; color:#777; flex-shrink:0; }
+.dropdown-item.danger { color:var(--danger); }
+.dropdown-item.danger svg { color:var(--danger); }
+.menu-badge {
+  font-size:10px; padding:2px 6px; border-radius:99px;
+  background:#f0f0f0; color:#999; margin-left:auto;
+}
+.dropdown-sep { height:1px; background:#f0f2f5; margin:4px 6px; }
 
-/* === Process Select === */
-.process-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+/* ===== PROCESS OPTIONS ===== */
+.process-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
 .process-option {
-  padding:14px; border:1px solid #ddd; border-radius:10px; text-align:center;
-  cursor:pointer; font-size:14px; font-weight:500; transition:all .2s; background:#fff;
+  padding:12px 6px; border:1.5px solid #dde3ef; border-radius:10px; text-align:center;
+  cursor:pointer; font-size:13px; font-weight:600; transition:all .2s; background:#fff;
 }
 .process-option:hover { border-color:var(--primary); background:var(--primary-bg); }
 .process-option.selected { border-color:var(--primary); background:var(--primary-bg); color:var(--primary); }
 
-/* === Landing Screen === */
-.landing-screen { background:#fff; align-items:center; justify-content:center; gap:24px; padding:40px; overflow-y:auto; }
-.landing-logo { font-size:32px; font-weight:700; color:var(--primary); }
-.landing-subtitle { font-size:13px; font-weight:600; color:var(--primary); background:var(--primary-bg); padding:6px 14px; border-radius:20px; margin-top:-10px; }
-.landing-main-copy { font-size:22px; font-weight:700; color:#111; text-align:center; line-height:1.55; letter-spacing:-.44px; }
-.landing-sub { font-size:15px; color:#666; text-align:center; line-height:1.5; }
-.landing-cta {
-  width:100%; max-width:320px; display:flex; flex-direction:column; gap:12px; align-items:center;
+/* ===== FORM SCREEN ===== */
+.form-screen-inner { display:flex; flex-direction:column; height:100%; background:#fff; }
+.form-header {
+  display:flex; align-items:center; gap:10px; padding:20px 20px 16px;
+  padding-top: max(env(safe-area-inset-top, 0px), 20px);
+  flex-shrink:0; border-bottom:1px solid var(--divider);
 }
-.landing-btn {
-  width:100%; padding:16px; background:var(--btn-blue); color:#fff; border:none;
-  border-radius:12px; font-size:17px; font-weight:600; cursor:pointer;
-  display:flex; align-items:center; justify-content:center; gap:8px;
-  box-shadow:0 4px 12px rgba(0,136,255,.3); transition:transform .15s;
+.back-btn {
+  background:none; border:none; cursor:pointer; padding:4px;
+  display:flex; align-items:center; color:#555; border-radius:6px;
 }
-.landing-btn:active { transform:scale(.97); }
-.landing-btn-secondary {
-  width:100%; padding:14px; background:#fff; color:var(--text-secondary); border:1px solid #ddd;
-  border-radius:12px; font-size:15px; font-weight:500; cursor:pointer;
-  display:flex; align-items:center; justify-content:center; gap:8px;
+.back-btn:hover { background:#f0f0f0; }
+.back-btn svg { width:22px; height:22px; }
+.form-header h2 { font-size:18px; font-weight:700; }
+.form-body { flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:28px; }
+.form-group { display:flex; flex-direction:column; gap:10px; }
+.form-label { font-size:13px; font-weight:700; color:#666; }
+.checkbox-row { display:flex; gap:16px; flex-wrap:wrap; }
+.chk-item { display:flex; align-items:center; gap:8px; cursor:pointer; }
+.chk-item input[type="checkbox"],
+.chk-item input[type="radio"] { width:18px; height:18px; accent-color:var(--primary); cursor:pointer; flex-shrink:0; }
+.chk-item label { font-size:15px; color:#aaa; cursor:pointer; }
+.chk-item input:checked + label { color:#111; font-weight:600; }
+.chk-item input[disabled] + label { color:#ddd; cursor:not-allowed; }
+.chk-item input[disabled] { opacity:0.4; cursor:not-allowed; }
+.date-row { display:flex; align-items:center; gap:8px; }
+.date-input {
+  flex:1; display:flex; align-items:center;
+  padding:11px 14px; background:#fff; border:1px solid var(--border-input);
+  border-radius:8px;
 }
-.landing-features {
-  width:100%; max-width:320px; display:flex; flex-direction:column; gap:12px; margin-top:8px;
+.date-input input { border:none; outline:none; font-size:15px; font-family:var(--font); width:100%; background:transparent; color:#222; }
+.date-sep { font-size:14px; color:#bbb; }
+.addr-input {
+  padding:11px 14px; background:#fff; border:1px solid var(--border-input);
+  border-radius:8px; font-size:15px; color:#222; width:100%; outline:none; font-family:var(--font);
 }
-.landing-feature {
-  display:flex; align-items:center; gap:12px; padding:12px 16px;
-  background:#f8f9ff; border-radius:10px;
+.addr-input:focus { border-color:var(--primary); }
+.addr-search-row { display:flex; gap:8px; }
+.addr-search-btn {
+  padding:11px 16px; background:var(--btn-blue); color:#fff; border:none;
+  border-radius:8px; font-size:14px; font-weight:600; cursor:pointer;
+  white-space:nowrap; font-family:var(--font); flex-shrink:0;
+  display:flex; align-items:center; gap:6px;
 }
-.landing-feature .feat-icon { font-size:20px; flex-shrink:0; }
-.landing-feature .feat-text { font-size:13px; color:#555; line-height:1.4; }
+.addr-search-btn svg { width:15px; height:15px; }
+.textarea-field {
+  width:100%; min-height:80px; padding:11px 14px; background:#fff;
+  border:1px solid var(--border-input); border-radius:8px;
+  font-size:15px; color:#222; resize:vertical; font-family:var(--font); outline:none;
+}
+.textarea-field:focus { border-color:var(--primary); }
+.form-footer { padding:16px 20px; flex-shrink:0; border-top:1px solid var(--divider); }
+.btn-primary {
+  width:100%; height:50px; background:var(--btn-blue); color:#fff; border:none;
+  border-radius:12px; font-size:16px; font-weight:700; cursor:pointer;
+}
+.btn-primary:active { opacity:.88; }
 
-/* === Account Menu === */
-.account-menu { padding:0 16px; }
-.account-card {
-  background:#fff; border-radius:12px; padding:20px; border:1px solid var(--card-border);
-  display:flex; flex-direction:column; gap:16px;
+/* ===== DIALOGS (bottom sheet) ===== */
+.overlay {
+  position:fixed; top:0; left:0; right:0; bottom:0;
+  background:rgba(0,0,0,.48); display:none; align-items:flex-end; justify-content:center;
+  z-index:100;
 }
-.account-row { display:flex; align-items:center; justify-content:space-between; padding:8px 0; cursor:pointer; }
-.account-row span { font-size:15px; }
-.account-row .arrow { color:#ccc; }
+.overlay.active { display:flex; }
+.dialog {
+  background:#fff; border-radius:22px 22px 0 0; padding:24px; width:100%; max-width:600px;
+  display:flex; flex-direction:column; gap:16px; max-height:90vh; overflow-y:auto;
+}
+.dialog h3 { font-size:18px; font-weight:700; }
+.dialog-input {
+  width:100%; padding:11px 14px; border:1px solid #dde3ef; border-radius:8px;
+  font-size:15px; font-family:var(--font); outline:none; color:#222;
+}
+.dialog-input:focus { border-color:var(--primary); }
+.dialog-actions { display:flex; gap:8px; justify-content:flex-end; }
+.dialog-actions button {
+  padding:10px 22px; border-radius:8px; border:none;
+  font-size:14px; font-weight:600; cursor:pointer; font-family:var(--font);
+}
+.btn-cancel { background:#f0f2f5; color:#555; }
+.btn-confirm { background:var(--primary); color:#fff; }
+@media(min-width:600px) {
+  .overlay { align-items:center; padding:20px; }
+  .dialog { border-radius:20px; }
+}
 
-/* Share dialog */
+/* ===== SHARE OPTIONS ===== */
 .share-options { display:flex; flex-direction:column; gap:8px; }
 .share-option {
-  display:flex; align-items:center; gap:12px; padding:12px 16px;
+  display:flex; align-items:center; gap:12px; padding:12px 14px;
   border:1px solid #eee; border-radius:10px; cursor:pointer; background:#fff;
 }
-.share-option:hover { background:#f8f9ff; border-color:var(--primary); }
-.share-option .s-icon { font-size:20px; }
+.share-option:hover { background:#f5f8ff; border-color:var(--primary); }
+.share-option .s-icon { width:28px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.share-option .s-icon svg { width:20px; height:20px; }
 .share-option .s-text { font-size:14px; font-weight:500; }
 
-/* === Inline Edit === */
-.inline-edit {
-  border:none; outline:none; font-size:14px; font-family:var(--font);
-  background:transparent; text-align:right; width:auto; min-width:60px;
-  color:var(--text-secondary); border-bottom:1px solid var(--primary);
-  padding:2px 0;
-}
-
-/* === Google Login Button === */
+/* ===== GOOGLE BTN ===== */
 .google-btn {
   display:flex; align-items:center; justify-content:center; gap:10px;
-  width:100%; padding:14px; background:#fff; border:1px solid #ddd;
-  border-radius:8px; font-size:15px; font-weight:500; cursor:pointer;
-  font-family:var(--font); transition:background .15s;
+  width:100%; padding:13px; background:#fff; border:1.5px solid #dde3ef;
+  border-radius:10px; font-size:15px; font-weight:600; cursor:pointer;
+  font-family:var(--font);
 }
-.google-btn:hover { background:#f5f5f5; }
+.google-btn:hover { background:#f8f9fc; }
 
-/* === Menu badge === */
-.menu-badge {
-  font-size:10px; padding:2px 6px; border-radius:99px;
-  background:#f0f0f0; color:#999; margin-left:4px; flex-shrink:0;
+/* ===== SCHEDULE DIALOG ===== */
+.sched-other-item {
+  display:flex; align-items:center; gap:8px;
+  padding:7px 0; border-bottom:1px solid #f5f5f5; font-size:13px;
 }
+.sched-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
 
-/* PC 레이아웃 */
-@media(min-width:768px) {
-  body { background:#e8ecf2; }
-  .app {
-    margin:0 auto;
-    box-shadow:0 0 40px rgba(0,0,0,.1);
-  }
-  .header { padding:28px 24px 0; }
-  .landing-screen { padding:60px 40px; }
+/* ===== LANDING ===== */
+.landing-screen {
+  background:#fff; align-items:center; justify-content:center;
+  gap:28px; padding:48px 32px; overflow-y:auto;
 }
+.landing-logo { font-size:38px; font-weight:800; color:var(--primary); letter-spacing:-1px; }
+.landing-subtitle {
+  font-size:13px; font-weight:700; color:var(--primary);
+  background:var(--primary-bg); padding:6px 16px; border-radius:20px; margin-top:-16px;
+}
+.landing-main-copy {
+  font-size:23px; font-weight:800; color:#111;
+  text-align:center; line-height:1.6; letter-spacing:-.5px;
+}
+.landing-cta { width:100%; max-width:360px; display:flex; flex-direction:column; gap:12px; }
+.landing-btn {
+  width:100%; padding:16px; background:var(--btn-blue); color:#fff; border:none;
+  border-radius:12px; font-size:17px; font-weight:700; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  box-shadow:0 4px 18px rgba(41,121,255,0.35); transition:transform .15s;
+}
+.landing-btn svg { width:20px; height:20px; }
+.landing-btn:active { transform:scale(.97); }
+.landing-btn-secondary {
+  width:100%; padding:14px; background:#fff; color:#555;
+  border:1.5px solid #dde3ef; border-radius:12px; font-size:15px; font-weight:600; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+}
+.landing-btn-secondary svg { width:18px; height:18px; color:#888; }
 
-@media(max-width:767px) {
-  .app { width:100%; max-width:100vw; }
+/* ===== ACCOUNT ===== */
+.account-card {
+  background:#fff; border-radius:14px; padding:20px;
+  border:1px solid var(--card-border); margin:20px;
+  display:flex; flex-direction:column; gap:4px;
 }
+.account-row { display:flex; align-items:center; justify-content:space-between; padding:11px 0; cursor:pointer; }
+.account-row .row-left { display:flex; align-items:center; gap:10px; font-size:15px; }
+.account-row .row-left svg { width:17px; height:17px; color:#999; }
+.account-row .arow svg { width:15px; height:15px; color:#ccc; }
 </style>
 </head>
 <body>
 <div class="app" id="app">
 
-  <!-- ==================== LANDING SCREEN ==================== -->
-  <div class="screen landing-screen" id="screen-landing">
-    <div class="landing-logo">Vibespace</div>
-    <div class="landing-subtitle">반셀프인테리어를 위한 플래닝툴</div>
-    <div class="landing-main-copy">반셀프하려니 막막하시죠?<br>바이브 스페이스와 함께<br>안전한 반셀프인테리어 진행하세요.</div>
-    <div class="landing-cta">
-      <button class="landing-btn" onclick="startNewProject()">
-        <span>+</span> 시공정보 입력
+<!-- ===== LANDING ===== -->
+<div class="screen landing-screen" id="screen-landing">
+  <div class="landing-logo">Vibespace</div>
+  <div class="landing-subtitle">반셀프인테리어를 위한 플래닝툴</div>
+  <div class="landing-main-copy">반셀프하려니 막막하시죠?<br>바이브 스페이스와 함께<br>안전한 반셀프인테리어 진행하세요.</div>
+  <div class="landing-cta">
+    <button class="landing-btn" onclick="startNewProject()">
+      <i data-lucide="plus-circle"></i> 시공정보 입력
+    </button>
+    <button class="landing-btn-secondary" onclick="loadExistingProjects()">
+      <i data-lucide="folder-open"></i> 기존 프로젝트 불러오기
+    </button>
+  </div>
+</div>
+
+<!-- ===== MAIN ===== -->
+<div class="screen" id="screen-main">
+  <div class="header">
+    <div class="project-selector" id="project-selector">
+      <button class="project-badge" id="project-badge-btn" onclick="toggleProjectDropdown(event)">
+        <span class="name" id="current-project-name">프로젝트명</span>
+        <span class="pchev"><i data-lucide="chevron-down" style="width:15px;height:15px;"></i></span>
       </button>
-      <button class="landing-btn-secondary" onclick="loadExistingProjects()">
-        기존 프로젝트 불러오기
-      </button>
+      <div class="project-dropdown" id="project-dropdown">
+        <div id="project-dropdown-list"></div>
+        <div class="pd-divider"></div>
+        <div class="pd-new" onclick="promptNewProject()">
+          <i data-lucide="plus" style="width:16px;height:16px;"></i> 새 프로젝트
+        </div>
+      </div>
     </div>
-    <div class="landing-features">
-      <div class="landing-feature"><span class="feat-icon">📋</span><span class="feat-text">공정 계획을 단계별로 관리</span></div>
-      <div class="landing-feature"><span class="feat-icon">📅</span><span class="feat-text">캘린더로 전체 일정 한눈에</span></div>
-      <div class="landing-feature"><span class="feat-icon">💰</span><span class="feat-text">예상 비용 자동 집계</span></div>
-      <div class="landing-feature"><span class="feat-icon">📤</span><span class="feat-text">계획서 다운로드 및 공유</span></div>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="toggleMainMenu(event)">
+        <i data-lucide="menu"></i>
+      </button>
     </div>
   </div>
 
-  <!-- ==================== MAIN PLAN SCREEN ==================== -->
-  <div class="screen" id="screen-main">
-    <!-- Header: 고정 -->
-    <div class="header compact" id="main-header" style="flex-shrink:0;">
-      <div class="project-badge" onclick="openProjectSelect()">
-        <span class="name" id="current-project-name">프로젝트명</span>
-        <span class="arrow">▾</span>
+  <div class="screen-scroll" id="main-scroll">
+    <!-- Summary -->
+    <div class="summary-wrap">
+      <div class="summary-toggle-row" onclick="toggleSummary()">
+        <span>시공요약</span>
+        <span class="sum-chev open" id="sum-chev"><i data-lucide="chevron-down" style="width:16px;height:16px;"></i></span>
       </div>
-      <div class="header-actions">
-        <button class="icon-btn" onclick="toggleMainMenu(event)" title="메뉴">
-          <svg viewBox="0 0 16 16" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round"><line x1="2" y1="4" x2="14" y2="4"/><line x1="2" y1="8" x2="14" y2="8"/><line x1="2" y1="12" x2="8" y2="12"/></svg>
+      <div class="summary-card" id="summary-card">
+        <div class="summary-list">
+          <div class="summary-row"><span class="label">총 예상 비용</span><span class="value" id="sum-cost">0원</span></div>
+          <div class="summary-divider"></div>
+          <div class="summary-row"><span class="label">전체 공사 기간</span><span class="value" id="sum-duration">-</span></div>
+          <div class="summary-divider"></div>
+          <div class="summary-row"><span class="label">참여 업체 수</span><span class="value" id="sum-companies">0개 업체</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tab-section">
+      <div class="tab-toggle">
+        <button class="tab-btn active" onclick="switchMainTab('plan',this)">
+          <i data-lucide="list"></i> 공정 계획
+        </button>
+        <button class="tab-btn" onclick="switchMainTab('calendar',this)">
+          <i data-lucide="calendar"></i> 전체일정
         </button>
       </div>
     </div>
 
-    <!-- 스크롤 영역: 시공요약 + 탭 + 카드 모두 포함 -->
-    <div class="screen-scroll" id="main-scroll">
-      <!-- Summary -->
-      <div class="summary-wrap" id="summary-section">
-        <div class="summary-toggle-row" onclick="toggleSummary()">
-          <span>시공요약</span>
-          <span class="chevron open" id="summary-chevron">▾</span>
-        </div>
-        <div class="summary-card" id="summary-card">
-          <div class="summary-list" id="summary-list">
-            <div class="summary-row"><span class="label">총 예상 비용</span><span class="value" id="sum-cost">0원</span></div>
-            <div class="summary-divider"></div>
-            <div class="summary-row"><span class="label">전체 공사 기간</span><span class="value" id="sum-duration">-</span></div>
-            <div class="summary-divider"></div>
-            <div class="summary-row"><span class="label">참여 업체 수</span><span class="value" id="sum-companies">0개 업체</span></div>
-          </div>
-        </div>
+    <!-- Plan Tab -->
+    <div id="tab-plan">
+      <div class="cards-area" id="work-cards"></div>
+      <div class="add-btn-bottom" onclick="openAddProcess()">
+        <i data-lucide="plus"></i> 공정 추가
       </div>
-
-      <!-- Tabs -->
-      <div class="tab-section" style="flex-shrink:0;">
-        <div class="tab-toggle">
-          <button class="tab-btn active" onclick="switchMainTab('plan',this)">공정 계획</button>
-          <button class="tab-btn" onclick="switchMainTab('calendar',this)">전체일정</button>
-        </div>
-        <button class="icon-btn" onclick="openAddProcess()" title="공정 추가" style="font-size:20px;">+</button>
-      </div>
-
-      <!-- Plan Tab Content -->
-      <div id="tab-plan">
-        <div class="cards-area" id="work-cards"></div>
-      </div>
-
-      <!-- Calendar Tab Content -->
-      <div id="tab-calendar" style="display:none;">
-        <div style="padding:0 16px;" id="calendar-container"></div>
-      </div>
-    </div><!-- /main-scroll -->
-
-    <!-- Floating Button: 프로젝트 저장만 -->
-    <div class="floating-group" id="main-floating">
-      <button class="floating-btn primary" onclick="saveToServer()">프로젝트 저장</button>
     </div>
 
-    <!-- Dropdown Menu -->
-    <div class="dropdown" id="main-menu" style="top:72px;right:16px;">
-      <button onclick="goTo('form');closeAllMenus();">시공정보</button>
-      <button onclick="saveToServer()">시공정보 저장</button>
-      <button onclick="openShareDialog()">공유하기</button>
-      <button onclick="openExpertDialog()">전문가 피드백 요청<span class="menu-badge">추후 오픈</span></button>
-      <button id="menu-login-btn" onclick="handleMenuLogin()">로그인</button>
+    <!-- Calendar Tab -->
+    <div id="tab-calendar" style="display:none;">
+      <div id="calendar-container"></div>
     </div>
   </div>
 
-  <!-- ==================== CONSTRUCTION INFO FORM ==================== -->
-  <div class="screen" id="screen-form">
-    <div class="form-screen-inner">
-      <div class="form-header">
-        <button class="back-btn" onclick="formGoBack()">←</button>
-        <h2 id="form-title">시공 정보</h2>
-      </div>
-      <div class="form-body" id="form-body">
-        <!-- 프로젝트명 -->
-        <div class="form-group">
-          <span class="form-label">프로젝트명</span>
-          <input class="addr-input" id="f-project-name" placeholder="프로젝트 이름을 입력하세요" oninput="saveFormData()">
-        </div>
-        <div class="form-group">
-          <span class="form-label">시공종류</span>
-          <div class="checkbox-row">
-            <div class="chk-item"><input type="checkbox" id="f-apt" checked onchange="saveFormData()"><label for="f-apt">아파트</label></div>
-            <div class="chk-item"><input type="checkbox" id="f-house" onchange="saveFormData()"><label for="f-house">단독주택</label></div>
-          </div>
-        </div>
-        <!-- 평형: radio 단일 선택 -->
-        <div class="form-group">
-          <span class="form-label">평형</span>
-          <div class="checkbox-row">
-            <div class="chk-item"><input type="radio" name="f-size" id="f-s10" value="10평대" onchange="saveFormData()"><label for="f-s10">10평대</label></div>
-            <div class="chk-item"><input type="radio" name="f-size" id="f-s20" value="20평대" onchange="saveFormData()"><label for="f-s20">20평대</label></div>
-            <div class="chk-item"><input type="radio" name="f-size" id="f-s30" value="30평대" checked onchange="saveFormData()"><label for="f-s30">30평대</label></div>
-          </div>
-          <div class="checkbox-row">
-            <div class="chk-item"><input type="radio" name="f-size" id="f-s40" value="40평대" onchange="saveFormData()"><label for="f-s40">40평대</label></div>
-            <div class="chk-item"><input type="radio" name="f-size" id="f-s50" value="50평대" onchange="saveFormData()"><label for="f-s50">50평대</label></div>
-            <div class="chk-item"><input type="radio" name="f-size" id="f-s60" value="60평대" onchange="saveFormData()"><label for="f-s60">60평대</label></div>
-          </div>
-        </div>
-        <div class="form-group">
-          <span class="form-label">시공방법</span>
-          <div class="checkbox-row">
-            <div class="chk-item"><input type="checkbox" id="f-self" checked onchange="saveFormData()"><label for="f-self">반셀프</label></div>
-            <div class="chk-item"><input type="checkbox" id="f-turnkey" disabled onchange="saveFormData()"><label for="f-turnkey" style="color:#ccc;cursor:not-allowed;">턴키(추후오픈)</label></div>
-          </div>
-        </div>
-        <div class="form-group">
-          <span class="form-label">시공일정</span>
-          <div class="date-row">
-            <div class="date-input"><input type="date" id="f-start" value="2025-11-01" onchange="saveFormData()"></div>
-            <span class="date-sep">~</span>
-            <div class="date-input"><input type="date" id="f-end" value="2025-11-30" onchange="saveFormData()"></div>
-          </div>
-        </div>
-        <div class="form-group">
-          <span class="form-label">메모</span>
-          <textarea class="textarea-field" id="f-memo" onchange="saveFormData()"></textarea>
-        </div>
-        <div class="form-group">
-          <span class="form-label">주소</span>
-          <div class="addr-search-row">
-            <input class="addr-input" id="f-address" placeholder="주소를 검색하세요" onchange="saveFormData()" style="flex:1;">
-            <button type="button" class="addr-search-btn" onclick="searchAddress()">주소 검색</button>
-          </div>
-          <input class="addr-input" id="f-address-detail" placeholder="상세주소 입력 (동, 호수 등)" onchange="saveFormData()" style="margin-top:8px;">
-        </div>
-      </div>
-      <div class="form-footer">
-        <button class="btn-primary" id="form-submit-btn" onclick="saveFormAndBack()">수정완료</button>
-      </div>
-    </div>
+  <!-- Floating: + 공정추가 (white) -->
+  <div class="floating-group">
+    <button class="floating-btn" onclick="openAddProcess()">
+      <i data-lucide="plus"></i> 공정 추가
+    </button>
   </div>
 
-  <!-- ==================== MY DRAWINGS ==================== -->
-  <div class="screen" id="screen-drawings">
-    <div class="form-screen-inner">
-      <div class="form-header">
-        <button class="back-btn" onclick="goTo('main')">←</button>
-        <h2>내 도면</h2>
-      </div>
-      <div class="form-body">
-        <span style="font-size:16px;color:#000;">시공 현장 도면</span>
-        <div class="upload-area" id="upload-area" onclick="document.getElementById('file-input').click()">
-          <span class="up-icon">📁</span>
-          <p>도면 이미지를 업로드하세요<br><small style="color:#bbb">클릭하여 파일 선택</small></p>
-        </div>
-        <img class="upload-preview" id="upload-preview" style="display:none;">
-        <input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleUpload(this)">
-      </div>
-      <div class="form-footer">
-        <button class="btn-primary" onclick="goTo('main')">수정완료</button>
-      </div>
-    </div>
+  <!-- Dropdown Menu -->
+  <div class="dropdown" id="main-menu" style="top:68px;right:20px;">
+    <button class="dropdown-item" onclick="goTo('form');closeAllMenus();">
+      <i data-lucide="file-text"></i> 시공정보
+    </button>
+    <button class="dropdown-item" onclick="openShareDialog()">
+      <i data-lucide="share-2"></i> 공유하기
+    </button>
+    <button class="dropdown-item" onclick="openExpertDialog()">
+      <i data-lucide="star"></i> 전문가 피드백 요청<span class="menu-badge">추후 오픈</span>
+    </button>
+    <div class="dropdown-sep"></div>
+    <button class="dropdown-item" id="menu-login-btn" onclick="handleMenuLogin()">
+      <i data-lucide="user"></i> 로그인
+    </button>
   </div>
-
-  <!-- ==================== ACCOUNT SCREEN ==================== -->
-  <div class="screen" id="screen-account">
-    <div class="form-screen-inner">
-      <div class="form-header">
-        <button class="back-btn" onclick="goTo('main')">←</button>
-        <h2>계정 관리</h2>
-      </div>
-      <div class="form-body">
-        <div class="account-card">
-          <div style="display:flex;align-items:center;gap:12px;padding-bottom:12px;border-bottom:1px solid #f0f0f0;">
-            <div style="width:48px;height:48px;border-radius:50%;background:#e8ecf2;display:flex;align-items:center;justify-content:center;font-size:20px;">👤</div>
-            <div>
-              <div style="font-size:16px;font-weight:600;" id="acct-name">사용자</div>
-              <div style="font-size:13px;color:#999;" id="acct-email">user@vibespace.kr</div>
-            </div>
-          </div>
-          <div class="account-row" onclick="alert('프로필 편집 기능은 추후 업데이트됩니다.')"><span>프로필 편집</span><span class="arrow">›</span></div>
-          <div class="account-row" onclick="alert('알림 설정 기능은 추후 업데이트됩니다.')"><span>알림 설정</span><span class="arrow">›</span></div>
-          <div class="account-row" onclick="alert('앱 버전: 1.0.0')"><span>앱 정보</span><span class="arrow">›</span></div>
-          <div class="account-row" onclick="doLogout()" style="color:var(--danger);"><span>로그아웃</span><span class="arrow">›</span></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
 </div>
 
-<!-- ==================== DIALOGS ==================== -->
+<!-- ===== FORM ===== -->
+<div class="screen" id="screen-form">
+  <div class="form-screen-inner">
+    <div class="form-header">
+      <button class="back-btn" onclick="formGoBack()"><i data-lucide="arrow-left"></i></button>
+      <h2 id="form-title">시공 정보</h2>
+    </div>
+    <div class="form-body">
+      <div class="form-group">
+        <span class="form-label">프로젝트명</span>
+        <input class="addr-input" id="f-project-name" placeholder="프로젝트 이름 입력" oninput="saveFormData()">
+      </div>
+      <div class="form-group">
+        <span class="form-label">시공종류</span>
+        <div class="checkbox-row">
+          <div class="chk-item"><input type="checkbox" id="f-apt" checked onchange="saveFormData()"><label for="f-apt">아파트</label></div>
+          <div class="chk-item"><input type="checkbox" id="f-house" onchange="saveFormData()"><label for="f-house">단독주택</label></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <span class="form-label">평형 (1개 선택)</span>
+        <div class="checkbox-row">
+          <div class="chk-item"><input type="radio" name="f-size" id="f-s10" value="10평대" onchange="saveFormData()"><label for="f-s10">10평대</label></div>
+          <div class="chk-item"><input type="radio" name="f-size" id="f-s20" value="20평대" onchange="saveFormData()"><label for="f-s20">20평대</label></div>
+          <div class="chk-item"><input type="radio" name="f-size" id="f-s30" value="30평대" checked onchange="saveFormData()"><label for="f-s30">30평대</label></div>
+        </div>
+        <div class="checkbox-row">
+          <div class="chk-item"><input type="radio" name="f-size" id="f-s40" value="40평대" onchange="saveFormData()"><label for="f-s40">40평대</label></div>
+          <div class="chk-item"><input type="radio" name="f-size" id="f-s50" value="50평대" onchange="saveFormData()"><label for="f-s50">50평대</label></div>
+          <div class="chk-item"><input type="radio" name="f-size" id="f-s60" value="60평대" onchange="saveFormData()"><label for="f-s60">60평대</label></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <span class="form-label">시공방법</span>
+        <div class="checkbox-row">
+          <div class="chk-item"><input type="checkbox" id="f-self" checked onchange="saveFormData()"><label for="f-self">반셀프</label></div>
+          <div class="chk-item"><input type="checkbox" id="f-turnkey" disabled><label for="f-turnkey" style="color:#ccc;cursor:not-allowed;">턴키(추후오픈)</label></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <span class="form-label">전체 시공일정</span>
+        <div class="date-row">
+          <div class="date-input"><input type="date" id="f-start" onchange="saveFormData()"></div>
+          <span class="date-sep">~</span>
+          <div class="date-input"><input type="date" id="f-end" onchange="saveFormData()"></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <span class="form-label">시공 주소</span>
+        <div class="addr-search-row">
+          <input class="addr-input" id="f-address" placeholder="주소 검색" onchange="saveFormData()" style="flex:1;">
+          <button type="button" class="addr-search-btn" onclick="searchAddress()">
+            <i data-lucide="search"></i> 검색
+          </button>
+        </div>
+        <input class="addr-input" id="f-address-detail" placeholder="상세주소 (동, 호수 등)" onchange="saveFormData()" style="margin-top:8px;">
+      </div>
+      <div class="form-group">
+        <span class="form-label">메모</span>
+        <textarea class="textarea-field" id="f-memo" onchange="saveFormData()" placeholder="시공 관련 메모"></textarea>
+      </div>
+    </div>
+    <div class="form-footer">
+      <button class="btn-primary" id="form-submit-btn" onclick="saveFormAndBack()">수정완료</button>
+    </div>
+  </div>
+</div>
 
-<!-- Add Process Dialog -->
+<!-- ===== ACCOUNT ===== -->
+<div class="screen" id="screen-account">
+  <div class="form-screen-inner">
+    <div class="form-header">
+      <button class="back-btn" onclick="goTo('main')"><i data-lucide="arrow-left"></i></button>
+      <h2>계정 관리</h2>
+    </div>
+    <div class="form-body" style="padding:0;">
+      <div class="account-card">
+        <div style="display:flex;align-items:center;gap:14px;padding-bottom:14px;border-bottom:1px solid #f0f0f0;margin-bottom:8px;">
+          <div style="width:52px;height:52px;border-radius:50%;background:#eef1f7;display:flex;align-items:center;justify-content:center;">
+            <i data-lucide="user" style="width:24px;height:24px;color:#aaa;"></i>
+          </div>
+          <div>
+            <div style="font-size:16px;font-weight:700;" id="acct-name">사용자</div>
+            <div style="font-size:13px;color:#aaa;margin-top:2px;" id="acct-email">-</div>
+          </div>
+        </div>
+        <div class="account-row" onclick="doLogout()" style="color:var(--danger);">
+          <div class="row-left" style="color:var(--danger);">
+            <i data-lucide="log-out" style="color:var(--danger);width:17px;height:17px;"></i> 로그아웃
+          </div>
+          <div class="arow"><i data-lucide="chevron-right"></i></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /.app -->
+
+<!-- Toast -->
+<div class="autosave-toast" id="autosave-toast">자동저장됨</div>
+
+<!-- ===== DIALOGS ===== -->
+
+<!-- Add Process -->
 <div class="overlay" id="dlg-add-process">
-  <div class="dialog" style="max-width:360px;">
+  <div class="dialog">
     <h3>공정 추가</h3>
-    <p style="font-size:13px;color:#666;">공정 유형을 선택하세요</p>
     <div class="process-grid" id="process-grid"></div>
-    <div style="margin-top:4px;">
-      <div style="font-size:13px;color:#666;margin-bottom:6px;">또는 직접 입력:</div>
+    <div>
+      <div style="font-size:12px;color:#aaa;font-weight:700;margin-bottom:6px;">직접 입력</div>
       <input class="dialog-input" id="custom-process-input" placeholder="커스텀 공정 이름">
     </div>
     <div class="dialog-actions">
@@ -625,7 +671,7 @@ button,input,textarea,select { font-family:var(--font); }
   </div>
 </div>
 
-<!-- Add Detail Item Dialog -->
+<!-- Add Detail -->
 <div class="overlay" id="dlg-add-detail">
   <div class="dialog">
     <h3>상세내역 추가</h3>
@@ -638,11 +684,11 @@ button,input,textarea,select { font-family:var(--font); }
   </div>
 </div>
 
-<!-- Edit Field Dialog -->
+<!-- Edit Field -->
 <div class="overlay" id="dlg-edit-field">
   <div class="dialog">
     <h3 id="edit-field-title">편집</h3>
-    <input class="dialog-input" id="edit-field-input" placeholder="">
+    <input class="dialog-input" id="edit-field-input">
     <div class="dialog-actions">
       <button class="btn-cancel" onclick="closeDialog('dlg-edit-field')">취소</button>
       <button class="btn-confirm" onclick="confirmEditField()">저장</button>
@@ -650,86 +696,21 @@ button,input,textarea,select { font-family:var(--font); }
   </div>
 </div>
 
-<!-- Project Select Dialog -->
-<div class="overlay" id="dlg-project-select">
-  <div class="dialog">
-    <h3>프로젝트 선택</h3>
-    <div id="project-list" style="display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto;"></div>
-    <div style="border-top:1px solid #eee;padding-top:12px;">
-      <input class="dialog-input" id="new-project-name" placeholder="새 프로젝트 이름">
-      <button class="btn-confirm" style="width:100%;margin-top:8px;" onclick="createProject()">새 프로젝트 생성</button>
-    </div>
-    <div class="dialog-actions"><button class="btn-cancel" onclick="closeDialog('dlg-project-select')">닫기</button></div>
-  </div>
-</div>
-
-<!-- Share Dialog -->
-<div class="overlay" id="dlg-share">
-  <div class="dialog">
-    <h3>공유하기</h3>
-    <div class="share-options">
-      <div class="share-option" onclick="shareAction('native')"><span class="s-icon">📤</span><span class="s-text">공유하기 (기본)</span></div>
-      <div class="share-option" onclick="shareAction('link')"><span class="s-icon">🔗</span><span class="s-text">링크 복사</span></div>
-      <div class="share-option" onclick="shareAction('kakao')"><span class="s-icon">💬</span><span class="s-text">카카오톡</span></div>
-      <div class="share-option" onclick="shareAction('twitter')"><span class="s-icon">🐦</span><span class="s-text">Twitter / X</span></div>
-      <div class="share-option" onclick="shareAction('facebook')"><span class="s-icon">📘</span><span class="s-text">Facebook</span></div>
-    </div>
-    <div class="dialog-actions"><button class="btn-cancel" onclick="closeDialog('dlg-share')">닫기</button></div>
-  </div>
-</div>
-
-<!-- Download Dialog -->
-<div class="overlay" id="dlg-download">
-  <div class="dialog">
-    <h3>시공 계획 다운로드</h3>
-    <p style="font-size:14px;color:#666;line-height:1.5;">현재 프로젝트의 시공 계획을 문서로 내보냅니다.</p>
-    <div class="share-options">
-      <div class="share-option" onclick="downloadPlan('pdf')"><span class="s-icon">📋</span><span class="s-text">PDF로 다운로드</span></div>
-      <div class="share-option" onclick="downloadPlan('excel')"><span class="s-icon">📊</span><span class="s-text">Excel로 다운로드</span></div>
-    </div>
-    <div class="dialog-actions"><button class="btn-cancel" onclick="closeDialog('dlg-download')">닫기</button></div>
-  </div>
-</div>
-
-<!-- Expert Dialog -->
-<div class="overlay" id="dlg-expert">
-  <div class="dialog">
-    <h3>전문가 피드백 요청</h3>
-    <p style="font-size:14px;color:#666;line-height:1.5;">해당 기능은 추후 오픈 예정입니다.<br>인테리어 전문가에게 시공 계획을 검토받을 수 있습니다.</p>
-    <div style="background:#f8f9ff;border-radius:10px;padding:16px;font-size:13px;color:#888;line-height:1.6;">
-      🔔 오픈 알림을 받으시려면 계정을 등록해 두세요.
-    </div>
-    <div class="dialog-actions">
-      <button class="btn-cancel" onclick="closeDialog('dlg-expert')">닫기</button>
-    </div>
-  </div>
-</div>
-
-<!-- Login Dialog -->
-<div class="overlay" id="dlg-login">
-  <div class="dialog">
-    <h3>로그인</h3>
-    <p style="font-size:14px;color:#666;line-height:1.5;">시공정보 입력 및 저장을 위해<br>로그인이 필요합니다.</p>
-    <div id="google-signin-btn" style="display:flex;justify-content:center;min-height:48px;margin:4px 0;"></div>
-    <div style="text-align:center;font-size:12px;color:#ccc;margin:-4px 0 0;">또는</div>
-    <button onclick="demoLogin()" class="google-btn" style="background:#f8f9ff;">
-      <span>🔑</span> 데모 로그인 (테스트용)
-    </button>
-    <div class="dialog-actions"><button class="btn-cancel" onclick="closeDialog('dlg-login')">취소</button></div>
-  </div>
-</div>
-
-<!-- Schedule Dialog -->
+<!-- Schedule Picker -->
 <div class="overlay" id="dlg-schedule">
   <div class="dialog">
     <h3>시공 일정 선택</h3>
     <div class="form-group">
       <span class="form-label">시작일</span>
-      <input type="date" id="sched-start" class="dialog-input" style="margin-top:6px;">
+      <input type="date" id="sched-start" class="dialog-input" style="margin-top:4px;">
     </div>
-    <div class="form-group" style="margin-top:8px;">
+    <div class="form-group">
       <span class="form-label">종료일</span>
-      <input type="date" id="sched-end" class="dialog-input" style="margin-top:6px;">
+      <input type="date" id="sched-end" class="dialog-input" style="margin-top:4px;">
+    </div>
+    <div id="sched-other-section" style="display:none;border-top:1px solid #f0f0f0;padding-top:12px;">
+      <div style="font-size:12px;color:#999;font-weight:700;margin-bottom:8px;">📅 다른 공정 일정 현황</div>
+      <div id="sched-other-list"></div>
     </div>
     <div class="dialog-actions">
       <button class="btn-cancel" onclick="closeDialog('dlg-schedule')">취소</button>
@@ -738,48 +719,115 @@ button,input,textarea,select { font-family:var(--font); }
   </div>
 </div>
 
+<!-- Share -->
+<div class="overlay" id="dlg-share">
+  <div class="dialog">
+    <h3>공유하기</h3>
+    <div class="share-options">
+      <div class="share-option" onclick="shareAction('native')">
+        <span class="s-icon"><i data-lucide="share-2"></i></span><span class="s-text">공유하기 (기본)</span>
+      </div>
+      <div class="share-option" onclick="shareAction('link')">
+        <span class="s-icon"><i data-lucide="link"></i></span><span class="s-text">링크 복사</span>
+      </div>
+      <div class="share-option" onclick="shareAction('kakao')">
+        <span class="s-icon" style="font-size:20px;">💬</span><span class="s-text">카카오톡</span>
+      </div>
+      <div class="share-option" onclick="shareAction('twitter')">
+        <span class="s-icon"><i data-lucide="twitter"></i></span><span class="s-text">Twitter / X</span>
+      </div>
+      <div class="share-option" onclick="shareAction('facebook')">
+        <span class="s-icon"><i data-lucide="facebook"></i></span><span class="s-text">Facebook</span>
+      </div>
+    </div>
+    <div class="dialog-actions"><button class="btn-cancel" onclick="closeDialog('dlg-share')">닫기</button></div>
+  </div>
+</div>
+
+<!-- Expert -->
+<div class="overlay" id="dlg-expert">
+  <div class="dialog">
+    <h3>전문가 피드백 요청</h3>
+    <p style="font-size:14px;color:#888;line-height:1.6;">해당 기능은 추후 오픈 예정입니다.<br>인테리어 전문가에게 시공 계획을 검토받을 수 있습니다.</p>
+    <div style="background:#f5f8ff;border-radius:10px;padding:14px;font-size:13px;color:#888;line-height:1.6;">
+      🔔 오픈 알림을 받으시려면 계정을 등록해 두세요.
+    </div>
+    <div class="dialog-actions"><button class="btn-cancel" onclick="closeDialog('dlg-expert')">닫기</button></div>
+  </div>
+</div>
+
+<!-- Login -->
+<div class="overlay" id="dlg-login">
+  <div class="dialog">
+    <h3>로그인</h3>
+    <p style="font-size:14px;color:#888;line-height:1.6;">시공정보 입력 및 저장을 위해<br>로그인이 필요합니다.</p>
+    <div id="google-signin-btn" style="display:flex;justify-content:center;min-height:48px;margin:4px 0;"></div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div style="flex:1;height:1px;background:#eee;"></div>
+      <span style="font-size:12px;color:#ccc;">또는</span>
+      <div style="flex:1;height:1px;background:#eee;"></div>
+    </div>
+    <button onclick="demoLogin()" class="google-btn">
+      <i data-lucide="key"></i> 데모 로그인 (테스트용)
+    </button>
+    <div class="dialog-actions"><button class="btn-cancel" onclick="closeDialog('dlg-login')">취소</button></div>
+  </div>
+</div>
+
 <script>
-// ===================== CONFIG =====================
+// ===== CONFIG =====
+// Google Cloud Console에서 발급받은 Client ID로 교체하세요
+// https://console.cloud.google.com/ → APIs & Services → Credentials → OAuth 2.0 Client IDs
 const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
 
-// ===================== DATA & STATE =====================
+// ===== CONSTANTS =====
 const PROCESS_TYPES = ['철거','샷시','목공','타일','욕실','도배','가구','전기'];
-const PROCESS_COLORS = { '철거':'c0','샷시':'c1','목공':'c2','타일':'c3','욕실':'c4','도배':'c5','가구':'c6','전기':'c7' };
+const PROCESS_COLORS = {'철거':'c0','샷시':'c1','목공':'c2','타일':'c3','욕실':'c4','도배':'c5','가구':'c6','전기':'c7'};
+const COLOR_HEX = {c0:'#2563eb',c1:'#16a34a',c2:'#f57c00',c3:'#9333ea',c4:'#e91e63',c5:'#00838f',c6:'#ff8f00',c7:'#6d4c41'};
 
+// ===== STATE =====
 let state = {
   loggedIn: false,
-  user: { email:'', name:'' },
+  user: {email:'', name:''},
   currentProjectId: null,
   projects: [],
   summaryOpen: true,
 };
-
 let pendingAction = null;
 
 function getProject() { return state.projects.find(p => p.id === state.currentProjectId); }
-function save() { localStorage.setItem('vibespace', JSON.stringify(state)); }
+
+let saveTimer = null;
+function save() {
+  localStorage.setItem('vibespace', JSON.stringify(state));
+  showToast();
+}
+let toastTimer = null;
+function showToast() {
+  const el = document.getElementById('autosave-toast');
+  if (!el) return;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 1600);
+}
+
 function load() {
   const d = localStorage.getItem('vibespace');
   if (d) { try { state = JSON.parse(d); } catch(e) {} }
-  if (!state.projects || !state.projects.length) { initDefaultProject(); }
-  // 기존 p.schedule(문자열) 마이그레이션
-  if (state.projects) {
-    state.projects.forEach(proj => {
-      if (proj.processes) {
-        proj.processes.forEach(p => {
-          if (p.schedule && !p.scheduleStart) {
-            const parts = p.schedule.replace(/\s/g,'').split('-');
-            if (parts.length >= 2) {
-              const s = parseKorDate(parts[0]);
-              const e = parseKorDate(parts[1]);
-              if (s) p.scheduleStart = s.toISOString().slice(0,10);
-              if (e) p.scheduleEnd = e.toISOString().slice(0,10);
-            }
-          }
-        });
+  if (!state.projects || !state.projects.length) initDefaultProject();
+  // migrate old p.schedule strings
+  state.projects && state.projects.forEach(proj => {
+    proj.processes && proj.processes.forEach(p => {
+      if (p.schedule && !p.scheduleStart) {
+        const parts = p.schedule.replace(/\s/g,'').split('-');
+        if (parts.length >= 2) {
+          const s = parseKorDate(parts[0]), e = parseKorDate(parts[1]);
+          if (s) p.scheduleStart = s.toISOString().slice(0,10);
+          if (e) p.scheduleEnd = e.toISOString().slice(0,10);
+        }
       }
     });
-  }
+  });
 }
 
 function initDefaultProject() {
@@ -792,37 +840,18 @@ function createDefaultProject(name) {
   return {
     id: 'p_' + Date.now() + Math.random().toString(36).slice(2,6),
     name,
-    form: {
-      type: ['아파트'], size: ['30평대'], method: ['반셀프'],
-      startDate: '2025-11-01', endDate: '2025-11-30',
-      memo: '', address: '경기도 수내동 182번지', addressDetail: '',
-    },
+    form: { type:['아파트'], size:['30평대'], method:['반셀프'], startDate:'', endDate:'', memo:'', address:'', addressDetail:'' },
     drawing: null,
-    processes: [
-      {
-        id: 'proc_1', name: '철거', type: '철거',
-        scheduleStart: '2026-10-30', scheduleEnd: '2026-12-30',
-        company: '철거왕',
-        details: [
-          { id:'d1', desc:'(욕실 2개) 철거, 방수, 젠다이', cost:140000 },
-          { id:'d2', desc:'(마루) 철거, 샌딩, 보강미장', cost:140000 },
-          { id:'d3', desc:'(타일) 철거, 신발장턱, 디딤석, 주방타일', cost:140000 },
-          { id:'d4', desc:'(가구) 싱크대, 신발장, 창고장, 안방붙박이장, 보조주방', cost:140000 },
-          { id:'d5', desc:'(현관) 중문, 문, 문틀 제거', cost:140000 },
-          { id:'d6', desc:'(잡철거) 블라인드 건조대, 장판', cost:140000 },
-        ]
-      }
-    ]
+    processes: []
   };
 }
 
-// ===================== AUTH =====================
+// ===== AUTH =====
 function requireLogin(action) {
   if (state.loggedIn) { action(); return; }
   pendingAction = action;
   openLoginDialog();
 }
-
 function openLoginDialog() {
   openDialog('dlg-login');
   setTimeout(() => {
@@ -833,12 +862,12 @@ function openLoginDialog() {
         GOOGLE_CLIENT_ID !== 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com') {
       try {
         google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleGoogleResponse });
-        google.accounts.id.renderButton(btn, { theme: 'outline', size: 'large', text: 'signin_with', width: 280 });
+        google.accounts.id.renderButton(btn, { theme:'outline', size:'large', text:'signin_with', width:300 });
       } catch(e) {}
     }
+    lucide.createIcons();
   }, 150);
 }
-
 function handleGoogleResponse(response) {
   try {
     const payload = JSON.parse(atob(response.credential.split('.')[1]));
@@ -848,61 +877,51 @@ function handleGoogleResponse(response) {
     closeDialog('dlg-login');
     updateLoginUI();
     if (pendingAction) { const a = pendingAction; pendingAction = null; a(); }
-  } catch(e) { alert('로그인 중 오류가 발생했습니다.'); }
+  } catch(e) { alert('로그인 오류가 발생했습니다.'); }
 }
-
 function demoLogin() {
   state.loggedIn = true;
-  state.user = { name: '테스트 사용자', email: 'demo@vibespace.kr' };
+  state.user = { name:'테스트 사용자', email:'demo@vibespace.kr' };
   save();
   closeDialog('dlg-login');
   updateLoginUI();
   if (pendingAction) { const a = pendingAction; pendingAction = null; a(); }
 }
-
 function handleMenuLogin() {
   closeAllMenus();
   if (state.loggedIn) {
-    if (confirm(`${state.user.name || '사용자'}님, 로그아웃 하시겠습니까?`)) doLogout();
+    if (confirm(`${state.user.name}님, 로그아웃 하시겠습니까?`)) doLogout();
   } else {
     pendingAction = null;
     openLoginDialog();
   }
 }
-
 function updateLoginUI() {
   const btn = document.getElementById('menu-login-btn');
-  if (btn) {
-    btn.textContent = state.loggedIn
-      ? `로그아웃 (${state.user.name || '사용자'})`
-      : '로그인';
-    btn.style.color = state.loggedIn ? 'var(--danger)' : '';
+  if (!btn) return;
+  if (state.loggedIn) {
+    btn.innerHTML = `<i data-lucide="log-out"></i> 로그아웃 (${state.user.name||'사용자'})`;
+    btn.classList.add('danger');
+  } else {
+    btn.innerHTML = `<i data-lucide="user"></i> 로그인`;
+    btn.classList.remove('danger');
   }
+  lucide.createIcons();
 }
-
-function saveToServer() {
+function doLogout() {
+  state.loggedIn = false;
+  state.user = {email:'', name:''};
+  save();
   closeAllMenus();
-  if (!state.loggedIn) {
-    pendingAction = () => { goTo('main'); saveToServer(); };
-    openLoginDialog();
-    return;
-  }
-  const proj = getProject();
-  if (!proj) return;
-  const saveData = { user: state.user, project: proj, savedAt: new Date().toISOString() };
-  localStorage.setItem('vibespace_saved_' + proj.id, JSON.stringify(saveData));
-  alert(`✅ "${proj.name}" 시공정보가 저장되었습니다.\n\n저장 계정: ${state.user.email}`);
+  updateLoginUI();
+  goTo('landing');
 }
 
-// ===================== LANDING & NAVIGATION =====================
+// ===== NAVIGATION =====
 let formMode = 'edit';
-
-function startNewProject() {
-  requireLogin(_startNewProject);
-}
+function startNewProject() { requireLogin(_startNewProject); }
 function _startNewProject() {
   const proj = createDefaultProject('새 시공 프로젝트');
-  proj.processes = [];
   state.projects.push(proj);
   state.currentProjectId = proj.id;
   save();
@@ -912,32 +931,19 @@ function _startNewProject() {
   goTo('form');
   loadFormData();
 }
-
 function loadExistingProjects() {
-  if (state.projects.length === 0) {
-    alert('저장된 프로젝트가 없습니다. 새 프로젝트를 생성해주세요.');
-    return;
-  }
-  if (state.projects.length === 1) {
-    state.currentProjectId = state.projects[0].id;
-    save();
-    goTo('main');
-    renderAll();
-    return;
-  }
-  openProjectSelect();
+  if (!state.projects.length) { alert('저장된 프로젝트가 없습니다.'); return; }
+  state.currentProjectId = state.projects[0].id;
+  save();
+  goTo('main');
+  renderAll();
 }
-
 function formGoBack() {
   if (formMode === 'new') {
     const proj = getProject();
-    if (proj && proj.processes.length === 0) {
+    if (proj && (!proj.processes || !proj.processes.length)) {
       state.projects = state.projects.filter(p => p.id !== proj.id);
-      if (state.projects.length > 0) {
-        state.currentProjectId = state.projects[0].id;
-      } else {
-        state.currentProjectId = null;
-      }
+      state.currentProjectId = state.projects[0]?.id || null;
       save();
     }
     formMode = 'edit';
@@ -946,17 +952,6 @@ function formGoBack() {
     goTo('main');
   }
 }
-
-function doLogout() {
-  state.loggedIn = false;
-  state.user = { email:'', name:'' };
-  save();
-  closeAllMenus();
-  updateLoginUI();
-  goTo('landing');
-}
-
-// ===================== NAVIGATION =====================
 function goTo(screen) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + screen).classList.add('active');
@@ -971,17 +966,72 @@ function goTo(screen) {
   }
   if (screen === 'account') {
     document.getElementById('acct-name').textContent = state.user.name || '사용자';
-    document.getElementById('acct-email').textContent = state.user.email || '';
+    document.getElementById('acct-email').textContent = state.user.email || '-';
   }
+  setTimeout(lucide.createIcons, 40);
 }
 
-// ===================== SUMMARY =====================
+// ===== PROJECT DROPDOWN =====
+function toggleProjectDropdown(e) {
+  e.stopPropagation();
+  const dd = document.getElementById('project-dropdown');
+  const btn = document.getElementById('project-badge-btn');
+  const wasActive = dd.classList.contains('active');
+  closeAllMenus();
+  if (!wasActive) {
+    renderProjectDropdownList();
+    dd.classList.add('active');
+    btn.classList.add('open');
+  }
+}
+function renderProjectDropdownList() {
+  const list = document.getElementById('project-dropdown-list');
+  list.innerHTML = state.projects.map(p => `
+    <div class="pd-item ${p.id===state.currentProjectId?'current':''}" onclick="selectProjectDD('${p.id}')">
+      <span class="pd-name">${esc(p.name)}</span>
+      ${state.projects.length > 1 ? `<span class="pd-del" onclick="event.stopPropagation();deleteProjectDD('${p.id}')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </span>` : ''}
+    </div>`).join('');
+}
+function selectProjectDD(id) {
+  state.currentProjectId = id;
+  save();
+  closeAllMenus();
+  renderAll();
+}
+function deleteProjectDD(id) {
+  if (!confirm('이 프로젝트를 삭제하시겠습니까?')) return;
+  state.projects = state.projects.filter(p => p.id !== id);
+  if (state.currentProjectId === id) state.currentProjectId = state.projects[0]?.id || null;
+  if (!state.projects.length) initDefaultProject();
+  save();
+  closeAllMenus();
+  renderAll();
+}
+function promptNewProject() {
+  closeAllMenus();
+  const name = prompt('새 프로젝트 이름:');
+  if (!name || !name.trim()) return;
+  requireLogin(() => {
+    const proj = createDefaultProject(name.trim());
+    state.projects.push(proj);
+    state.currentProjectId = proj.id;
+    save();
+    formMode = 'new';
+    document.getElementById('form-title').textContent = '시공정보 입력';
+    document.getElementById('form-submit-btn').textContent = '시작하기';
+    goTo('form');
+    loadFormData();
+  });
+}
+
+// ===== SUMMARY =====
 function toggleSummary() {
   state.summaryOpen = !state.summaryOpen;
   updateSummary();
-  save();
+  localStorage.setItem('vibespace', JSON.stringify(state));
 }
-
 function updateSummary() {
   const proj = getProject(); if (!proj) return;
   let totalCost = 0;
@@ -993,173 +1043,175 @@ function updateSummary() {
   document.getElementById('sum-cost').textContent = totalCost > 0 ? '약 ' + formatNum(totalCost) + '원' : '0원';
   if (proj.form.startDate && proj.form.endDate) {
     const s = new Date(proj.form.startDate), e = new Date(proj.form.endDate);
-    const months = Math.max(1, Math.round((e - s) / (1000*60*60*24*30)));
+    const months = Math.max(1, Math.round((e-s)/(1000*60*60*24*30)));
     document.getElementById('sum-duration').textContent = '약 ' + months + '개월';
-  }
+  } else { document.getElementById('sum-duration').textContent = '-'; }
   document.getElementById('sum-companies').textContent = companies.size + '개 업체';
-
   const isOpen = state.summaryOpen !== false;
   document.getElementById('summary-card').classList.toggle('collapsed', !isOpen);
-  const chevron = document.getElementById('summary-chevron');
-  if (chevron) chevron.classList.toggle('open', isOpen);
+  const chev = document.getElementById('sum-chev');
+  if (chev) chev.classList.toggle('open', isOpen);
 }
-
 function formatNum(n) {
+  if (n >= 100000000) return (n/100000000).toFixed(1) + '억';
   if (n >= 10000) return Math.round(n/10000).toLocaleString() + '만';
   return n.toLocaleString();
 }
 
-// ===================== TABS =====================
+// ===== TABS =====
 function switchMainTab(tab, btn) {
-  document.querySelectorAll('.tab-toggle .tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
   document.getElementById('tab-plan').style.display = tab === 'plan' ? '' : 'none';
   document.getElementById('tab-calendar').style.display = tab === 'calendar' ? '' : 'none';
-  // floating 버튼 항상 유지 (숨기지 않음)
   if (tab === 'calendar') renderCalendar();
+  setTimeout(lucide.createIcons, 40);
 }
 
-// ===================== WORK CARDS =====================
-let editingProcessId = null;
-let editingFieldKey = null;
-
+// ===== WORK CARDS =====
+let editingProcessId = null, editingFieldKey = null;
 function renderWorkCards() {
   const proj = getProject(); if (!proj) return;
   const container = document.getElementById('work-cards');
   if (!proj.processes.length) {
-    container.innerHTML = '<div style="text-align:center;padding:60px 0;color:#999;font-size:14px;grid-column:1/-1;">공정을 추가해주세요</div>';
+    container.innerHTML = '<div style="text-align:center;padding:60px 20px;color:#bbb;font-size:15px;grid-column:1/-1;">아래 버튼을 눌러 첫 공정을 추가하세요</div>';
     return;
   }
   container.innerHTML = proj.processes.map(p => {
     const totalCost = p.details.reduce((s,d) => s + (d.cost||0), 0);
-    const scheduleDisplay = (p.scheduleStart && p.scheduleEnd)
+    const schedDisplay = (p.scheduleStart && p.scheduleEnd)
       ? formatDate(p.scheduleStart) + ' ~ ' + formatDate(p.scheduleEnd)
       : '일정 선택';
-    const scheduleHasFill = !!(p.scheduleStart && p.scheduleEnd);
     return `
     <div class="work-card">
       <div class="work-card-header">
         <span class="work-card-title">${esc(p.name)}</span>
-        ${totalCost > 0 ? `<span class="work-card-cost">${totalCost.toLocaleString()}원</span>` : ''}
+        <div class="card-header-right">
+          ${totalCost > 0 ? `<span class="work-card-cost">${totalCost.toLocaleString()}원</span>` : ''}
+          <button class="card-del-btn" onclick="deleteProcess('${p.id}')">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          </button>
+        </div>
       </div>
       <div class="work-field">
         <span class="f-label">예상견적</span>
-        <span class="f-value ${totalCost > 0 ? 'filled' : ''}">
-          ${totalCost > 0 ? totalCost.toLocaleString()+'원' : '상세내역 입력시 자동계산'}
+        <span class="f-value ${totalCost>0?'readonly':''}">
+          ${totalCost>0 ? totalCost.toLocaleString()+'원' : '상세내역 입력시 자동계산'}
         </span>
       </div>
       <div class="field-divider"></div>
       <div class="work-field">
         <span class="f-label">예상 일정</span>
-        <span class="f-value ${scheduleHasFill?'filled':''}" onclick="openScheduleDialog('${p.id}')">
-          ${esc(scheduleDisplay)} <span class="edit-icon">✎</span>
+        <span class="f-value ${p.scheduleStart?'filled':''}" onclick="openScheduleDialog('${p.id}')">
+          ${esc(schedDisplay)}
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--primary)"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         </span>
       </div>
       <div class="field-divider"></div>
       <div class="work-field">
         <span class="f-label">참여 업체</span>
         <span class="f-value ${p.company?'filled':''}" onclick="editField('${p.id}','company','참여 업체')">
-          ${p.company ? esc(p.company) : '업체입력'} <span class="edit-icon">✎</span>
+          ${p.company ? esc(p.company) : '업체입력'}
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--primary)"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         </span>
       </div>
       <div class="field-divider"></div>
       <div class="detail-header">
         <span class="d-label">상세내역</span>
-        <div class="detail-actions">
-          <button onclick="openAddDetail('${p.id}')" title="추가">+</button>
-          <button onclick="deleteProcess('${p.id}')" title="삭제" style="color:var(--danger);">✕</button>
-        </div>
+        <button class="detail-add-btn" onclick="openAddDetail('${p.id}')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
       </div>
       ${p.details.length ? p.details.map(d => `
         <div class="detail-item">
           <span class="d-desc">${esc(d.desc)}</span>
-          <div style="display:flex;align-items:center;gap:8px">
+          <div class="d-right">
             <span class="d-cost">${(d.cost||0).toLocaleString()}원</span>
-            <button class="detail-del-btn" onclick="deleteDetail('${p.id}','${d.id}')">✕</button>
+            <button class="detail-del-btn" onclick="deleteDetail('${p.id}','${d.id}')">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
           </div>
-        </div>
-      `).join('') : '<div class="detail-empty">상세 내역 없음</div>'}
+        </div>`).join('') : '<div class="detail-empty">+ 버튼으로 상세내역을 추가하세요</div>'}
     </div>`;
   }).join('');
 }
 
 function editField(procId, key, label) {
-  editingProcessId = procId;
-  editingFieldKey = key;
-  const proj = getProject();
-  const proc = proj.processes.find(p => p.id === procId);
-  document.getElementById('edit-field-title').textContent = label;
+  editingProcessId = procId; editingFieldKey = key;
+  const proc = getProject().processes.find(p => p.id === procId);
+  document.getElementById('edit-field-title').textContent = label + ' 입력';
   document.getElementById('edit-field-input').value = proc[key] || '';
-  document.getElementById('edit-field-input').placeholder = label + '을 입력하세요';
   openDialog('dlg-edit-field');
   setTimeout(() => document.getElementById('edit-field-input').focus(), 100);
 }
 function confirmEditField() {
-  const proj = getProject();
-  const proc = proj.processes.find(p => p.id === editingProcessId);
+  const proc = getProject().processes.find(p => p.id === editingProcessId);
   if (proc) { proc[editingFieldKey] = document.getElementById('edit-field-input').value; save(); renderAll(); }
   closeDialog('dlg-edit-field');
 }
-
 function deleteProcess(procId) {
   if (!confirm('이 공정을 삭제하시겠습니까?')) return;
   const proj = getProject();
   proj.processes = proj.processes.filter(p => p.id !== procId);
   save(); renderAll();
 }
-
-// 상세내역 삭제
 function deleteDetail(procId, detailId) {
-  const proj = getProject(); if (!proj) return;
-  const proc = proj.processes.find(p => p.id === procId); if (!proc) return;
-  proc.details = proc.details.filter(d => d.id !== detailId);
-  save(); renderAll();
+  const proc = getProject()?.processes.find(p => p.id === procId);
+  if (proc) { proc.details = proc.details.filter(d => d.id !== detailId); save(); renderAll(); }
 }
 
-// ===================== SCHEDULE DIALOG =====================
+// ===== SCHEDULE DIALOG =====
 let schedulingProcessId = null;
-
 function openScheduleDialog(procId) {
   schedulingProcessId = procId;
   const proj = getProject();
   const proc = proj.processes.find(p => p.id === procId);
   document.getElementById('sched-start').value = proc.scheduleStart || '';
   document.getElementById('sched-end').value = proc.scheduleEnd || '';
+  const others = proj.processes.filter(p => p.id !== procId && p.scheduleStart && p.scheduleEnd);
+  const section = document.getElementById('sched-other-section');
+  const list = document.getElementById('sched-other-list');
+  if (others.length === 0) {
+    section.style.display = 'none';
+  } else {
+    section.style.display = 'block';
+    list.innerHTML = others.map(p => {
+      const cls = PROCESS_COLORS[p.type] || 'c' + (Math.abs(hashCode(p.name)) % 8);
+      const color = COLOR_HEX[cls] || '#666';
+      return `<div class="sched-other-item">
+        <div class="sched-dot" style="background:${color};"></div>
+        <span style="font-weight:700;flex:1;">${esc(p.name)}</span>
+        <span style="color:#aaa;font-size:12px;">${formatDate(p.scheduleStart)} ~ ${formatDate(p.scheduleEnd)}</span>
+      </div>`;
+    }).join('');
+  }
   openDialog('dlg-schedule');
 }
-
 function confirmSchedule() {
-  const proj = getProject(); if (!proj) return;
-  const proc = proj.processes.find(p => p.id === schedulingProcessId); if (!proc) return;
+  const proc = getProject()?.processes.find(p => p.id === schedulingProcessId);
+  if (!proc) return;
   const start = document.getElementById('sched-start').value;
   const end = document.getElementById('sched-end').value;
-  if (start && end && start > end) {
-    alert('종료일이 시작일보다 빠를 수 없습니다.'); return;
-  }
+  if (start && end && start > end) { alert('종료일이 시작일보다 빠를 수 없습니다.'); return; }
   proc.scheduleStart = start;
   proc.scheduleEnd = end;
   save(); renderAll();
   closeDialog('dlg-schedule');
 }
-
 function formatDate(iso) {
   if (!iso) return '';
   const [y,m,d] = iso.split('-');
   return `${y}.${m}.${d}`;
 }
 
-// ===================== ADD PROCESS =====================
+// ===== ADD PROCESS =====
 let selectedProcessType = null;
-function openAddProcess() {
-  requireLogin(_openAddProcess);
-}
+function openAddProcess() { requireLogin(_openAddProcess); }
 function _openAddProcess() {
   selectedProcessType = null;
   document.getElementById('custom-process-input').value = '';
-  const grid = document.getElementById('process-grid');
-  grid.innerHTML = PROCESS_TYPES.map(t => `
-    <div class="process-option" onclick="selectProcessType(this,'${t}')">${t}</div>
-  `).join('');
+  document.getElementById('process-grid').innerHTML = PROCESS_TYPES.map(t =>
+    `<div class="process-option" onclick="selectProcessType(this,'${t}')">${t}</div>`).join('');
   openDialog('dlg-add-process');
 }
 function selectProcessType(el, type) {
@@ -1172,17 +1224,12 @@ function confirmAddProcess() {
   const custom = document.getElementById('custom-process-input').value.trim();
   const name = custom || selectedProcessType;
   if (!name) { alert('공정 유형을 선택하거나 이름을 입력하세요.'); return; }
-  const proj = getProject();
-  proj.processes.push({
-    id: 'proc_' + Date.now(),
-    name, type: selectedProcessType || name,
-    scheduleStart:'', scheduleEnd:'', company:'', details:[]
-  });
+  getProject().processes.push({ id:'proc_'+Date.now(), name, type:selectedProcessType||name, scheduleStart:'', scheduleEnd:'', company:'', details:[] });
   save(); renderAll();
   closeDialog('dlg-add-process');
 }
 
-// ===================== ADD DETAIL =====================
+// ===== ADD DETAIL =====
 let addDetailProcessId = null;
 function openAddDetail(procId) {
   addDetailProcessId = procId;
@@ -1195,21 +1242,15 @@ function confirmAddDetail() {
   const desc = document.getElementById('detail-desc').value.trim();
   const cost = parseInt(document.getElementById('detail-cost').value) || 0;
   if (!desc) { alert('작업 내용을 입력하세요.'); return; }
-  const proj = getProject();
-  const proc = proj.processes.find(p => p.id === addDetailProcessId);
-  if (proc) {
-    proc.details.push({ id:'d_'+Date.now(), desc, cost });
-    save(); renderAll();
-  }
+  const proc = getProject()?.processes.find(p => p.id === addDetailProcessId);
+  if (proc) { proc.details.push({ id:'d_'+Date.now(), desc, cost }); save(); renderAll(); }
   closeDialog('dlg-add-detail');
 }
 
-// ===================== CALENDAR =====================
+// ===== CALENDAR =====
 function renderCalendar() {
   const proj = getProject(); if (!proj) return;
   const container = document.getElementById('calendar-container');
-
-  // 커버해야 할 날짜 범위: form의 startDate~endDate + 모든 process scheduleStart~End
   let allDates = [];
   if (proj.form.startDate) allDates.push(new Date(proj.form.startDate));
   if (proj.form.endDate) allDates.push(new Date(proj.form.endDate));
@@ -1217,124 +1258,87 @@ function renderCalendar() {
     if (p.scheduleStart) allDates.push(new Date(p.scheduleStart));
     if (p.scheduleEnd) allDates.push(new Date(p.scheduleEnd));
   });
-
   if (!allDates.length) {
     const now = new Date();
     allDates = [now, new Date(now.getFullYear(), now.getMonth()+2, 1)];
   }
-
-  const minDate = new Date(Math.min(...allDates));
-  const maxDate = new Date(Math.max(...allDates));
-
-  // 시작월 ~ 종료월 모두 렌더링
-  let html = '';
-  let cur = new Date(minDate.getFullYear(), minDate.getMonth(), 1);
-  const endMonth = new Date(maxDate.getFullYear(), maxDate.getMonth(), 1);
-  let safety = 0;
-  while (cur <= endMonth && safety < 24) {
-    html += renderMonth(cur, proj.processes);
-    cur = new Date(cur.getFullYear(), cur.getMonth()+1, 1);
-    safety++;
-  }
-  container.innerHTML = html;
+  const minD = new Date(Math.min(...allDates));
+  const maxD = new Date(Math.max(...allDates));
+  let html = '', cur = new Date(minD.getFullYear(), minD.getMonth(), 1);
+  const endM = new Date(maxD.getFullYear(), maxD.getMonth(), 1);
+  let i = 0;
+  while (cur <= endM && i < 24) { html += renderMonth(cur, proj.processes); cur = new Date(cur.getFullYear(), cur.getMonth()+1, 1); i++; }
+  container.innerHTML = html || '<div style="text-align:center;padding:48px;color:#bbb;">공정 일정을 입력하면 여기에 표시됩니다</div>';
 }
-
 function renderMonth(date, processes) {
   const year = date.getFullYear(), month = date.getMonth();
   const firstDay = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const weekdays = ['일','월','화','수','목','금','토'];
-
+  const daysInMonth = new Date(year, month+1, 0).getDate();
   let html = `<div class="cal-month-title">${year}년 ${month+1}월</div>`;
-  html += `<div class="cal-weekdays">${weekdays.map(w=>`<div>${w}</div>`).join('')}</div>`;
+  html += `<div class="cal-weekdays">${['일','월','화','수','목','금','토'].map(w=>`<div>${w}</div>`).join('')}</div>`;
   html += `<div class="cal-grid">`;
-  for (let i = 0; i < firstDay; i++) html += `<div class="cal-cell empty"><span class="day-num">-</span></div>`;
-  for (let d = 1; d <= daysInMonth; d++) {
-    const tags = getProcessTagsForDay(year, month, d, processes);
+  for (let i=0; i<firstDay; i++) html += `<div class="cal-cell empty"><span class="day-num">-</span></div>`;
+  for (let d=1; d<=daysInMonth; d++) {
+    const tags = getTagsForDay(year, month, d, processes);
     html += `<div class="cal-cell"><span class="day-num">${d}</span>${tags}</div>`;
   }
-  html += `</div>`;
-  return html;
+  return html + '</div>';
 }
-
-function getProcessTagsForDay(year, month, day, processes) {
-  let tags = '';
-  processes.forEach(p => {
-    if (!p.scheduleStart || !p.scheduleEnd) return;
-    const s = new Date(p.scheduleStart);
-    const e = new Date(p.scheduleEnd);
+function getTagsForDay(year, month, day, processes) {
+  return processes.filter(p => p.scheduleStart && p.scheduleEnd).map(p => {
+    const s = new Date(p.scheduleStart + 'T00:00:00');
+    const e = new Date(p.scheduleEnd + 'T23:59:59');
     const cur = new Date(year, month, day);
-    if (cur >= s && cur <= e) {
-      const cls = PROCESS_COLORS[p.type] || 'c' + (Math.abs(hashCode(p.name)) % 8);
-      tags += `<span class="cal-tag ${cls}">${p.name.slice(0,2)}</span>`;
-    }
-  });
-  return tags;
+    if (cur < s || cur > e) return '';
+    const cls = PROCESS_COLORS[p.type] || 'c' + (Math.abs(hashCode(p.name)) % 8);
+    return `<span class="cal-tag ${cls}">${p.name.slice(0,2)}</span>`;
+  }).join('');
 }
-
 function parseKorDate(s) {
   const m = s.match(/(\d{4})\.(\d{1,2})\.(\d{1,2})/);
-  if (m) return new Date(+m[1], +m[2]-1, +m[3]);
-  return null;
+  return m ? new Date(+m[1], +m[2]-1, +m[3]) : null;
 }
 function hashCode(s) { let h=0; for(let i=0;i<s.length;i++) h=((h<<5)-h)+s.charCodeAt(i); return h; }
 
-// ===================== FORM =====================
+// ===== FORM =====
 function loadFormData() {
   const proj = getProject(); if (!proj) return;
   const f = proj.form;
-  // 프로젝트명
-  const pnameEl = document.getElementById('f-project-name');
-  if (pnameEl) pnameEl.value = proj.name || '';
-  // 시공종류
+  document.getElementById('f-project-name').value = proj.name || '';
   document.getElementById('f-apt').checked = f.type.includes('아파트');
   document.getElementById('f-house').checked = f.type.includes('단독주택');
-  // 평형 (radio 단일 선택)
-  const sizeVal = (f.size && f.size.length > 0) ? f.size[0] : '30평대';
+  const sizeVal = f.size?.[0] || '30평대';
   ['10','20','30','40','50','60'].forEach(s => {
     const el = document.getElementById('f-s'+s);
     if (el) el.checked = (sizeVal === s+'평대');
   });
-  // 시공방법
   document.getElementById('f-self').checked = f.method.includes('반셀프');
-  // 턴키는 항상 disabled
   document.getElementById('f-turnkey').checked = false;
   document.getElementById('f-start').value = f.startDate || '';
   document.getElementById('f-end').value = f.endDate || '';
   document.getElementById('f-memo').value = f.memo || '';
   document.getElementById('f-address').value = f.address || '';
-  const detailEl = document.getElementById('f-address-detail');
-  if (detailEl) detailEl.value = f.addressDetail || '';
+  document.getElementById('f-address-detail').value = f.addressDetail || '';
 }
-
 function saveFormData() {
   const proj = getProject(); if (!proj) return;
   const f = proj.form;
-  // 프로젝트명 저장
-  const pname = document.getElementById('f-project-name') ? document.getElementById('f-project-name').value.trim() : '';
-  if (pname) proj.name = pname;
-  // 시공종류
+  const pname = document.getElementById('f-project-name')?.value.trim();
+  if (pname) { proj.name = pname; const el = document.getElementById('current-project-name'); if (el) el.textContent = pname; }
   f.type = [];
   if (document.getElementById('f-apt').checked) f.type.push('아파트');
   if (document.getElementById('f-house').checked) f.type.push('단독주택');
-  // 평형: radio 단일 선택 → [선택된값] 형태
-  const checkedSize = document.querySelector('input[name="f-size"]:checked');
-  f.size = checkedSize ? [checkedSize.value] : [];
-  // 시공방법
+  const sr = document.querySelector('input[name="f-size"]:checked');
+  f.size = sr ? [sr.value] : [];
   f.method = [];
   if (document.getElementById('f-self').checked) f.method.push('반셀프');
   f.startDate = document.getElementById('f-start').value;
   f.endDate = document.getElementById('f-end').value;
   f.memo = document.getElementById('f-memo').value;
   f.address = document.getElementById('f-address').value;
-  const detailEl = document.getElementById('f-address-detail');
-  if (detailEl) f.addressDetail = detailEl.value;
+  f.addressDetail = document.getElementById('f-address-detail').value;
   save();
-  // 헤더의 프로젝트명도 즉시 반영
-  const nameEl = document.getElementById('current-project-name');
-  if (nameEl) nameEl.textContent = proj.name;
 }
-
 function saveFormAndBack() {
   saveFormData();
   if (formMode === 'new') {
@@ -1343,208 +1347,88 @@ function saveFormAndBack() {
     document.getElementById('form-submit-btn').textContent = '수정완료';
     goTo('main');
     renderAll();
-  } else {
-    goTo('main');
-  }
+  } else { goTo('main'); }
 }
 
-// ===================== ADDRESS SEARCH =====================
+// ===== ADDRESS =====
 function searchAddress() {
-  if (typeof daum === 'undefined' || !daum.Postcode) {
-    alert('주소 검색 서비스를 불러오는 중입니다.\n잠시 후 다시 시도해주세요.');
-    return;
-  }
+  if (typeof daum === 'undefined' || !daum.Postcode) { alert('주소 검색 서비스를 불러오는 중입니다.'); return; }
   new daum.Postcode({
     oncomplete: function(data) {
       const addr = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
       document.getElementById('f-address').value = addr;
-      const detailEl = document.getElementById('f-address-detail');
-      if (detailEl) detailEl.focus();
+      document.getElementById('f-address-detail').focus();
       saveFormData();
     }
   }).open();
 }
 
-// ===================== PROJECTS =====================
-function openProjectSelect() {
-  const list = document.getElementById('project-list');
-  list.innerHTML = state.projects.map(p => `
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border:1px solid ${p.id===state.currentProjectId?'var(--primary)':'#eee'};border-radius:10px;cursor:pointer;background:${p.id===state.currentProjectId?'var(--primary-bg)':'#fff'}" onclick="selectProject('${p.id}')">
-      <span style="font-size:14px;font-weight:${p.id===state.currentProjectId?'600':'400'}">${esc(p.name)}</span>
-      ${state.projects.length > 1 ? `<span style="font-size:12px;color:#ccc;cursor:pointer;" onclick="event.stopPropagation();deleteProject('${p.id}')">✕</span>` : ''}
-    </div>
-  `).join('');
-  document.getElementById('new-project-name').value = '';
-  openDialog('dlg-project-select');
-}
-function selectProject(id) {
-  state.currentProjectId = id;
-  save();
-  closeDialog('dlg-project-select');
-  goTo('main');
-  renderAll();
-}
-function createProject() {
-  const name = document.getElementById('new-project-name').value.trim();
-  if (!name) { alert('프로젝트 이름을 입력하세요.'); return; }
-  const proj = createDefaultProject(name);
-  proj.processes = [];
-  state.projects.push(proj);
-  state.currentProjectId = proj.id;
-  save(); renderAll();
-  closeDialog('dlg-project-select');
-}
-function deleteProject(id) {
-  if (!confirm('이 프로젝트를 삭제하시겠습니까?')) return;
-  state.projects = state.projects.filter(p => p.id !== id);
-  if (state.currentProjectId === id) state.currentProjectId = state.projects[0]?.id || null;
-  if (!state.projects.length) initDefaultProject();
-  save(); renderAll();
-  openProjectSelect();
-}
-
-// ===================== DRAWINGS =====================
-function handleUpload(input) {
-  if (!input.files || !input.files[0]) return;
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    document.getElementById('upload-preview').src = e.target.result;
-    document.getElementById('upload-preview').style.display = 'block';
-    document.getElementById('upload-area').style.display = 'none';
-    const proj = getProject();
-    if (proj) { proj.drawing = e.target.result; save(); }
-  };
-  reader.readAsDataURL(input.files[0]);
-}
-
-// ===================== SHARE / DOWNLOAD / EXPERT =====================
+// ===== SHARE =====
 function openShareDialog() { closeAllMenus(); openDialog('dlg-share'); }
-function openDownloadDialog() { closeAllMenus(); openDialog('dlg-download'); }
 function openExpertDialog() { closeAllMenus(); openDialog('dlg-expert'); }
-
 function shareAction(type) {
   const proj = getProject();
   const url = window.location.href;
   const text = `[Vibespace] ${proj ? proj.name : '시공 계획'}`;
-
   if (type === 'native') {
-    if (navigator.share) {
-      navigator.share({ title: text, url }).catch(() => {});
-    } else {
-      shareAction('link');
-    }
+    navigator.share ? navigator.share({title:text, url}).catch(()=>{}) : shareAction('link');
   } else if (type === 'link') {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(url).then(() => alert('링크가 복사되었습니다!'));
-    } else {
-      alert('링크: ' + url);
-    }
+    navigator.clipboard ? navigator.clipboard.writeText(url).then(()=>alert('링크가 복사되었습니다!')) : alert('링크: ' + url);
   } else if (type === 'twitter') {
-    window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url), '_blank');
+    window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(text)+'&url='+encodeURIComponent(url),'_blank');
   } else if (type === 'facebook') {
-    window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url), '_blank');
+    window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(url),'_blank');
   } else if (type === 'kakao') {
-    alert('카카오톡 공유는 카카오 SDK 연동 후 이용 가능합니다.\n\n링크를 복사하여 직접 공유해 주세요.');
-    shareAction('link');
-    return;
+    alert('카카오톡 공유는 카카오 SDK 연동 후 이용 가능합니다.\n링크를 복사하여 공유해 주세요.');
+    shareAction('link'); return;
   }
   closeDialog('dlg-share');
 }
 
-function downloadPlan(format) {
-  const proj = getProject();
-  if (format === 'pdf') {
-    const content = generatePlanText(proj);
-    const blob = new Blob([content], {type:'text/plain;charset=utf-8'});
-    downloadBlob(blob, proj.name + '_시공계획.txt');
-  } else {
-    downloadAsJson();
-  }
-  closeDialog('dlg-download');
-  alert('다운로드가 시작됩니다.');
-}
-
-function generatePlanText(proj) {
-  let txt = `[시공 계획서] ${proj.name}\n${'='.repeat(40)}\n\n`;
-  txt += `시공종류: ${proj.form.type.join(', ')}\n`;
-  txt += `평형: ${proj.form.size.join(', ')}\n`;
-  txt += `시공방법: ${proj.form.method.join(', ')}\n`;
-  txt += `시공일정: ${proj.form.startDate} ~ ${proj.form.endDate}\n`;
-  txt += `주소: ${proj.form.address} ${proj.form.addressDetail || ''}\n\n`;
-  txt += `${'─'.repeat(40)}\n공정 계획\n${'─'.repeat(40)}\n\n`;
-  proj.processes.forEach((p,i) => {
-    const totalCost = p.details.reduce((s,d) => s+(d.cost||0), 0);
-    txt += `${i+1}. ${p.name}\n`;
-    txt += `   예상견적: ${totalCost > 0 ? totalCost.toLocaleString()+'원' : '-'}\n`;
-    txt += `   일정: ${p.scheduleStart && p.scheduleEnd ? formatDate(p.scheduleStart)+' ~ '+formatDate(p.scheduleEnd) : '-'}\n`;
-    txt += `   업체: ${p.company || '-'}\n`;
-    if (p.details.length) {
-      txt += `   상세내역:\n`;
-      p.details.forEach(d => { txt += `     - ${d.desc}: ${d.cost?.toLocaleString() || 0}원\n`; });
-    }
-    txt += '\n';
-  });
-  return txt;
-}
-
-function downloadAsJson() {
-  const proj = getProject();
-  const blob = new Blob([JSON.stringify(proj, null, 2)], {type:'application/json'});
-  downloadBlob(blob, proj.name + '.json');
-}
-
-function downloadBlob(blob, name) {
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = name;
-  a.click();
-  URL.revokeObjectURL(a.href);
-}
-
-// ===================== DIALOG UTILS =====================
-function openDialog(id) { document.getElementById(id).classList.add('active'); }
+// ===== DIALOGS =====
+function openDialog(id) { document.getElementById(id).classList.add('active'); setTimeout(lucide.createIcons, 40); }
 function closeDialog(id) { document.getElementById(id).classList.remove('active'); }
 function toggleMainMenu(e) {
   e.stopPropagation();
-  document.getElementById('main-menu').classList.toggle('active');
+  const menu = document.getElementById('main-menu');
+  const wasActive = menu.classList.contains('active');
+  closeAllMenus();
+  if (!wasActive) { menu.classList.add('active'); setTimeout(lucide.createIcons, 30); }
 }
 function closeAllMenus() {
   document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('active'));
+  document.querySelectorAll('.project-dropdown').forEach(d => d.classList.remove('active'));
+  document.querySelectorAll('.project-badge').forEach(b => b.classList.remove('open'));
 }
-document.addEventListener('click', (e) => {
-  if (!e.target.closest('.dropdown') && !e.target.closest('.icon-btn')) closeAllMenus();
+document.addEventListener('click', e => {
+  if (!e.target.closest('.dropdown') && !e.target.closest('.icon-btn') && !e.target.closest('.project-selector'))
+    closeAllMenus();
 });
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
-function esc(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
-
-// ===================== RENDER =====================
+// ===== RENDER =====
 function renderAll() {
   const proj = getProject();
   if (proj) {
     document.getElementById('current-project-name').textContent = proj.name;
     renderWorkCards();
     updateSummary();
-    if (proj.drawing) {
-      document.getElementById('upload-preview').src = proj.drawing;
-      document.getElementById('upload-preview').style.display = 'block';
-      document.getElementById('upload-area').style.display = 'none';
-    } else {
-      document.getElementById('upload-preview').style.display = 'none';
-      document.getElementById('upload-area').style.display = 'flex';
-    }
   }
   updateLoginUI();
+  setTimeout(lucide.createIcons, 30);
 }
 
-// ===================== INIT =====================
+// ===== INIT =====
 load();
 goTo('landing');
 updateLoginUI();
-window.addEventListener('load', function() {
+window.addEventListener('load', () => {
+  lucide.createIcons();
   if (typeof google !== 'undefined' && google.accounts &&
       GOOGLE_CLIENT_ID !== 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com') {
     try {
       google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleGoogleResponse });
+      if (!state.loggedIn) google.accounts.id.prompt();
     } catch(e) {}
   }
 });
