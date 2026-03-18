@@ -4,8 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Vibespace - 시공 플래너</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
@@ -30,14 +29,14 @@
   --success: #00a053;
   --border-light: #e6e6e6;
   --border-input: #dbdbdb;
-  --font: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Pretendard', sans-serif;
+  --font: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 body { font-family:var(--font); background:#e8ecf2; display:flex; justify-content:center; min-height:100vh; }
 button,input,textarea,select { font-family:var(--font); }
 
 .app {
-  width:390px; max-width:100vw; min-height:100vh;
+  width:100%; max-width:1100px; min-height:100vh; height:100vh;
   background:var(--bg); position:relative; overflow:hidden;
 }
 .screen {
@@ -62,7 +61,7 @@ button,input,textarea,select { font-family:var(--font); }
   display:flex; align-items:center; gap:6px;
   background:var(--primary-bg); border-radius:12px; padding:12px 14px; cursor:pointer;
 }
-.project-badge .name { color:var(--primary); font-size:17px; font-weight:600; letter-spacing:-.34px; }
+.project-badge .name { color:var(--primary); font-size:17px; font-weight:700; letter-spacing:-.34px; }
 .project-badge .arrow { color:var(--primary); font-size:10px; }
 
 .header-actions { display:flex; align-items:center; gap:8px; }
@@ -124,6 +123,14 @@ button,input,textarea,select { font-family:var(--font); }
 
 /* === Work Cards === */
 .cards-area { padding:16px; display:flex; flex-direction:column; gap:16px; }
+
+/* PC: 2열 그리드 */
+@media(min-width:768px) {
+  .cards-area { display:grid; grid-template-columns:1fr 1fr; gap:16px; padding:16px; }
+  /* 카드 1개면 풀 width */
+  .cards-area > :only-child { grid-column: 1 / -1; }
+}
+
 .work-card {
   background:#fff; border-radius:12px; padding:20px;
   border:1px solid var(--card-border); box-shadow:var(--card-shadow);
@@ -156,15 +163,13 @@ button,input,textarea,select { font-family:var(--font); }
 .detail-item .d-cost { font-size:17px; font-weight:600; white-space:nowrap; }
 .detail-empty { text-align:center; padding:20px 0; font-size:14px; color:#999; }
 
-/* === Add Button === */
-.add-btn-bottom {
-  display:flex; align-items:center; justify-content:center; gap:10px;
-  width:calc(100% - 32px); max-width:350px; height:46px; margin:0 auto 20px;
-  background:#fff; border-radius:12px; border:1px solid #cacaca;
-  box-shadow:0 8px 10.5px rgba(0,0,0,.12); cursor:pointer; flex-shrink:0;
+/* 상세내역 삭제 버튼 */
+.detail-del-btn {
+  background:var(--danger); color:#fff; border:none; border-radius:4px;
+  font-size:11px; padding:2px 6px; cursor:pointer; line-height:1.4;
+  flex-shrink:0;
 }
-.add-btn-bottom .plus { font-size:14px; color:#4e4e4e; }
-.add-btn-bottom span { font-size:16px; font-weight:500; color:#4e4e4e; letter-spacing:-.32px; }
+.detail-del-btn:hover { background:#cc2d24; }
 
 /* === Floating Buttons === */
 .floating-group {
@@ -206,8 +211,12 @@ button,input,textarea,select { font-family:var(--font); }
 .checkbox-row { display:flex; gap:20px; flex-wrap:wrap; }
 .chk-item { display:flex; align-items:center; gap:8px; cursor:pointer; }
 .chk-item input[type="checkbox"] { width:20px; height:20px; accent-color:#222; cursor:pointer; flex-shrink:0; }
+.chk-item input[type="radio"] { width:20px; height:20px; accent-color:#222; cursor:pointer; flex-shrink:0; }
 .chk-item label { font-size:16px; color:#999; cursor:pointer; }
 .chk-item input:checked + label { color:#242424; }
+/* 비활성화 스타일 */
+.chk-item input[disabled] + label { color:#ccc; cursor:not-allowed; }
+.chk-item input[disabled] { cursor:not-allowed; opacity:0.4; }
 .date-row { display:flex; align-items:center; gap:4px; }
 .date-input {
   flex:1; display:flex; align-items:center; justify-content:space-between;
@@ -298,9 +307,11 @@ button,input,textarea,select { font-family:var(--font); }
 .process-option.selected { border-color:var(--primary); background:var(--primary-bg); color:var(--primary); }
 
 /* === Landing Screen === */
-.landing-screen { background:#fff; align-items:center; justify-content:center; gap:32px; padding:40px; }
+.landing-screen { background:#fff; align-items:center; justify-content:center; gap:24px; padding:40px; overflow-y:auto; }
 .landing-logo { font-size:32px; font-weight:700; color:var(--primary); }
-.landing-sub { font-size:15px; color:#666; margin-top:-16px; text-align:center; line-height:1.5; }
+.landing-subtitle { font-size:13px; font-weight:600; color:var(--primary); background:var(--primary-bg); padding:6px 14px; border-radius:20px; margin-top:-10px; }
+.landing-main-copy { font-size:22px; font-weight:700; color:#111; text-align:center; line-height:1.55; letter-spacing:-.44px; }
+.landing-sub { font-size:15px; color:#666; text-align:center; line-height:1.5; }
 .landing-cta {
   width:100%; max-width:320px; display:flex; flex-direction:column; gap:12px; align-items:center;
 }
@@ -369,8 +380,19 @@ button,input,textarea,select { font-family:var(--font); }
   background:#f0f0f0; color:#999; margin-left:4px; flex-shrink:0;
 }
 
-@media(min-width:391px) {
-  .app { box-shadow:0 0 40px rgba(0,0,0,.1); }
+/* PC 레이아웃 */
+@media(min-width:768px) {
+  body { background:#e8ecf2; }
+  .app {
+    margin:0 auto;
+    box-shadow:0 0 40px rgba(0,0,0,.1);
+  }
+  .header { padding:28px 24px 0; }
+  .landing-screen { padding:60px 40px; }
+}
+
+@media(max-width:767px) {
+  .app { width:100%; max-width:100vw; }
 }
 </style>
 </head>
@@ -380,7 +402,8 @@ button,input,textarea,select { font-family:var(--font); }
   <!-- ==================== LANDING SCREEN ==================== -->
   <div class="screen landing-screen" id="screen-landing">
     <div class="landing-logo">Vibespace</div>
-    <div class="landing-sub">내 집 인테리어 시공을<br>체계적으로 관리하세요</div>
+    <div class="landing-subtitle">반셀프인테리어를 위한 플래닝툴</div>
+    <div class="landing-main-copy">반셀프하려니 막막하시죠?<br>바이브 스페이스와 함께<br>안전한 반셀프인테리어 진행하세요.</div>
     <div class="landing-cta">
       <button class="landing-btn" onclick="startNewProject()">
         <span>+</span> 시공정보 입력
@@ -399,9 +422,10 @@ button,input,textarea,select { font-family:var(--font); }
 
   <!-- ==================== MAIN PLAN SCREEN ==================== -->
   <div class="screen" id="screen-main">
-    <div class="header" id="main-header">
+    <!-- Header: 고정 -->
+    <div class="header compact" id="main-header" style="flex-shrink:0;">
       <div class="project-badge" onclick="openProjectSelect()">
-        <span class="name" id="current-project-name">정자동 아파트 플랜</span>
+        <span class="name" id="current-project-name">프로젝트명</span>
         <span class="arrow">▾</span>
       </div>
       <div class="header-actions">
@@ -411,52 +435,52 @@ button,input,textarea,select { font-family:var(--font); }
       </div>
     </div>
 
-    <!-- Summary -->
-    <div class="summary-wrap" id="summary-section">
-      <div class="summary-toggle-row" onclick="toggleSummary()">
-        <span>시공요약</span>
-        <span class="chevron open" id="summary-chevron">▾</span>
-      </div>
-      <div class="summary-card" id="summary-card">
-        <div class="summary-list" id="summary-list">
-          <div class="summary-row"><span class="label">총 예상 비용</span><span class="value" id="sum-cost">0원</span></div>
-          <div class="summary-divider"></div>
-          <div class="summary-row"><span class="label">전체 공사 기간</span><span class="value" id="sum-duration">-</span></div>
-          <div class="summary-divider"></div>
-          <div class="summary-row"><span class="label">참여 업체 수</span><span class="value" id="sum-companies">0개 업체</span></div>
+    <!-- 스크롤 영역: 시공요약 + 탭 + 카드 모두 포함 -->
+    <div class="screen-scroll" id="main-scroll">
+      <!-- Summary -->
+      <div class="summary-wrap" id="summary-section">
+        <div class="summary-toggle-row" onclick="toggleSummary()">
+          <span>시공요약</span>
+          <span class="chevron open" id="summary-chevron">▾</span>
+        </div>
+        <div class="summary-card" id="summary-card">
+          <div class="summary-list" id="summary-list">
+            <div class="summary-row"><span class="label">총 예상 비용</span><span class="value" id="sum-cost">0원</span></div>
+            <div class="summary-divider"></div>
+            <div class="summary-row"><span class="label">전체 공사 기간</span><span class="value" id="sum-duration">-</span></div>
+            <div class="summary-divider"></div>
+            <div class="summary-row"><span class="label">참여 업체 수</span><span class="value" id="sum-companies">0개 업체</span></div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Tabs -->
-    <div class="tab-section">
-      <div class="tab-toggle">
-        <button class="tab-btn active" onclick="switchMainTab('plan',this)">공정 계획</button>
-        <button class="tab-btn" onclick="switchMainTab('calendar',this)">전체일정</button>
+      <!-- Tabs -->
+      <div class="tab-section" style="flex-shrink:0;">
+        <div class="tab-toggle">
+          <button class="tab-btn active" onclick="switchMainTab('plan',this)">공정 계획</button>
+          <button class="tab-btn" onclick="switchMainTab('calendar',this)">전체일정</button>
+        </div>
+        <button class="icon-btn" onclick="openAddProcess()" title="공정 추가" style="font-size:20px;">+</button>
       </div>
-      <button class="icon-btn" onclick="openAddProcess()" title="공정 추가" style="font-size:20px;">+</button>
-    </div>
 
-    <!-- Plan Tab Content -->
-    <div class="screen-scroll" id="tab-plan">
-      <div class="cards-area" id="work-cards"></div>
-      <div class="add-btn-bottom" onclick="openAddProcess()">
-        <span class="plus">+</span><span>추가하기</span>
+      <!-- Plan Tab Content -->
+      <div id="tab-plan">
+        <div class="cards-area" id="work-cards"></div>
       </div>
-    </div>
 
-    <!-- Calendar Tab Content -->
-    <div class="screen-scroll" id="tab-calendar" style="display:none;">
-      <div style="padding:0 16px;" id="calendar-container"></div>
-    </div>
+      <!-- Calendar Tab Content -->
+      <div id="tab-calendar" style="display:none;">
+        <div style="padding:0 16px;" id="calendar-container"></div>
+      </div>
+    </div><!-- /main-scroll -->
 
-    <!-- Floating Buttons -->
+    <!-- Floating Button: 프로젝트 저장만 -->
     <div class="floating-group" id="main-floating">
-      <button class="floating-btn" onclick="openAddProcess()">+ 시공 추가</button>
+      <button class="floating-btn primary" onclick="saveToServer()">프로젝트 저장</button>
     </div>
 
     <!-- Dropdown Menu -->
-    <div class="dropdown" id="main-menu" style="top:105px;right:16px;">
+    <div class="dropdown" id="main-menu" style="top:72px;right:16px;">
       <button onclick="goTo('form');closeAllMenus();">시공정보</button>
       <button onclick="saveToServer()">시공정보 저장</button>
       <button onclick="openShareDialog()">공유하기</button>
@@ -473,6 +497,11 @@ button,input,textarea,select { font-family:var(--font); }
         <h2 id="form-title">시공 정보</h2>
       </div>
       <div class="form-body" id="form-body">
+        <!-- 프로젝트명 -->
+        <div class="form-group">
+          <span class="form-label">프로젝트명</span>
+          <input class="addr-input" id="f-project-name" placeholder="프로젝트 이름을 입력하세요" oninput="saveFormData()">
+        </div>
         <div class="form-group">
           <span class="form-label">시공종류</span>
           <div class="checkbox-row">
@@ -480,24 +509,25 @@ button,input,textarea,select { font-family:var(--font); }
             <div class="chk-item"><input type="checkbox" id="f-house" onchange="saveFormData()"><label for="f-house">단독주택</label></div>
           </div>
         </div>
+        <!-- 평형: radio 단일 선택 -->
         <div class="form-group">
           <span class="form-label">평형</span>
           <div class="checkbox-row">
-            <div class="chk-item"><input type="checkbox" id="f-s10" onchange="saveFormData()"><label for="f-s10">10평대</label></div>
-            <div class="chk-item"><input type="checkbox" id="f-s20" onchange="saveFormData()"><label for="f-s20">20평대</label></div>
-            <div class="chk-item"><input type="checkbox" id="f-s30" checked onchange="saveFormData()"><label for="f-s30">30평대</label></div>
+            <div class="chk-item"><input type="radio" name="f-size" id="f-s10" value="10평대" onchange="saveFormData()"><label for="f-s10">10평대</label></div>
+            <div class="chk-item"><input type="radio" name="f-size" id="f-s20" value="20평대" onchange="saveFormData()"><label for="f-s20">20평대</label></div>
+            <div class="chk-item"><input type="radio" name="f-size" id="f-s30" value="30평대" checked onchange="saveFormData()"><label for="f-s30">30평대</label></div>
           </div>
           <div class="checkbox-row">
-            <div class="chk-item"><input type="checkbox" id="f-s40" onchange="saveFormData()"><label for="f-s40">40평대</label></div>
-            <div class="chk-item"><input type="checkbox" id="f-s50" onchange="saveFormData()"><label for="f-s50">50평대</label></div>
-            <div class="chk-item"><input type="checkbox" id="f-s60" onchange="saveFormData()"><label for="f-s60">60평대</label></div>
+            <div class="chk-item"><input type="radio" name="f-size" id="f-s40" value="40평대" onchange="saveFormData()"><label for="f-s40">40평대</label></div>
+            <div class="chk-item"><input type="radio" name="f-size" id="f-s50" value="50평대" onchange="saveFormData()"><label for="f-s50">50평대</label></div>
+            <div class="chk-item"><input type="radio" name="f-size" id="f-s60" value="60평대" onchange="saveFormData()"><label for="f-s60">60평대</label></div>
           </div>
         </div>
         <div class="form-group">
           <span class="form-label">시공방법</span>
           <div class="checkbox-row">
             <div class="chk-item"><input type="checkbox" id="f-self" checked onchange="saveFormData()"><label for="f-self">반셀프</label></div>
-            <div class="chk-item"><input type="checkbox" id="f-turnkey" onchange="saveFormData()"><label for="f-turnkey" style="color:#999">턴키(추후오픈예정)</label></div>
+            <div class="chk-item"><input type="checkbox" id="f-turnkey" disabled onchange="saveFormData()"><label for="f-turnkey" style="color:#ccc;cursor:not-allowed;">턴키(추후오픈)</label></div>
           </div>
         </div>
         <div class="form-group">
@@ -689,10 +719,27 @@ button,input,textarea,select { font-family:var(--font); }
   </div>
 </div>
 
+<!-- Schedule Dialog -->
+<div class="overlay" id="dlg-schedule">
+  <div class="dialog">
+    <h3>시공 일정 선택</h3>
+    <div class="form-group">
+      <span class="form-label">시작일</span>
+      <input type="date" id="sched-start" class="dialog-input" style="margin-top:6px;">
+    </div>
+    <div class="form-group" style="margin-top:8px;">
+      <span class="form-label">종료일</span>
+      <input type="date" id="sched-end" class="dialog-input" style="margin-top:6px;">
+    </div>
+    <div class="dialog-actions">
+      <button class="btn-cancel" onclick="closeDialog('dlg-schedule')">취소</button>
+      <button class="btn-confirm" onclick="confirmSchedule()">확인</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ===================== CONFIG =====================
-// TODO: Google Cloud Console에서 발급받은 Client ID로 교체하세요
-// https://console.cloud.google.com/ → APIs & Services → Credentials
 const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
 
 // ===================== DATA & STATE =====================
@@ -715,6 +762,24 @@ function load() {
   const d = localStorage.getItem('vibespace');
   if (d) { try { state = JSON.parse(d); } catch(e) {} }
   if (!state.projects || !state.projects.length) { initDefaultProject(); }
+  // 기존 p.schedule(문자열) 마이그레이션
+  if (state.projects) {
+    state.projects.forEach(proj => {
+      if (proj.processes) {
+        proj.processes.forEach(p => {
+          if (p.schedule && !p.scheduleStart) {
+            const parts = p.schedule.replace(/\s/g,'').split('-');
+            if (parts.length >= 2) {
+              const s = parseKorDate(parts[0]);
+              const e = parseKorDate(parts[1]);
+              if (s) p.scheduleStart = s.toISOString().slice(0,10);
+              if (e) p.scheduleEnd = e.toISOString().slice(0,10);
+            }
+          }
+        });
+      }
+    });
+  }
 }
 
 function initDefaultProject() {
@@ -736,7 +801,8 @@ function createDefaultProject(name) {
     processes: [
       {
         id: 'proc_1', name: '철거', type: '철거',
-        estimate: '5,400,000', schedule: '2026.10.30-2026.12.30', company: '철거왕',
+        scheduleStart: '2026-10-30', scheduleEnd: '2026-12-30',
+        company: '철거왕',
         details: [
           { id:'d1', desc:'(욕실 2개) 철거, 방수, 젠다이', cost:140000 },
           { id:'d2', desc:'(마루) 철거, 샌딩, 보강미장', cost:140000 },
@@ -823,14 +889,13 @@ function saveToServer() {
   }
   const proj = getProject();
   if (!proj) return;
-  // 실제 서버 연동 시 fetch API 사용
   const saveData = { user: state.user, project: proj, savedAt: new Date().toISOString() };
   localStorage.setItem('vibespace_saved_' + proj.id, JSON.stringify(saveData));
   alert(`✅ "${proj.name}" 시공정보가 저장되었습니다.\n\n저장 계정: ${state.user.email}`);
 }
 
 // ===================== LANDING & NAVIGATION =====================
-let formMode = 'edit'; // 'new' or 'edit'
+let formMode = 'edit';
 
 function startNewProject() {
   requireLogin(_startNewProject);
@@ -950,7 +1015,7 @@ function switchMainTab(tab, btn) {
   if (btn) btn.classList.add('active');
   document.getElementById('tab-plan').style.display = tab === 'plan' ? '' : 'none';
   document.getElementById('tab-calendar').style.display = tab === 'calendar' ? '' : 'none';
-  document.getElementById('main-floating').style.display = tab === 'plan' ? '' : 'none';
+  // floating 버튼 항상 유지 (숨기지 않음)
   if (tab === 'calendar') renderCalendar();
 }
 
@@ -962,11 +1027,15 @@ function renderWorkCards() {
   const proj = getProject(); if (!proj) return;
   const container = document.getElementById('work-cards');
   if (!proj.processes.length) {
-    container.innerHTML = '<div style="text-align:center;padding:60px 0;color:#999;font-size:14px;">공정을 추가해주세요</div>';
+    container.innerHTML = '<div style="text-align:center;padding:60px 0;color:#999;font-size:14px;grid-column:1/-1;">공정을 추가해주세요</div>';
     return;
   }
   container.innerHTML = proj.processes.map(p => {
     const totalCost = p.details.reduce((s,d) => s + (d.cost||0), 0);
+    const scheduleDisplay = (p.scheduleStart && p.scheduleEnd)
+      ? formatDate(p.scheduleStart) + ' ~ ' + formatDate(p.scheduleEnd)
+      : '일정 선택';
+    const scheduleHasFill = !!(p.scheduleStart && p.scheduleEnd);
     return `
     <div class="work-card">
       <div class="work-card-header">
@@ -975,22 +1044,22 @@ function renderWorkCards() {
       </div>
       <div class="work-field">
         <span class="f-label">예상견적</span>
-        <span class="f-value ${p.estimate?'filled':''}" onclick="editField('${p.id}','estimate','예상견적')">
-          ${p.estimate || '견적입력'} <span class="edit-icon">✎</span>
+        <span class="f-value ${totalCost > 0 ? 'filled' : ''}">
+          ${totalCost > 0 ? totalCost.toLocaleString()+'원' : '상세내역 입력시 자동계산'}
         </span>
       </div>
       <div class="field-divider"></div>
       <div class="work-field">
         <span class="f-label">예상 일정</span>
-        <span class="f-value ${p.schedule?'filled':''}" onclick="editField('${p.id}','schedule','예상 일정')">
-          ${p.schedule || '일정 입력'} <span class="edit-icon">✎</span>
+        <span class="f-value ${scheduleHasFill?'filled':''}" onclick="openScheduleDialog('${p.id}')">
+          ${esc(scheduleDisplay)} <span class="edit-icon">✎</span>
         </span>
       </div>
       <div class="field-divider"></div>
       <div class="work-field">
         <span class="f-label">참여 업체</span>
         <span class="f-value ${p.company?'filled':''}" onclick="editField('${p.id}','company','참여 업체')">
-          ${p.company || '업체입력'} <span class="edit-icon">✎</span>
+          ${p.company ? esc(p.company) : '업체입력'} <span class="edit-icon">✎</span>
         </span>
       </div>
       <div class="field-divider"></div>
@@ -1004,7 +1073,10 @@ function renderWorkCards() {
       ${p.details.length ? p.details.map(d => `
         <div class="detail-item">
           <span class="d-desc">${esc(d.desc)}</span>
-          <span class="d-cost">${(d.cost||0).toLocaleString()}</span>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="d-cost">${(d.cost||0).toLocaleString()}원</span>
+            <button class="detail-del-btn" onclick="deleteDetail('${p.id}','${d.id}')">✕</button>
+          </div>
         </div>
       `).join('') : '<div class="detail-empty">상세 내역 없음</div>'}
     </div>`;
@@ -1036,6 +1108,46 @@ function deleteProcess(procId) {
   save(); renderAll();
 }
 
+// 상세내역 삭제
+function deleteDetail(procId, detailId) {
+  const proj = getProject(); if (!proj) return;
+  const proc = proj.processes.find(p => p.id === procId); if (!proc) return;
+  proc.details = proc.details.filter(d => d.id !== detailId);
+  save(); renderAll();
+}
+
+// ===================== SCHEDULE DIALOG =====================
+let schedulingProcessId = null;
+
+function openScheduleDialog(procId) {
+  schedulingProcessId = procId;
+  const proj = getProject();
+  const proc = proj.processes.find(p => p.id === procId);
+  document.getElementById('sched-start').value = proc.scheduleStart || '';
+  document.getElementById('sched-end').value = proc.scheduleEnd || '';
+  openDialog('dlg-schedule');
+}
+
+function confirmSchedule() {
+  const proj = getProject(); if (!proj) return;
+  const proc = proj.processes.find(p => p.id === schedulingProcessId); if (!proc) return;
+  const start = document.getElementById('sched-start').value;
+  const end = document.getElementById('sched-end').value;
+  if (start && end && start > end) {
+    alert('종료일이 시작일보다 빠를 수 없습니다.'); return;
+  }
+  proc.scheduleStart = start;
+  proc.scheduleEnd = end;
+  save(); renderAll();
+  closeDialog('dlg-schedule');
+}
+
+function formatDate(iso) {
+  if (!iso) return '';
+  const [y,m,d] = iso.split('-');
+  return `${y}.${m}.${d}`;
+}
+
 // ===================== ADD PROCESS =====================
 let selectedProcessType = null;
 function openAddProcess() {
@@ -1064,7 +1176,7 @@ function confirmAddProcess() {
   proj.processes.push({
     id: 'proc_' + Date.now(),
     name, type: selectedProcessType || name,
-    estimate:'', schedule:'', company:'', details:[]
+    scheduleStart:'', scheduleEnd:'', company:'', details:[]
   });
   save(); renderAll();
   closeDialog('dlg-add-process');
@@ -1096,12 +1208,33 @@ function confirmAddDetail() {
 function renderCalendar() {
   const proj = getProject(); if (!proj) return;
   const container = document.getElementById('calendar-container');
-  const start = proj.form.startDate ? new Date(proj.form.startDate) : new Date();
-  const months = 3;
+
+  // 커버해야 할 날짜 범위: form의 startDate~endDate + 모든 process scheduleStart~End
+  let allDates = [];
+  if (proj.form.startDate) allDates.push(new Date(proj.form.startDate));
+  if (proj.form.endDate) allDates.push(new Date(proj.form.endDate));
+  proj.processes.forEach(p => {
+    if (p.scheduleStart) allDates.push(new Date(p.scheduleStart));
+    if (p.scheduleEnd) allDates.push(new Date(p.scheduleEnd));
+  });
+
+  if (!allDates.length) {
+    const now = new Date();
+    allDates = [now, new Date(now.getFullYear(), now.getMonth()+2, 1)];
+  }
+
+  const minDate = new Date(Math.min(...allDates));
+  const maxDate = new Date(Math.max(...allDates));
+
+  // 시작월 ~ 종료월 모두 렌더링
   let html = '';
-  for (let m = 0; m < months; m++) {
-    const date = new Date(start.getFullYear(), start.getMonth() + m, 1);
-    html += renderMonth(date, proj.processes);
+  let cur = new Date(minDate.getFullYear(), minDate.getMonth(), 1);
+  const endMonth = new Date(maxDate.getFullYear(), maxDate.getMonth(), 1);
+  let safety = 0;
+  while (cur <= endMonth && safety < 24) {
+    html += renderMonth(cur, proj.processes);
+    cur = new Date(cur.getFullYear(), cur.getMonth()+1, 1);
+    safety++;
   }
   container.innerHTML = html;
 }
@@ -1127,11 +1260,9 @@ function renderMonth(date, processes) {
 function getProcessTagsForDay(year, month, day, processes) {
   let tags = '';
   processes.forEach(p => {
-    if (!p.schedule) return;
-    const parts = p.schedule.replace(/\s/g,'').split('-');
-    if (parts.length < 2) return;
-    const s = parseKorDate(parts[0]), e = parseKorDate(parts[1]);
-    if (!s || !e) return;
+    if (!p.scheduleStart || !p.scheduleEnd) return;
+    const s = new Date(p.scheduleStart);
+    const e = new Date(p.scheduleEnd);
     const cur = new Date(year, month, day);
     if (cur >= s && cur <= e) {
       const cls = PROCESS_COLORS[p.type] || 'c' + (Math.abs(hashCode(p.name)) % 8);
@@ -1140,6 +1271,7 @@ function getProcessTagsForDay(year, month, day, processes) {
   });
   return tags;
 }
+
 function parseKorDate(s) {
   const m = s.match(/(\d{4})\.(\d{1,2})\.(\d{1,2})/);
   if (m) return new Date(+m[1], +m[2]-1, +m[3]);
@@ -1151,13 +1283,22 @@ function hashCode(s) { let h=0; for(let i=0;i<s.length;i++) h=((h<<5)-h)+s.charC
 function loadFormData() {
   const proj = getProject(); if (!proj) return;
   const f = proj.form;
+  // 프로젝트명
+  const pnameEl = document.getElementById('f-project-name');
+  if (pnameEl) pnameEl.value = proj.name || '';
+  // 시공종류
   document.getElementById('f-apt').checked = f.type.includes('아파트');
   document.getElementById('f-house').checked = f.type.includes('단독주택');
+  // 평형 (radio 단일 선택)
+  const sizeVal = (f.size && f.size.length > 0) ? f.size[0] : '30평대';
   ['10','20','30','40','50','60'].forEach(s => {
-    document.getElementById('f-s'+s).checked = f.size.includes(s+'평대');
+    const el = document.getElementById('f-s'+s);
+    if (el) el.checked = (sizeVal === s+'평대');
   });
+  // 시공방법
   document.getElementById('f-self').checked = f.method.includes('반셀프');
-  document.getElementById('f-turnkey').checked = f.method.includes('턴키');
+  // 턴키는 항상 disabled
+  document.getElementById('f-turnkey').checked = false;
   document.getElementById('f-start').value = f.startDate || '';
   document.getElementById('f-end').value = f.endDate || '';
   document.getElementById('f-memo').value = f.memo || '';
@@ -1165,19 +1306,23 @@ function loadFormData() {
   const detailEl = document.getElementById('f-address-detail');
   if (detailEl) detailEl.value = f.addressDetail || '';
 }
+
 function saveFormData() {
   const proj = getProject(); if (!proj) return;
   const f = proj.form;
+  // 프로젝트명 저장
+  const pname = document.getElementById('f-project-name') ? document.getElementById('f-project-name').value.trim() : '';
+  if (pname) proj.name = pname;
+  // 시공종류
   f.type = [];
   if (document.getElementById('f-apt').checked) f.type.push('아파트');
   if (document.getElementById('f-house').checked) f.type.push('단독주택');
-  f.size = [];
-  ['10','20','30','40','50','60'].forEach(s => {
-    if (document.getElementById('f-s'+s).checked) f.size.push(s+'평대');
-  });
+  // 평형: radio 단일 선택 → [선택된값] 형태
+  const checkedSize = document.querySelector('input[name="f-size"]:checked');
+  f.size = checkedSize ? [checkedSize.value] : [];
+  // 시공방법
   f.method = [];
   if (document.getElementById('f-self').checked) f.method.push('반셀프');
-  if (document.getElementById('f-turnkey').checked) f.method.push('턴키');
   f.startDate = document.getElementById('f-start').value;
   f.endDate = document.getElementById('f-end').value;
   f.memo = document.getElementById('f-memo').value;
@@ -1185,7 +1330,11 @@ function saveFormData() {
   const detailEl = document.getElementById('f-address-detail');
   if (detailEl) f.addressDetail = detailEl.value;
   save();
+  // 헤더의 프로젝트명도 즉시 반영
+  const nameEl = document.getElementById('current-project-name');
+  if (nameEl) nameEl.textContent = proj.name;
 }
+
 function saveFormAndBack() {
   saveFormData();
   if (formMode === 'new') {
@@ -1324,9 +1473,10 @@ function generatePlanText(proj) {
   txt += `주소: ${proj.form.address} ${proj.form.addressDetail || ''}\n\n`;
   txt += `${'─'.repeat(40)}\n공정 계획\n${'─'.repeat(40)}\n\n`;
   proj.processes.forEach((p,i) => {
+    const totalCost = p.details.reduce((s,d) => s+(d.cost||0), 0);
     txt += `${i+1}. ${p.name}\n`;
-    txt += `   예상견적: ${p.estimate || '-'}\n`;
-    txt += `   일정: ${p.schedule || '-'}\n`;
+    txt += `   예상견적: ${totalCost > 0 ? totalCost.toLocaleString()+'원' : '-'}\n`;
+    txt += `   일정: ${p.scheduleStart && p.scheduleEnd ? formatDate(p.scheduleStart)+' ~ '+formatDate(p.scheduleEnd) : '-'}\n`;
     txt += `   업체: ${p.company || '-'}\n`;
     if (p.details.length) {
       txt += `   상세내역:\n`;
