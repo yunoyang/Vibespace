@@ -783,13 +783,14 @@ button, input, textarea, select { font-family:var(--font); }
 .overlay {
   position:fixed; top:0; left:0; right:0; bottom:0;
   background:rgba(0,0,0,.48); display:none; align-items:flex-end; justify-content:center;
-  z-index:100;
+  z-index:9000;
 }
 .overlay.active { display:flex; animation:ovFadeIn .22s ease forwards; }
 .overlay.active .dialog { animation:dlgSlideUp .3s cubic-bezier(0.22,1,0.36,1) forwards; }
 .dialog {
   background:#fff; border-radius:22px 22px 0 0; padding:24px; width:100%; max-width:600px;
   display:flex; flex-direction:column; gap:16px; max-height:90vh; overflow-y:auto;
+  position:relative; z-index:1;
 }
 .dialog h3 { font-size:18px; font-weight:700; }
 .dialog-input {
