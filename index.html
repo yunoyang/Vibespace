@@ -135,6 +135,9 @@
 <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="icons-sprite.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script>emailjs.init('r9S0kpOB1nFauIyfg');</script>
 <style>
 :root {
   --primary: #3176ff;
@@ -690,23 +693,8 @@ button, input, textarea, select { font-family:var(--font); }
 .cal-day-detail {
   font-size:14px; color:#888; line-height:1.3;
 }
-/* Color per process class */
-.cal-day-proc.c0  .cal-day-pname { color:#00C144; }
-.cal-day-proc.c1  .cal-day-pname { color:#10B569; }
-.cal-day-proc.c2  .cal-day-pname { color:#20A98F; }
-.cal-day-proc.c3  .cal-day-pname { color:#309CB4; }
-.cal-day-proc.c4  .cal-day-pname { color:#4090DA; }
-.cal-day-proc.c5  .cal-day-pname { color:#5084FF; }
-.cal-day-proc.c6  .cal-day-pname { color:#577CFF; }
-.cal-day-proc.c7  .cal-day-pname { color:#5E74FF; }
-.cal-day-proc.c8  .cal-day-pname { color:#646CFF; }
-.cal-day-proc.c9  .cal-day-pname { color:#6B64FF; }
-.cal-day-proc.c10 .cal-day-pname { color:#725CFF; }
-.cal-day-proc.c11 .cal-day-pname { color:#8E5AD6; }
-.cal-day-proc.c12 .cal-day-pname { color:#AA58AD; }
-.cal-day-proc.c13 .cal-day-pname { color:#C75584; }
-.cal-day-proc.c14 .cal-day-pname { color:#E3535B; }
-.cal-day-proc.c15 .cal-day-pname { color:#FF5132; }
+/* 전체일정 공정명 — 모두 #222 */
+.cal-day-proc .cal-day-pname { color:#222; }
 
 /* ===== DAY BOTTOM POPUP ===== */
 #dlg-day-popup {
@@ -1012,8 +1000,8 @@ button, input, textarea, select { font-family:var(--font); }
 }
 .cm-role.owner { background:#fef9c3; color:#b45309; }
 .cm-role.viewer { background:#f0fdf4; color:#059669; }
-.cm-remove { padding:4px; background:none; border:none; cursor:pointer; color:#ccc; flex-shrink:0; }
-.cm-remove:hover { color:#e05050; }
+.cm-remove { padding:4px; background:none; border:none; cursor:pointer; color:#bbb; flex-shrink:0; border-radius:50%; transition:background .15s,color .15s; }
+.cm-remove:hover { background:#fee2e2; color:#e05050; }
 
 /* invite form */
 .invite-form { display:flex; flex-direction:column; gap:10px; margin-top:8px; }
@@ -1029,11 +1017,15 @@ button, input, textarea, select { font-family:var(--font); }
 }
 .invite-role-select:focus { border-color:var(--primary); }
 .invite-gen-btn {
-  padding:10px 18px; background:var(--primary); color:#fff; border:none;
-  border-radius:9px; font-size:14px; font-weight:600; cursor:pointer; font-family:var(--font);
+  padding:10px 18px; background:#d1d9ef; color:#a0aec0; border:none;
+  border-radius:9px; font-size:14px; font-weight:600; cursor:not-allowed; font-family:var(--font);
   white-space:nowrap; display:flex; align-items:center; gap:6px;
+  transition:background .2s, color .2s;
 }
-.invite-gen-btn:disabled { background:#b0c4f0; cursor:not-allowed; }
+.invite-gen-btn.active {
+  background:var(--primary); color:#fff; cursor:pointer;
+}
+.invite-gen-btn:disabled { background:#b0c4f0; color:#fff; cursor:not-allowed; }
 
 /* generated link box */
 .invite-link-box {
@@ -1061,7 +1053,8 @@ button, input, textarea, select { font-family:var(--font); }
 }
 .pi-email { flex:1; font-size:13px; color:#555; }
 .pi-expire { font-size:11px; color:#b45309; }
-.pi-cancel { padding:4px 8px; background:none; border:1px solid #fca5a5; color:#e05050; border-radius:6px; font-size:11.5px; cursor:pointer; }
+.pi-remove { display:flex;align-items:center;justify-content:center; width:22px;height:22px; background:none; border:none; border-radius:50%; color:#aaa; cursor:pointer; flex-shrink:0; transition:background .15s,color .15s; }
+.pi-remove:hover { background:#fee2e2; color:#e05050; }
 
 /* firebase not configured warning */
 .fb-not-configured {
@@ -1071,6 +1064,10 @@ button, input, textarea, select { font-family:var(--font); }
 }
 .fb-not-configured svg { width:32px; height:32px; color:#f59e0b; }
 .fb-not-configured p { font-size:13px; color:#92400e; line-height:1.6; margin:0; }
+
+/* 업체선택 다이얼로그 — 리스트 내부 스크롤 */
+#dlg-company-search .dialog { overflow:hidden; }
+#comp-suggest-list { max-height:calc(90vh - 220px); overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
 
 /* join invite overlay */
 #dlg-join-invite .dialog { gap:20px; }
@@ -1254,8 +1251,6 @@ button, input, textarea, select { font-family:var(--font); }
 .cal-proc-card.c11 { background:#F4EDFF; border-left-color:#8E5AD6; }
 .cal-proc-card.c12 { background:#FAEEFF; border-left-color:#AA58AD; }
 .cal-proc-card.c13 { background:#FFEDFA; border-left-color:#C75584; }
-.cal-proc-card.c14 { background:#FFEEF0; border-left-color:#E3535B; }
-.cal-proc-card.c15 { background:#FFECE8; border-left-color:#FF5132; }
 .pcard-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:5px; gap:8px; }
 .pcard-type-badge { font-size:10px; font-weight:700; padding:2px 8px; border-radius:20px; flex-shrink:0; }
 .pcard-type-badge.c0  { background:#CCFFDE; color:#00C144; }
@@ -1272,8 +1267,6 @@ button, input, textarea, select { font-family:var(--font); }
 .pcard-type-badge.c11 { background:#EDDCFF; color:#8E5AD6; }
 .pcard-type-badge.c12 { background:#F6DCFF; color:#AA58AD; }
 .pcard-type-badge.c13 { background:#FFDCF5; color:#C75584; }
-.pcard-type-badge.c14 { background:#FFDCDD; color:#E3535B; }
-.pcard-type-badge.c15 { background:#FFD9D1; color:#FF5132; }
 
 /* ===== TIP PAGE ===== */
 .tip-page-hero {
@@ -1648,6 +1641,9 @@ button, input, textarea, select { font-family:var(--font); }
     <button class="dropdown-item" onclick="openExportDialog();closeAllMenus();">
       <svg class="icon" width="20" height="20"><use href="#icon-file-down"/></svg> 공사계획 내보내기
     </button>
+    <button class="dropdown-item" onclick="openNoticeDialog();closeAllMenus();">
+      <svg class="icon" width="20" height="20"><use href="#icon-file-text"/></svg> 인테리어 양해 안내문
+    </button>
     <button class="dropdown-item" onclick="openExpertDialog()">
       <svg class="icon" width="20" height="20"><use href="#icon-star"/></svg> 전문가 검토 받기<span class="menu-badge">준비 중</span>
     </button>
@@ -1792,6 +1788,72 @@ button, input, textarea, select { font-family:var(--font); }
     </div>
     <div class="screen-scroll" id="tip-page-content">
       <!-- dynamically filled by showProcessTip() -->
+    </div>
+  </div>
+</div>
+
+<!-- ===== 인테리어 양해 안내문 스크린 ===== -->
+<div class="screen" id="screen-notice">
+  <div class="form-screen-inner">
+    <div class="form-header">
+      <button class="back-btn" onclick="goTo('main')"><svg class="icon" width="22" height="22"><use href="#icon-arrow-left"/></svg></button>
+      <h2>인테리어 양해 안내문</h2>
+      <button onclick="downloadNoticeImage()" id="notice-download-btn" style="
+        margin-left:auto; display:flex; align-items:center; gap:5px;
+        background:var(--primary); color:#fff; border:none; border-radius:9px;
+        padding:8px 14px; font-size:13px; font-weight:700; cursor:pointer; font-family:var(--font);
+      ">
+        <svg class="icon" width="14" height="14"><use href="#icon-download"/></svg> 저장하기
+      </button>
+    </div>
+    <div class="screen-scroll" style="padding:16px 20px calc(32px + env(safe-area-inset-bottom));">
+      <!-- 동호수 입력 -->
+      <div style="margin-bottom:14px;">
+        <label style="font-size:12px;color:#666;font-weight:600;display:block;margin-bottom:5px;">동·호수</label>
+        <input id="notice-unit" type="text" placeholder="예: 101동 502호"
+          style="width:100%;box-sizing:border-box;padding:10px 14px;border:1.5px solid #dde3ef;border-radius:10px;font-size:14px;font-family:var(--font);outline:none;"
+          oninput="updateNoticePreview()"/>
+      </div>
+      <!-- 안내문 카드 -->
+      <div id="notice-card" style="
+        background:#fff; border:1.5px solid #e5e9f2; border-radius:16px;
+        padding:36px 28px; text-align:center; font-family:'Noto Sans KR',sans-serif;
+        display:flex; flex-direction:column; align-items:center; gap:0;
+      ">
+        <div style="margin-bottom:20px;">
+          <svg width="130" height="65" viewBox="0 0 120 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="60" cy="38" rx="10" ry="6" fill="#a8d5e2" opacity=".4"/>
+            <circle cx="60" cy="30" r="7" fill="#7ec8d8"/>
+            <circle cx="60" cy="30" r="3" fill="#f4c430"/>
+            <circle cx="44" cy="33" r="6" fill="#9db8e8"/>
+            <circle cx="44" cy="33" r="2.5" fill="#f4c430"/>
+            <circle cx="76" cy="33" r="6" fill="#c8a8d8"/>
+            <circle cx="76" cy="33" r="2.5" fill="#f4c430"/>
+            <circle cx="52" cy="24" r="5" fill="#b8d0f0"/>
+            <circle cx="68" cy="24" r="5" fill="#d4a8c8"/>
+            <path d="M30 42 Q40 20 55 38" stroke="#7db87d" stroke-width="1.5" fill="none"/>
+            <path d="M90 42 Q80 20 65 38" stroke="#7db87d" stroke-width="1.5" fill="none"/>
+            <path d="M25 44 Q33 30 42 40" stroke="#8fc88f" stroke-width="1.2" fill="none"/>
+            <path d="M95 44 Q87 30 78 40" stroke="#8fc88f" stroke-width="1.2" fill="none"/>
+            <ellipse cx="33" cy="38" rx="4" ry="2.5" fill="#a8d0a8" opacity=".6" transform="rotate(-30 33 38)"/>
+            <ellipse cx="87" cy="38" rx="4" ry="2.5" fill="#a8d0a8" opacity=".6" transform="rotate(30 87 38)"/>
+          </svg>
+        </div>
+        <div id="np-greeting" style="font-size:15px;color:#333;line-height:2;margin-bottom:20px;"></div>
+        <div id="np-dates" style="font-size:15px;color:#333;line-height:2;margin-bottom:20px;"></div>
+        <div style="font-size:14px;color:#444;line-height:2;margin-bottom:20px;">
+          공사로 인해 여러 불편함을 드리게 되어<br>
+          진심으로 죄송한 마음입니다.<br>
+          최대한 신속하고 안전하게 공사를 마칠 수 있도록<br>
+          최선을 다하겠습니다.<br>
+          부디 너그러운 양해 부탁드립니다.
+        </div>
+        <div style="font-size:13.5px;color:#555;line-height:2;">
+          이웃님 가정에 늘 건강과 평안이 함께하시길 바라며,<br>
+          앞으로 좋은 이웃으로 인사드리겠습니다.<br>
+          <strong>감사합니다.</strong>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -2005,7 +2067,7 @@ button, input, textarea, select { font-family:var(--font); }
             oninput="this.style.borderColor='var(--primary)'"
             onkeydown="if(event.key==='Enter')saveCompanyManual()">
         </div>
-        <div id="comp-current-info" style="display:none;padding:10px 14px;background:#f8f9fc;border-radius:10px;font-size:13px;color:#555;line-height:1.7;"></div>
+        <div id="comp-current-info" style="display:none;padding:10px 14px;background:#f8f9fc;border-radius:10px;font-size:13px;line-height:1.7;display:none;align-items:center;justify-content:space-between;gap:8px;"></div>
       </div>
       <div class="dialog-actions split" style="margin-top:16px;">
         <button class="btn-cancel" onclick="closeDialog('dlg-company-search');clearCompanyManual()">취소</button>
@@ -2015,7 +2077,7 @@ button, input, textarea, select { font-family:var(--font); }
 
     <!-- ── 업체선택 탭 ── -->
     <div id="ctab-select-pane" style="display:none;padding-bottom:16px;">
-      <div id="comp-suggest-list" style="display:flex;flex-direction:column;gap:8px;margin-top:0;max-height:55vh;overflow-y:auto;padding:2px 0;"></div>
+      <div id="comp-suggest-list" style="display:flex;flex-direction:column;gap:8px;margin-top:0;padding:2px 0;"></div>
       <div id="comp-suggest-empty" style="display:none;text-align:center;padding:32px 0;color:#bbb;font-size:14px;">
         이 공정에 등록된 업체가 없습니다.<br><span style="font-size:12px;">어드민에서 업체를 추가해주세요.</span>
       </div>
@@ -2039,6 +2101,9 @@ button, input, textarea, select { font-family:var(--font); }
     </button>
     <button class="mobile-sheet-item" onclick="openExportDialog();closeAllMenus();">
       <svg class="icon" width="20" height="20"><use href="#icon-file-down"/></svg> 공사계획 내보내기
+    </button>
+    <button class="mobile-sheet-item" onclick="openNoticeDialog();closeAllMenus();">
+      <svg class="icon" width="20" height="20"><use href="#icon-file-text"/></svg> 인테리어 양해 안내문
     </button>
     <button class="mobile-sheet-item" onclick="openFeedbackDialog();closeAllMenus();">
       <svg class="icon" width="20" height="20"><use href="#icon-message-square"/></svg> 피드백 &amp; 아이디어
@@ -2231,7 +2296,6 @@ button, input, textarea, select { font-family:var(--font); }
   <div class="day-popup-handle"></div>
   <div class="day-popup-header">
     <span class="day-popup-title" id="day-popup-title">3월 19일</span>
-    <button id="day-popup-add-btn" onclick="closeDayPopup();openAddProcess(window._dayPopupDateStr)" style="background:var(--primary);color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);">+ 공정 추가</button>
     <button class="day-popup-close" onclick="closeDayPopup()">
       <svg class="icon" width="14" height="14" style="stroke-width:2.5"><use href="#icon-x"/></svg>
     </button>
@@ -2284,8 +2348,8 @@ const GOOGLE_PLACES_KEY = 'YOUR_GOOGLE_PLACES_KEY';
 
 // ===== CONSTANTS =====
 const PROCESS_TYPES = ['실측','도면설계','철거','샷시','목공','전기','타일','욕실','싱크','마루','도배','필름','동의서 및 보양','가구','입주청소','이삿짐정리'];
-const PROCESS_COLORS = {'실측':'c8','도면설계':'c9','철거':'c0','샷시':'c1','목공':'c2','타일':'c3','욕실':'c4','도배':'c5','가구':'c6','전기':'c7','입주청소':'c10','이삿짐정리':'c11','싱크':'c12','마루':'c13','필름':'c14','동의서 및 보양':'c15'};
-const COLOR_HEX = {c0:'#00C144',c1:'#10B569',c2:'#20A98F',c3:'#309CB4',c4:'#4090DA',c5:'#5084FF',c6:'#577CFF',c7:'#5E74FF',c8:'#646CFF',c9:'#6B64FF',c10:'#725CFF',c11:'#8E5AD6',c12:'#AA58AD',c13:'#C75584',c14:'#E3535B',c15:'#FF5132'};
+const PROCESS_COLORS = {'실측':'c8','도면설계':'c9','철거':'c0','샷시':'c1','목공':'c2','타일':'c3','욕실':'c4','도배':'c5','가구':'c6','전기':'c7','입주청소':'c10','이삿짐정리':'c11','싱크':'c12','마루':'c13','필름':'c11','동의서 및 보양':'c12'};
+const COLOR_HEX = {c0:'#00C144',c1:'#10B569',c2:'#20A98F',c3:'#309CB4',c4:'#4090DA',c5:'#5084FF',c6:'#577CFF',c7:'#5E74FF',c8:'#646CFF',c9:'#6B64FF',c10:'#725CFF',c11:'#8E5AD6',c12:'#AA58AD',c13:'#C75584'};
 
 // ===== STATE =====
 let state = {
@@ -2347,7 +2411,7 @@ function initDefaultProject() {
 }
 
 const DEFAULT_PROCESS_NAMES = [
-  '실측','도면설계','동의서 및 보양','철거','샷시','전기',
+  '실측','도면설계','동의서 및 보양','철거','샷시','전기','시스템 에어컨',
   '목공','타일','욕실','싱크','마루','도배','필름','가구',
   '입주청소','이삿짐정리'
 ];
@@ -2886,6 +2950,9 @@ function goTo(screen) {
   }
   if (screen === 'tip') {
     document.getElementById('tip-page-content').scrollTop = 0;
+  }
+  if (screen === 'notice') {
+    updateNoticePreview();
   }
 }
 
@@ -3620,23 +3687,21 @@ function _renderContractorSelectList(procType) {
     <div id="ccard-${esc(cId)}" data-selected="0"
       style="background:#f8f9fc;border-radius:12px;border:2px solid #eef0f6;transition:all .15s;display:flex;align-items:stretch;overflow:hidden;">
       <!-- 좌: 선택 영역 -->
-      <div onclick="_toggleContractorCard(this.closest('[id]'),'${esc(cId)}')" style="flex:1;min-width:0;padding:16px 12px 16px 16px;cursor:pointer;display:flex;align-items:center;gap:10px;">
+      <div onclick="_toggleContractorCard(this.closest('[id]'),'${esc(cId)}')" style="flex:1;min-width:0;padding:10px 12px 10px 16px;cursor:pointer;display:flex;align-items:center;gap:10px;">
         <div class="ccard-check" style="width:22px;height:22px;flex-shrink:0;">
           <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d0d5e0" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>
         </div>
         <div style="flex:1;min-width:0;">
           <div style="font-size:16px;font-weight:700;color:#222;margin-bottom:${c.description?3:0}px;">${esc(c.name)}</div>
           ${c.description ? `<div style="font-size:13px;color:#555;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(c.description)}</div>` : ''}
-          <div style="display:flex;align-items:center;gap:4px;font-size:13px;color:#888;font-weight:500;margin-top:3px;">
-            <svg class="icon" width="11" height="11"><use href="#icon-map-pin"/></svg>
+          <div style="display:flex;align-items:center;gap:4px;font-size:13px;color:#222;font-weight:500;margin-top:3px;">
+            <svg class="icon" width="11" height="11" style="color:#888;"><use href="#icon-map-pin"/></svg>
             <span>${esc(c.area||'')} · ${esc(c.originalCategory||c.category||'')}</span>
           </div>
         </div>
       </div>
-      <!-- 세로선 -->
-      <div style="width:1px;background:#eef0f6;flex-shrink:0;margin:10px 0;"></div>
       <!-- 우: 더보기 버튼 -->
-      <button onclick="event.stopPropagation();_openContractorDetail('${esc(cId)}')" style="background:none;border:none;cursor:pointer;padding:0 16px;display:flex;align-items:center;justify-content:center;gap:4px;font-size:13px;font-weight:500;color:#888;flex-shrink:0;font-family:var(--font);">
+      <button onclick="event.stopPropagation();_openContractorDetail('${esc(cId)}')" style="background:none;border:none;border-left:1.5px solid #eef0f6;cursor:pointer;padding:0 16px;display:flex;align-items:center;justify-content:center;gap:4px;font-size:13px;font-weight:500;color:#888;flex-shrink:0;font-family:var(--font);">
         더보기
         <svg class="icon" width="13" height="13" style="stroke-width:2.5"><use href="#icon-chevron-right"/></svg>
       </button>
@@ -3746,8 +3811,16 @@ function openCompanySearch(procId) {
   // 기존 업체 표시
   const cur = document.getElementById('comp-current-info');
   if (proc?.companyData?.name) {
-    cur.style.display = 'block';
-    cur.innerHTML = `<span style="font-size:11px;font-weight:700;color:#888;display:block;margin-bottom:3px;">현재 등록 업체</span>${esc(proc.companyData.name)}${proc.companyData.phone ? ' · '+esc(proc.companyData.phone) : ''}`;
+    cur.style.display = 'flex';
+    const cId = proc.companyData.contractorId || proc.companyData.id || '';
+    cur.innerHTML = `
+      <div style="min-width:0;">
+        <div style="font-size:11px;font-weight:700;color:#888;margin-bottom:2px;">현재 등록 업체</div>
+        <div style="font-size:14px;font-weight:700;color:#222;">${esc(proc.companyData.name)}</div>
+        ${proc.companyData.phone ? `<div style="font-size:13px;color:#222;margin-top:1px;">${esc(proc.companyData.phone)}</div>` : ''}
+      </div>
+      ${cId ? `<button onclick="_openContractorDetail('${esc(cId)}')" style="flex-shrink:0;padding:7px 12px;background:#fff;border:1.5px solid #dde3ef;border-radius:8px;font-size:12px;font-weight:600;color:#3176ff;cursor:pointer;font-family:var(--font);white-space:nowrap;">업체 정보 보기</button>` : ''}
+    `;
   } else { cur.style.display = 'none'; }
   // 항상 직접입력 탭으로 시작
   switchCompTab('manual');
@@ -3809,8 +3882,8 @@ function renderWorkCards() {
   container.innerHTML = sorted.map(p => {
     const totalCost = p.details.reduce((s,d) => s + (d.cost||0), 0);
     const schedDisplay = (p.scheduleStart && p.scheduleEnd)
-      ? formatDate(p.scheduleStart) + ' ~ ' + formatDate(p.scheduleEnd) : '일정 미설정';
-    const compDisplay = p.companyData?.name || p.company || '업체 미설정';
+      ? formatDate(p.scheduleStart) + ' ~ ' + formatDate(p.scheduleEnd) : '일정 설정하기';
+    const compDisplay = p.companyData?.name || p.company || '업체 설정하기';
     const isExpanded = _expandedCards.has(p.id);
     return `
     <div class="work-card${isExpanded ? ' expanded' : ''}" data-proc-id="${p.id}">
@@ -4513,10 +4586,13 @@ function openDayPopup(year, month, day) {
         <div class="day-proc-block">
           <div class="day-proc-head" style="background:rgba(${parseInt(hex.slice(1,3),16)},${parseInt(hex.slice(3,5),16)},${parseInt(hex.slice(5,7),16)},0.08);">
             <div class="day-proc-dot" style="background:${hex};"></div>
-            <span style="color:${hex};font-weight:700;">${esc(p.name)}</span>
+            <span style="color:#222;font-weight:700;">${esc(p.name)}</span>
             <span style="font-size:11px;color:#aaa;font-weight:400;margin-left:auto;">${formatDate(p.scheduleStart)} ~ ${formatDate(p.scheduleEnd)}</span>
           </div>
           ${detailsHtml}
+          <div style="padding:6px 16px 10px;text-align:right;border-top:1px solid #f0f2f5;margin-top:2px;">
+            <button onclick="closeDayPopup();openProcDetailScreen('${p.id}')" style="background:none;border:none;font-size:13px;font-weight:700;color:var(--primary);cursor:pointer;font-family:var(--font);padding:4px 0;display:inline-flex;align-items:center;gap:3px;">상세보기 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+          </div>
         </div>`;
     }).join('');
   }
@@ -4812,6 +4888,66 @@ function searchAddress() {
 function openExportDialog() {
   renderExportDoc();
   openDialog('dlg-export');
+}
+
+// ===== 인테리어 양해 안내문 =====
+function openNoticeDialog() {
+  const proj = getProject();
+  const detail = proj?.form?.addressDetail || '';
+  const unitInput = document.getElementById('notice-unit');
+  if (unitInput && !unitInput.value) unitInput.value = detail;
+  updateNoticePreview();
+  goTo('notice');
+}
+
+function updateNoticePreview() {
+  const proj = getProject();
+  const unit = (document.getElementById('notice-unit')?.value || '').trim();
+  const f = proj?.form || {};
+
+  // 동호수 인사말
+  const greetEl = document.getElementById('np-greeting');
+  if (greetEl) {
+    greetEl.innerHTML = unit
+      ? `안녕하세요.<br><strong>${esc(unit)}</strong>에 이사하게 된 입주민입니다.`
+      : `안녕하세요.<br>이사하게 된 입주민입니다.`;
+  }
+
+  // 공사 기간
+  const datesEl = document.getElementById('np-dates');
+  if (datesEl) {
+    if (f.startDate && f.endDate) {
+      const s = new Date(f.startDate + 'T00:00:00');
+      const e = new Date(f.endDate + 'T00:00:00');
+      const fmt = d => `${d.getMonth()+1}월 ${d.getDate()}일`;
+      datesEl.innerHTML = `오는 <strong>${fmt(s)}</strong>부터 <strong>${fmt(e)}</strong>까지<br>인테리어 공사가 예정되어 있어<br>미리 양해 말씀드립니다.`;
+    } else {
+      datesEl.innerHTML = `인테리어 공사가 예정되어 있어<br>미리 양해 말씀드립니다.`;
+    }
+  }
+}
+
+async function downloadNoticeImage() {
+  const card = document.getElementById('notice-card');
+  if (!card) return;
+  const btn = document.getElementById('notice-download-btn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span style="display:inline-block;width:12px;height:12px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;"></span>'; }
+  try {
+    const canvas = await html2canvas(card, {
+      scale: 3,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      logging: false,
+    });
+    const link = document.createElement('a');
+    link.download = '인테리어_양해안내문.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    showToastMessage('✅ 이미지가 저장됐습니다!');
+  } catch(e) {
+    alert('이미지 저장 실패: ' + e.message);
+  }
+  if (btn) { btn.disabled = false; btn.innerHTML = '<svg class="icon" width="14" height="14"><use href="#icon-download"/></svg> 저장하기'; }
 }
 
 function printExportDoc() {
@@ -5259,6 +5395,7 @@ function renderAll() {
     renderWorkCards();
     updateSummary();
     renderCalendar();
+    updateCollabIndicator(proj.collaborators || [], proj.owner);
   }
   updateLoginUI();
 }
@@ -5410,8 +5547,10 @@ function _genToken(len = 28) {
 async function _pushProjToCloud(proj) {
   if (!_db) return null;
   if (!proj.cloudId) proj.cloudId = _genToken(16);
+  const projData = JSON.parse(JSON.stringify(proj));
+  delete projData.myRole; // myRole은 각 클라이언트에서 결정 — Firestore에 저장 안 함
   const payload = {
-    projectData: JSON.parse(JSON.stringify(proj)),
+    projectData: projData,
     ownerEmail: state.user.email,          // top-level: 인덱스 없이 쿼리 가능
     'meta.owner': { email: state.user.email, name: state.user.name },
     'meta.collaborators': proj.collaborators || [],
@@ -5430,8 +5569,10 @@ async function _pushProjToCloud(proj) {
 
 function _syncProjToCloud(proj) {
   if (!_db || !proj.cloudId) return;
+  const projData = JSON.parse(JSON.stringify(proj));
+  delete projData.myRole; // myRole은 각 클라이언트에서 결정 — Firestore에 저장 안 함
   const payload = {
-    projectData: JSON.parse(JSON.stringify(proj)),
+    projectData: projData,
     ownerEmail: state.user.email,   // 구버전 문서 ownerEmail 자동 backfill
     'meta.updatedAt': firebase.firestore.FieldValue.serverTimestamp(),
     'meta.updatedBy': state.user.email,
@@ -5522,10 +5663,9 @@ async function renderCollabTab() {
   }
 
   const proj = getProject();
-  const isOwner = !proj.myRole || proj.myRole === 'owner';
+  const isOwner = !proj.myRole || proj.myRole === 'owner' || proj.owner?.email === state.user?.email;
   const collaborators = proj.collaborators || [];
   const invites = proj.invites || [];
-  const pendingInvites = invites.filter(inv => new Date(inv.expiresAt) > new Date());
 
   body.innerHTML = `
     <div style="font-size:13px;font-weight:700;color:#888;margin-bottom:6px;">현재 멤버</div>
@@ -5552,47 +5692,56 @@ async function renderCollabTab() {
         </div>`).join('')}
     </div>
 
-    ${pendingInvites.length ? `
-      <div style="font-size:13px;font-weight:700;color:#888;margin:12px 0 6px;">대기 중인 초대</div>
+    ${invites.length ? `
+      <div style="font-size:13px;font-weight:700;color:#888;margin:12px 0 6px;">초대 현황</div>
       <div style="display:flex;flex-direction:column;gap:5px;">
-        ${pendingInvites.map(inv => `
-          <div class="pending-invite-row">
-            <svg class="icon" width="14" height="14" style="color:#b45309"><use href="#icon-clock"/></svg>
-            <div class="pi-email">${esc(inv.email||'초대 링크')} · ${inv.role==='viewer'?'뷰어':'편집자'}</div>
-            <div class="pi-expire">~${inv.expiresAt.slice(0,10)}</div>
-            <button class="pi-cancel" onclick="cancelInvite('${inv.token}')">취소</button>
-          </div>`).join('')}
+        ${invites.map(inv => {
+          const expired = new Date(inv.expiresAt) < new Date();
+          return `
+          <div class="pending-invite-row" style="${expired ? 'opacity:0.55;' : ''}">
+            <svg class="icon" width="14" height="14" style="color:${expired?'#aaa':'#b45309'}"><use href="#icon-clock"/></svg>
+            <div class="pi-email">${esc(inv.email||'초대 링크')} · ${inv.role==='viewer'?'뷰어':'편집자'}${expired?' · <span style="color:#e05050;font-size:11px;">만료</span>':''}</div>
+            <div class="pi-expire">${expired ? '만료됨' : '~'+inv.expiresAt.slice(0,10)}</div>
+            <button class="pi-remove" onclick="cancelInvite('${inv.token}')" title="초대 삭제">
+              <svg class="icon" width="14" height="14"><use href="#icon-x"/></svg>
+            </button>
+          </div>`;
+        }).join('')}
       </div>` : ''}
 
     ${isOwner ? `
       <div style="font-size:13px;font-weight:700;color:#888;margin:14px 0 8px;">새 멤버 초대</div>
       <div class="invite-form">
         <div class="invite-row">
-          <input type="email" id="invite-email-input" placeholder="이메일 주소 입력" />
+          <input type="email" id="invite-email-input" placeholder="초대할 이메일 주소" oninput="checkInviteEmailInput(this)" />
           <select class="invite-role-select" id="invite-role-select">
             <option value="editor">편집자</option>
             <option value="viewer">뷰어</option>
           </select>
         </div>
-        <button class="invite-gen-btn" onclick="generateInviteLink()">
-          <svg class="icon" width="14" height="14"><use href="#icon-link"/></svg> 초대 링크 생성
+        <button class="invite-gen-btn" id="invite-gen-btn" onclick="generateInviteLink()" disabled>
+          <svg class="icon" width="15" height="15"><use href="#icon-mail"/></svg> 이메일로 초대 보내기
         </button>
         <div class="invite-link-box" id="invite-link-box">
-          <div style="font-size:12px;font-weight:700;color:#3176ff;display:flex;align-items:center;gap:5px;">
-            <svg class="icon" width="13" height="13"><use href="#icon-check-circle"/></svg> 초대 링크 생성 완료 (7일 유효)
+          <div style="font-size:13px;font-weight:700;color:#16a34a;display:flex;align-items:center;gap:6px;">
+            <svg class="icon" width="15" height="15" style="color:#16a34a"><use href="#icon-check-circle"/></svg>
+            초대 이메일을 전송했습니다 <span style="font-weight:400;color:#888;font-size:11px;">(7일 유효)</span>
           </div>
-          <div class="invite-link-url" id="invite-link-url"></div>
-          <div class="invite-link-actions">
+          <div style="font-size:12px;color:#888;margin-top:-2px;" id="invite-sent-to"></div>
+          <div class="invite-link-actions" style="margin-top:4px;">
             <button class="invite-link-btn ilb-copy" onclick="copyInviteLink()">
-              <svg class="icon" width="12" height="12"><use href="#icon-copy"/></svg> 복사
-            </button>
-            <button class="invite-link-btn ilb-mail" onclick="sendInviteByMail()">
-              <svg class="icon" width="12" height="12"><use href="#icon-mail"/></svg> 이메일 전송
+              <svg class="icon" width="12" height="12"><use href="#icon-copy"/></svg> 링크 복사
             </button>
             <button class="invite-link-btn ilb-kakao" onclick="shareInviteKakao()">
               💬 카카오톡
             </button>
+            <button class="invite-link-btn ilb-mail" onclick="sendInviteByMail()">
+              <svg class="icon" width="12" height="12"><use href="#icon-mail"/></svg> 다시 보내기
+            </button>
           </div>
+          <button onclick="resetInviteForm()" style="margin-top:8px;width:100%;padding:7px;background:none;border:1.5px dashed #c7d7f9;border-radius:8px;color:#3176ff;font-size:12.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;">
+            <svg class="icon" width="13" height="13"><use href="#icon-plus"/></svg> 다른 사람 초대하기
+          </button>
         </div>
       </div>` : `<div style="font-size:13px;color:#888;text-align:center;padding:12px;">편집 초대 권한은 프로젝트 오너만 가능합니다.</div>`}
   `;
@@ -5611,12 +5760,12 @@ async function generateInviteLink() {
     emailEl?.focus();
     alert('올바른 이메일 주소를 입력해주세요.'); return;
   }
-  const btn = document.querySelector('.invite-gen-btn');
-  if (btn) { btn.disabled = true; btn.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;"></span> 생성 중...'; }
+  const btn = document.getElementById('invite-gen-btn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;"></span> 초대장 만드는 중...'; }
 
   const ok = await _initFirebase();
   if (!ok) {
-    if (btn) { btn.disabled = false; btn.innerHTML = '<svg class="icon" width="14" height="14"><use href="#icon-link"/></svg> 초대 링크 생성'; }
+    if (btn) { btn.disabled = false; btn.classList.add('active'); btn.innerHTML = '<svg class="icon" width="15" height="15"><use href="#icon-mail"/></svg> 이메일로 초대 보내기'; }
     alert('Firebase 연결에 실패했습니다. 잠시 후 다시 시도해주세요.'); return;
   }
 
@@ -5639,7 +5788,7 @@ async function generateInviteLink() {
     if (!proj.owner) proj.owner = { email: state.user.email, name: state.user.name };
     const cloudId = await _pushProjToCloud(proj);
     if (!cloudId) {
-      if (btn) { btn.disabled = false; btn.innerHTML = '<svg class="icon" width="14" height="14"><use href="#icon-link"/></svg> 초대 링크 생성'; }
+      if (btn) { btn.disabled = false; btn.classList.add('active'); btn.innerHTML = '<svg class="icon" width="15" height="15"><use href="#icon-mail"/></svg> 이메일로 초대 보내기'; }
       alert('클라우드 저장에 실패했습니다. 네트워크 연결을 확인하고 다시 시도해주세요.'); return;
     }
     proj.cloudId = cloudId; proj.isCloud = true;
@@ -5668,14 +5817,13 @@ async function generateInviteLink() {
     const link = `${window.location.origin}${window.location.pathname}?invite=${token}`;
     _currentInviteLink = link;
     _currentInviteEmail = email;
-    const linkBox = document.getElementById('invite-link-box');
-    const linkUrl = document.getElementById('invite-link-url');
-    if (linkBox) linkBox.classList.add('show');
-    if (linkUrl) linkUrl.textContent = link;
-    if (btn) { btn.disabled = false; btn.innerHTML = '<svg class="icon" width="14" height="14"><use href="#icon-link"/></svg> 새 초대 링크 생성'; }
+    // EmailJS로 직접 발송 (실패 시 mailto fallback 내장)
+    sendInviteByMail();
+    if (btn) { btn.disabled = false; btn.classList.add('active'); btn.innerHTML = '<svg class="icon" width="15" height="15"><use href="#icon-mail"/></svg> 이메일로 초대 보내기'; }
+    if (emailEl) { emailEl.value = ''; emailEl.classList.remove('error'); }
     updateCollabIndicator(proj.collaborators||[], proj.owner);
   } catch(e) {
-    if (btn) { btn.disabled = false; btn.innerHTML = '<svg class="icon" width="14" height="14"><use href="#icon-link"/></svg> 초대 링크 생성'; }
+    if (btn) { btn.disabled = false; btn.classList.add('active'); btn.innerHTML = '<svg class="icon" width="15" height="15"><use href="#icon-mail"/></svg> 이메일로 초대 보내기'; }
     alert('초대 링크 생성 실패: ' + e.message);
   }
 }
@@ -5687,14 +5835,38 @@ function copyInviteLink() {
   });
 }
 
-function sendInviteByMail() {
+async function sendInviteByMail() {
   const proj = getProject();
-  const subject = encodeURIComponent(`[Vibespace] ${proj?.name||'시공 프로젝트'} 공동작업 초대`);
-  const body = encodeURIComponent(
-    `안녕하세요!\n\n${state.user.name || state.user.email}님이 Vibespace에서 시공 프로젝트에 초대했습니다.\n\n` +
-    `프로젝트명: ${proj?.name||''}\n\n아래 링크를 클릭해 참여하세요:\n${_currentInviteLink}\n\n(링크는 7일간 유효합니다)`
-  );
-  window.open(`mailto:${_currentInviteEmail}?subject=${subject}&body=${body}`);
+  const btn = document.getElementById('invite-gen-btn');
+  const origText = btn ? btn.innerHTML : '';
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;"></span> 전송 중...'; }
+  try {
+    await emailjs.send('service_elvk718', 'template_11ldrbw', {
+      to_email:     _currentInviteEmail,
+      to_name:      _currentInviteEmail.split('@')[0],
+      from_name:    state.user.name || state.user.email,
+      project_name: proj?.name || '시공 프로젝트',
+      invite_link:  _currentInviteLink,
+      role:         (document.getElementById('invite-role-select')?.value === 'viewer') ? '뷰어' : '편집자',
+    });
+    if (btn) { btn.disabled = false; btn.innerHTML = origText; }
+    showToastMessage('✉️ 초대 이메일을 전송했습니다!');
+    const linkBox = document.getElementById('invite-link-box');
+    if (linkBox) linkBox.classList.add('show');
+    const sentTo = document.getElementById('invite-sent-to');
+    if (sentTo) sentTo.textContent = _currentInviteEmail + '로 발송됐습니다.';
+  } catch(e) {
+    if (btn) { btn.disabled = false; btn.innerHTML = origText; }
+    console.error('EmailJS 오류:', e);
+    // fallback: 메일 앱 열기
+    const subject = encodeURIComponent(`[Vibespace] ${proj?.name||'시공 프로젝트'} 공동작업 초대`);
+    const body = encodeURIComponent(
+      `안녕하세요!\n\n${state.user.name || state.user.email}님이 Vibespace에서 시공 프로젝트에 초대했습니다.\n\n` +
+      `프로젝트명: ${proj?.name||''}\n\n아래 링크를 클릭해 참여하세요:\n${_currentInviteLink}\n\n(링크는 7일간 유효합니다)`
+    );
+    window.open(`mailto:${_currentInviteEmail}?subject=${subject}&body=${body}`);
+    showToastMessage('⚠️ 직접 전송 실패 — 메일 앱을 열었습니다.');
+  }
 }
 
 function shareInviteKakao() {
@@ -5702,11 +5874,35 @@ function shareInviteKakao() {
   alert('링크가 복사되었습니다. 카카오톡에서 붙여넣기로 공유하세요! 💬');
 }
 
+function checkInviteEmailInput(input) {
+  const btn = document.getElementById('invite-gen-btn');
+  if (!btn) return;
+  const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value.trim());
+  btn.disabled = !valid;
+  btn.classList.toggle('active', valid);
+}
+
+function resetInviteForm() {
+  const linkBox = document.getElementById('invite-link-box');
+  if (linkBox) linkBox.classList.remove('show');
+  const emailEl = document.getElementById('invite-email-input');
+  if (emailEl) { emailEl.value = ''; emailEl.classList.remove('error'); emailEl.focus(); }
+  const btn = document.getElementById('invite-gen-btn');
+  if (btn) {
+    btn.disabled = true;
+    btn.classList.remove('active');
+    btn.innerHTML = '<svg class="icon" width="15" height="15"><use href="#icon-mail"/></svg> 이메일로 초대 보내기';
+  }
+  _currentInviteLink = ''; _currentInviteEmail = '';
+}
+
 async function cancelInvite(token) {
-  if (!confirm('이 초대를 취소하시겠습니까?')) return;
+  const proj = getProject();
+  const inv = proj?.invites?.find(i => i.token === token);
+  const who = inv?.email ? `${inv.email}에 대한 ` : '';
+  if (!confirm(`${who}초대를 취소하시겠습니까?`)) return;
   const ok = await _initFirebase();
   if (ok && _db) { try { await _db.collection('vb_invites').doc(token).delete(); } catch(e){} }
-  const proj = getProject();
   if (proj && proj.invites) {
     proj.invites = proj.invites.filter(i => i.token !== token);
     save();
@@ -6153,7 +6349,21 @@ async function _syncFromCloudOnStartup() {
     for (const p of state.projects) {
       if (p.isCloud && p.cloudId) {
         _startCollabListener(p.cloudId);
-        updateCollabIndicator(p.collaborators||[], p.owner);
+        // collaborators가 비어있으면 Firestore에서 직접 보완
+        if (!(p.collaborators||[]).length) {
+          _db.collection('vb_projects').doc(p.cloudId).get().then(snap => {
+            if (!snap.exists) return;
+            const meta = snap.data().meta || {};
+            if ((meta.collaborators||[]).length) {
+              p.collaborators = meta.collaborators;
+              p.owner = meta.owner || p.owner;
+              localStorage.setItem('vibespace', JSON.stringify(state));
+              updateCollabIndicator(p.collaborators, p.owner);
+            }
+          }).catch(() => {});
+        } else {
+          updateCollabIndicator(p.collaborators, p.owner);
+        }
       }
     }
   } catch(e) {
