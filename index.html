@@ -2792,7 +2792,6 @@ async function _autoUploadOnLogin() {
   _notifyNewUserIfNeeded();
 
   // ── 클라우드 전체 프로젝트 조회 ──
-  showToastMessage('☁️ 클라우드 데이터 확인 중...');
   const allCloudProjs = await _fetchAllMyCloudProjects();
 
   if (allCloudProjs.length) {
@@ -2809,7 +2808,6 @@ async function _autoUploadOnLogin() {
       state.currentProjectId = isNewLocal ? currentProj.id : (state.projects[0]?.id || null);
       save();
       renderAll();
-      showToastMessage('☁️ 클라우드에서 데이터를 불러왔습니다!');
       for (const p of state.projects) {
         if (p.cloudId) {
           _startCollabListener(p.cloudId);
@@ -6912,11 +6910,13 @@ async function _syncFromCloudOnStartup() {
 
     // 로컬에 실제 데이터가 있으면 클라우드가 명확히 더 많을 때만 교체 (데이터 보호)
     if (cloudTotal > 0 && cloudTotal >= localTotal) {
-      state.projects = filteredProjs;
-      state.currentProjectId = state.projects[0]?.id || null;
+      const newLocalProjs = (state.projects||[]).filter(p => !p.cloudId && p.name !== '정자동 아파트 플랜');
+      const currentProj = getProject();
+      const isNewLocal = currentProj && !currentProj.cloudId && currentProj.name !== '정자동 아파트 플랜';
+      state.projects = [...filteredProjs, ...newLocalProjs];
+      state.currentProjectId = isNewLocal ? currentProj.id : (state.projects[0]?.id || null);
       save();
       renderAll();
-      showToastMessage('☁️ 클라우드에서 데이터를 불러왔습니다!');
     }
 
     for (const p of state.projects) {
