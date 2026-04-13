@@ -1712,7 +1712,7 @@ button, input, textarea, select { font-family:var(--font); }
     <!-- Tabs -->
     <div class="tab-section">
       <div class="tab-toggle">
-        <button class="tab-btn active" onclick="switchMainTab('plan',this)">공정 계획</button>
+        <button class="tab-btn active" onclick="switchMainTab('plan',this)">공정 계획<span id="plan-count-badge" style="display:none;margin-left:6px;background:#00C87D;color:#fff;font-size:11px;font-weight:600;border-radius:999px;padding:1px 7px;vertical-align:middle;line-height:1.6;"></span></button>
         <button class="tab-btn" onclick="switchMainTab('calendar',this)">전체 일정</button>
       </div>
     </div>
@@ -5903,6 +5903,12 @@ function renderAll() {
     updateSummary();
     renderCalendar();
     updateCollabIndicator(proj.collaborators || [], proj.owner);
+    const badge = document.getElementById('plan-count-badge');
+    if (badge) {
+      const cnt = proj.processes.length;
+      badge.textContent = cnt;
+      badge.style.display = cnt > 0 ? '' : 'none';
+    }
   }
   updateLoginUI();
 }
