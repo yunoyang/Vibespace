@@ -2801,8 +2801,12 @@ async function _autoUploadOnLogin() {
     const localTotal = (state.projects||[]).reduce((s,p) => s + (p.processes?.length||0), 0);
     // 클라우드에 실제 데이터가 있고, 로컬보다 많거나 같을 때만 교체 (로컬 데이터 보호)
     if (cloudTotal > 0 && cloudTotal >= localTotal) {
-      state.projects = allCloudProjs;
-      state.currentProjectId = state.projects[0]?.id || null;
+      // 새로 생성된 로컬 전용 프로젝트(cloudId 없음) 보존
+      const newLocalProjs = (state.projects||[]).filter(p => !p.cloudId && p.name !== '정자동 아파트 플랜');
+      const currentProj = getProject();
+      const isNewLocal = currentProj && !currentProj.cloudId && currentProj.name !== '정자동 아파트 플랜';
+      state.projects = [...allCloudProjs, ...newLocalProjs];
+      state.currentProjectId = isNewLocal ? currentProj.id : (state.projects[0]?.id || null);
       save();
       renderAll();
       showToastMessage('☁️ 클라우드에서 데이터를 불러왔습니다!');
