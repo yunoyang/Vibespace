@@ -1112,6 +1112,7 @@ button, input, textarea, select { font-family:var(--font); }
   align-items: center;
   width: 100%;
   position: relative;
+  gap: 8px;
 }
 /* 탭 사이를 연결하는 가운데 수평 라인 */
 .phase-segment::before {
@@ -1130,8 +1131,8 @@ button, input, textarea, select { font-family:var(--font); }
   align-items: center;
   justify-content: center;
   flex: 1;
-  height: 38px;
-  padding: 2px 4px;
+  height: 42px;
+  padding: 4px 4px;
   border: 1.5px solid #d8dae3;
   border-radius: 999px;
   background: #fff;
@@ -1777,8 +1778,8 @@ button, input, textarea, select { font-family:var(--font); }
 /* ===== FORM SCREEN ===== */
 .form-screen-inner { display:flex; flex-direction:column; height:100%; background:#fff; }
 .form-header {
-  display:flex; align-items:center; gap:8px; padding:20px 20px 16px 18px;
-  padding-top: max(env(safe-area-inset-top, 0px), 20px);
+  display:flex; align-items:center; gap:8px; padding:10px 10px 8px 9px;
+  padding-top: max(env(safe-area-inset-top, 0px), 10px);
   flex-shrink:0; border-bottom:1px solid var(--divider);
 }
 .back-btn {
@@ -2120,9 +2121,22 @@ button, input, textarea, select { font-family:var(--font); }
 .share-social-icon.x-icon { background:#000; }
 .share-social-icon.ig-icon { background:#fff; border:1.5px solid #d6249f; }
 .share-social-label { font-size:13px; color:#555; font-weight:500; }
+/* bottom-sheet: 모바일=바텀시트, PC=중앙 모달 */
+.bottom-sheet {
+  background:#fff; border-radius:22px 22px 0 0;
+  width:100%; max-width:600px;
+  position:relative; z-index:1; overflow-y:auto; max-height:90vh;
+}
 @media(min-width:600px) {
   .overlay { align-items:center; padding:20px; }
   .dialog { border-radius:20px; }
+  .bottom-sheet { border-radius:20px; width:auto; min-width:380px; max-width:480px; }
+  /* style-add-sheet 독립형 → 중앙 모달 */
+  #style-add-sheet {
+    bottom:auto !important; left:50% !important; right:auto !important;
+    top:50% !important; transform:translate(-50%,-50%) !important;
+    border-radius:20px !important; width:420px !important;
+  }
 }
 
 /* ===== SHARE OPTIONS ===== */
@@ -2634,27 +2648,22 @@ button, input, textarea, select { font-family:var(--font); }
 /* ===== LANDING ===== */
 /* ===== LANDING — WHITE CLEAN ===== */
 .landing-screen {
-  background:#fff; padding:0;
-  justify-content:space-between; align-items:stretch;
+  background:#fff;
+  padding:max(env(safe-area-inset-top,0px),0px) 0 0;
+  justify-content:flex-start; align-items:stretch;
   flex-direction:column;
 }
 .landing-bg { display:none; }
-.landing-center {
-  flex:1; display:flex; flex-direction:column;
-  align-items:center; justify-content:center;
-  padding:60px 32px 32px; gap:14px; text-align:center;
-}
-/* 로고 + 베타 뱃지 래퍼 — 이미지/텍스트 로고 전환과 무관하게 뱃지 항상 표시 */
+/* landing-center: 미사용 (로고가 landing-mid로 이동) */
+.landing-center { display:none; }
 .landing-logo-wrap {
   display:flex; align-items:center; justify-content:center; gap:10px;
 }
 .landing-logo {
-  font-size:38px; font-weight:800; color:#111;
+  font-size:36px; font-weight:800; color:#111;
   letter-spacing:-1px; line-height:1;
 }
-.landing-logo span {
-  color:var(--primary);
-}
+.landing-logo span { color:var(--primary); }
 .landing-beta-badge {
   font-size:13px; font-weight:700; color:var(--primary);
   background:transparent; border:1.5px solid var(--primary);
@@ -2662,18 +2671,52 @@ button, input, textarea, select { font-family:var(--font); }
   align-self:center; flex-shrink:0;
 }
 .landing-main-copy {
-  font-size:15px; font-weight:400; color:#444444;
+  font-size:15px; font-weight:400; color:#888;
   text-align:center; line-height:1.7; letter-spacing:-.1px;
-  margin-top:4px;
 }
 .landing-divider {
-  width:40px; height:3px; background:var(--primary);
-  border-radius:2px; margin:4px 0;
+  width:36px; height:3px; background:var(--primary);
+  border-radius:2px; margin:2px 0;
 }
+/* 가운데: 로고+카피 위아래 중앙 */
+.landing-mid {
+  flex:1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  padding:0 32px;
+}
+/* 하단 버튼 그룹 */
 .landing-bottom {
-  padding:0 24px calc(env(safe-area-inset-bottom,0px) + 28px); display:flex; flex-direction:column; gap:10px;
+  padding:0 24px calc(env(safe-area-inset-bottom,0px) + 28px);
+  display:flex; flex-direction:column; gap:10px; align-items:center;
   width:100%; box-sizing:border-box; flex-shrink:0;
 }
+.landing-bottom > button {
+  max-width:390px; width:100%;
+}
+/* 프로젝트 바로가기 카드 */
+.landing-proj-card {
+  width:100%; padding:16px;
+  background:#fff; border:1.5px solid #d8dae3; border-radius:16px;
+  cursor:pointer; display:flex; align-items:center; justify-content:space-between;
+  transition:transform .13s, background .15s; font-family:var(--font);
+  box-sizing:border-box;
+}
+.landing-proj-card:active { transform:scale(.97); background:#f5f5f8; }
+.landing-proj-card-name {
+  font-size:15px; font-weight:600; color:#111;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.landing-proj-card-sub { display:none; }
+/* 새 공사 아웃라인 버튼 */
+.landing-btn-new {
+  width:100%; padding:16px;
+  background:#fff; color:#111; border:1.5px solid #d8dae3; border-radius:16px;
+  font-size:15px; font-weight:600; cursor:pointer;
+  display:flex; align-items:center; justify-content:space-between;
+  transition:transform .13s, background .15s; font-family:var(--font);
+  box-sizing:border-box;
+}
+.landing-btn-new:active { transform:scale(.97); background:#f5f5f8; }
 .landing-btn {
   width:100%; padding:16px; background:#222; color:#fff; border:none;
   border-radius:12px; font-size:16px; font-weight:600; cursor:pointer;
@@ -2984,27 +3027,30 @@ button, input, textarea, select { font-family:var(--font); }
 <!-- ===== LANDING ===== -->
 <div class="screen landing-screen" id="screen-landing">
 
-  <!-- 중앙 로고 + 카피 -->
-  <div class="landing-center">
-    <!-- 로고 + 베타 뱃지: 이미지/텍스트 로고 중 하나만 표시되지만 뱃지는 항상 표시 -->
+  <!-- 가운데: 로고 + 카피 (남은 영역 위아래 중앙) -->
+  <div class="landing-mid">
     <div class="landing-logo-wrap">
       <img id="landing-brand-logo" class="landing-logo-img" alt="Brand Logo">
       <div class="landing-logo" id="landing-text-logo">Vibe<span>space</span></div>
       <span class="landing-beta-badge">beta</span>
     </div>
-    <div class="landing-divider"></div>
+    <div class="landing-divider" style="margin:14px 0 10px;"></div>
     <div class="landing-main-copy">반셀프 인테리어가 막막한 분들을 위한 플래닝 툴.</div>
   </div>
 
-  <!-- 하단 버튼 -->
+  <!-- 하단 버튼 그룹 -->
   <div class="landing-bottom">
-    <button class="landing-btn" onclick="startNewProject()">
-      <svg class="icon" width="20" height="20"><use href="#icon-plus"/></svg> 내 공사 계획 시작하기
+    <!-- 로그인: 프로젝트 카드 + 새 공사 -->
+    <button class="landing-proj-card" id="landing-proj-card-btn" onclick="loadExistingProjects()" style="display:none;">
+      <span class="landing-proj-card-name" id="landing-proj-name">프로젝트</span>
+      <svg width="16" height="16" fill="none" stroke="#111" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24" style="flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>
     </button>
-    <button class="landing-btn-secondary" onclick="loadExistingProjects()">
-      <svg class="icon" width="20" height="20"><use href="#icon-folder-open"/></svg> 이전 플랜 이어서 진행
+    <button class="landing-btn-new" id="landing-btn-new" onclick="startNewProject()" style="display:none;">
+      <span>새 공사</span>
+      <svg width="16" height="16" fill="none" stroke="#111" stroke-width="2.5" viewBox="0 0 24 24" style="flex-shrink:0;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     </button>
-    <button class="landing-btn-google" onclick="openDialog('dlg-login')">
+    <!-- 비로그인: 구글 로그인만 -->
+    <button class="landing-btn-google" id="landing-btn-google" onclick="openDialog('dlg-login')">
       <svg viewBox="0 0 24 24" width="18" height="18"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
       구글 로그인
     </button>
@@ -3015,7 +3061,7 @@ button, input, textarea, select { font-family:var(--font); }
 <div class="screen" id="screen-main">
   <div class="header">
     <button class="header-home-btn" onclick="goTo('landing')" title="홈으로">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M13.9036 4.85667C12.7971 3.94825 11.2029 3.94825 10.0964 4.85667L4.73093 9.26165C4.2682 9.64155 4 10.2087 4 10.8074V18C4 19.1046 4.89543 20 6 20H18C19.1046 20 20 19.1046 20 18V10.8074C20 10.2087 19.7318 9.64155 19.2691 9.26165L13.9036 4.85667ZM8.82732 3.31089C10.6715 1.79684 13.3285 1.79684 15.1727 3.31089L20.5381 7.71587C21.4636 8.47565 22 9.61006 22 10.8074V18C22 20.2091 20.2091 22 18 22H6C3.79086 22 2 20.2091 2 18V10.8074C2 9.61006 2.53641 8.47565 3.46186 7.71587L8.82732 3.31089Z" fill="black"/></svg>
+      <svg width="28" height="28" viewBox="0 0 32 37" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M26.7633 23.3452V15.3539C26.7633 14.1542 26.2841 13.0029 25.4128 12.1783C24.3913 11.2116 22.9742 9.90754 21.8301 8.9942C19.666 7.26652 18.5859 5.85492 16.0001 5.85492C13.4142 5.85492 12.3341 7.26652 10.17 8.9942C9.0259 9.90754 7.60877 11.2116 6.58735 12.1783C5.716 13.0029 5.23682 14.1542 5.23682 15.3539V23.3452C5.23682 24.8313 6.44153 25.6378 7.92763 25.6378H12.7639H19.3216H24.0725C25.5586 25.6378 26.7633 24.8313 26.7633 23.3452Z" stroke="#333" stroke-width="3"/></svg>
     </button>
     <div class="project-selector" id="project-selector">
       <button class="project-badge" id="project-badge-btn" onclick="toggleProjectDropdown(event)">
@@ -3038,7 +3084,10 @@ button, input, textarea, select { font-family:var(--font); }
   <div class="summary-wrap">
     <div class="summary-unified">
       <div class="summary-toggle-row" onclick="toggleSummary()">
-        <span>공사정보</span>
+        <div style="display:flex;align-items:center;gap:16px;">
+          <span>공사정보</span>
+          <span id="sum-dday" style="font-size:13px;font-weight:700;color:#5084ff;"></span>
+        </div>
         <span class="sum-chev open" id="sum-chev"><svg class="icon" width="16" height="16"><use href="#icon-chevron-down"/></svg></span>
       </div>
       <div class="summary-card" id="summary-card">
@@ -3064,6 +3113,7 @@ button, input, textarea, select { font-family:var(--font); }
         <button class="tab-btn" onclick="switchMainTab('calendar',this)"><span class="tab-label">일정</span></button>
         <button class="tab-btn" onclick="switchMainTab('style',this)"><span class="tab-label">스타일</span></button>
         <button class="tab-btn" onclick="switchMainTab('content',this)"><span class="tab-label">컨텐츠</span></button>
+        <button class="tab-btn" id="tab-btn-meeting" onclick="switchMainTab('meeting',this)"><span class="tab-label">기록</span></button>
       </div>
     </div>
 
@@ -3096,14 +3146,13 @@ button, input, textarea, select { font-family:var(--font); }
     <!-- Content Tab -->
     <div id="tab-content" style="display:none; background:#fff; flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch;">
       <div class="content-tab-inner">
-        <div class="content-add-bar">
-          <input class="content-add-input" id="content-url-input"
-            placeholder="유튜브 링크를 붙여넣기 하세요"
-            onkeydown="if(event.key==='Enter'){_addContentLink();event.preventDefault();}">
-          <button class="content-add-confirm-btn" onclick="_addContentLink()">추가</button>
-        </div>
         <div id="content-list"></div>
       </div>
+    </div>
+
+    <!-- Meeting Tab -->
+    <div id="tab-meeting" style="display:none; background:#fff; flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch;">
+      <div id="meeting-list" style="padding:14px 16px 100px;"></div>
     </div>
 
 
@@ -3156,27 +3205,29 @@ button, input, textarea, select { font-family:var(--font); }
       <button class="back-btn" onclick="formGoBack()"><svg class="icon" width="22" height="22"><use href="#icon-chevron-left"/></svg></button>
       <h2 id="form-title">공사 정보</h2>
       <button class="form-edit-icon-btn" id="form-edit-icon-btn" onclick="switchToFormEdit()" title="수정">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="#333"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+        <svg width="24" height="24" viewBox="0 0 32 37" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16 6.25H12.25C8.93629 6.25 6.25 8.93629 6.25 12.25V19.75C6.25 23.0637 8.93629 25.75 12.25 25.75H19.75C23.0637 25.75 25.75 23.0637 25.75 19.75V16M16.481 15.4534L24.896 7.03838" stroke="#333" stroke-width="3" stroke-linecap="round"/></svg>
       </button>
     </div>
 
     <!-- ▶ VIEW MODE (읽기 전용) -->
     <div id="form-view-panel" class="info-view-body" style="display:none;">
-      <div class="info-view-card" id="iv-floorplan-card" style="display:none;">
+      <!-- 프로젝트명 최상단 -->
+      <div class="info-view-hero">
+        <div style="font-size:14px;font-weight:600;color:#aaa;letter-spacing:.04em;margin-bottom:6px;">프로젝트명</div>
+        <div class="info-view-project-name" id="iv-project-name">-</div>
+      </div>
+      <!-- 도면 카드 (항상 표시) -->
+      <div class="info-view-card" id="iv-floorplan-card">
         <div class="info-view-floorplan-wrap">
           <div class="fp-edit-row">
             <div class="info-view-floorplan-label" style="margin-bottom:0;">도면</div>
-            <button class="fp-edit-btn" onclick="openFpEditor()">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="#333"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+            <button class="fp-edit-btn" id="iv-fp-edit-btn" style="display:none;" onclick="openFpEditor()">
+              <svg width="13" height="13" viewBox="0 0 32 37" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16 6.25H12.25C8.93629 6.25 6.25 8.93629 6.25 12.25V19.75C6.25 23.0637 8.93629 25.75 12.25 25.75H19.75C23.0637 25.75 25.75 23.0637 25.75 19.75V16M16.481 15.4534L24.896 7.03838" stroke="#333" stroke-width="3" stroke-linecap="round"/></svg>
               도면 편집
             </button>
           </div>
           <div class="iv-floorplan-scroll" id="iv-floorplan-scroll"></div>
         </div>
-      </div>
-      <div class="info-view-hero">
-        <div style="font-size:14px;font-weight:600;color:#aaa;letter-spacing:.04em;margin-bottom:6px;">프로젝트명</div>
-        <div class="info-view-project-name" id="iv-project-name">-</div>
       </div>
       <div class="info-view-card">
         <div class="info-view-row">
@@ -3430,10 +3481,190 @@ button, input, textarea, select { font-family:var(--font); }
     <svg class="icon" width="18" height="18" style="stroke-width:2.5"><use href="#icon-plus"/></svg> 공정 단계 추가
   </button>
 </div>
-<div class="floating-group" id="floating-add-style" style="display:none;">
-  <button class="floating-btn" onclick="openStyleNewSpace()">
-    <svg class="icon" width="18" height="18" style="stroke-width:2.5"><use href="#icon-plus"/></svg> 스타일 추가
+<!-- floating-add-style 제거: 스타일 상세 뷰어 헤더 + 버튼으로 대체 -->
+<div class="floating-group" id="floating-add-meeting" style="display:none;">
+  <button class="floating-btn" onclick="openAddMeeting()">
+    <svg class="icon" width="18" height="18" style="stroke-width:2.5"><use href="#icon-plus"/></svg> 기록 추가
   </button>
+</div>
+<div class="floating-group" id="floating-add-content" style="display:none;">
+  <button class="floating-btn" onclick="openAddContent()">
+    <svg class="icon" width="18" height="18" style="stroke-width:2.5"><use href="#icon-plus"/></svg> 컨텐츠 추가
+  </button>
+</div>
+
+<!-- Content Add Sheet -->
+<div class="overlay" id="dlg-content-add" onclick="if(event.target===this)closeAddContent()" style="display:none;z-index:9200;">
+  <div class="bottom-sheet" style="padding:0 0 env(safe-area-inset-bottom,0);">
+    <div style="width:36px;height:4px;background:#e5e5ec;border-radius:4px;margin:12px auto 0;"></div>
+    <div style="padding:14px 18px 6px;display:flex;align-items:center;justify-content:space-between;">
+      <span style="font-size:17px;font-weight:700;color:#111;">컨텐츠 추가</span>
+      <button onclick="closeAddContent()" style="background:none;border:none;padding:4px;cursor:pointer;">
+        <svg class="icon" width="20" height="20"><use href="#icon-x"/></svg>
+      </button>
+    </div>
+    <div style="padding:8px 18px 24px;">
+      <input id="content-url-input" type="url" inputmode="url" placeholder="유튜브 링크를 붙여넣기 하세요"
+        style="width:100%;box-sizing:border-box;height:48px;border:1.5px solid #e1e5ef;border-radius:12px;padding:0 14px;font-size:15px;font-family:var(--font);outline:none;margin-bottom:12px;"
+        onkeydown="if(event.key==='Enter'){_addContentLink();closeAddContent();event.preventDefault();}">
+      <button onclick="_addContentLink();closeAddContent();" style="width:100%;height:48px;background:#222;color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:700;font-family:var(--font);cursor:pointer;">추가</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 회의록 작성/수정 전체화면 에디터 ===== -->
+<div id="screen-meeting-write" style="position:fixed;top:0;left:0;right:0;bottom:0;background:#fff;z-index:8700;transform:translateY(100%);transition:transform .35s cubic-bezier(.32,1,.64,1);display:flex;flex-direction:column;overflow:hidden;pointer-events:none;">
+
+  <!-- 헤더 -->
+  <div class="form-header">
+    <button class="back-btn" onclick="closeMeetingWrite()">
+      <svg class="icon" width="22" height="22" style="stroke-width:2.5"><use href="#icon-chevron-left"/></svg>
+    </button>
+    <span id="meeting-write-header" style="flex:1;font-size:16px;font-weight:700;color:#111;">기록 작성</span>
+    <button id="btn-meeting-save" onclick="saveMeeting()" style="padding:8px 18px;background:#222;color:#fff;border:none;border-radius:20px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);">저장</button>
+  </div>
+
+  <!-- 스크롤 영역 -->
+  <div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;">
+
+    <!-- 제목 입력 -->
+    <input id="meeting-title-input" placeholder="제목을 입력하세요"
+      style="width:100%;box-sizing:border-box;border:none;border-bottom:1px solid #f0f2f5;padding:18px 20px 14px;font-size:22px;font-weight:700;color:#111;font-family:var(--font);outline:none;background:transparent;">
+
+    <!-- 멘션 칩 영역 -->
+    <div id="meeting-mention-chips" style="display:flex;flex-wrap:wrap;gap:6px;padding:10px 20px;min-height:0;"></div>
+
+    <!-- 에디터 툴바 -->
+    <div id="editor-toolbar" style="display:flex;align-items:center;gap:2px;padding:6px 10px;border-bottom:1px solid #f0f2f5;background:#fafbfc;position:sticky;top:0;z-index:5;flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;">
+      <!-- 헤딩 -->
+      <button onclick="_mwInsertHeading(2)" title="제목 (H2)" style="height:32px;padding:0 8px;border:none;background:none;cursor:pointer;border-radius:6px;font-size:12px;font-weight:800;color:#333;font-family:serif;white-space:nowrap;">H2</button>
+      <button onclick="_mwInsertHeading(3)" title="소제목 (H3)" style="height:32px;padding:0 8px;border:none;background:none;cursor:pointer;border-radius:6px;font-size:11px;font-weight:700;color:#666;font-family:serif;white-space:nowrap;">H3</button>
+      <div style="width:1px;height:18px;background:#e0e0e0;margin:0 3px;flex-shrink:0;"></div>
+      <!-- 텍스트 서식 -->
+      <button onclick="_mwFmt('bold')" title="굵게" style="width:32px;height:32px;border:none;background:none;cursor:pointer;border-radius:6px;font-size:15px;font-weight:900;color:#333;font-family:serif;">B</button>
+      <button onclick="_mwFmt('italic')" title="기울임" style="width:32px;height:32px;border:none;background:none;cursor:pointer;border-radius:6px;font-size:15px;font-style:italic;color:#333;font-family:serif;">I</button>
+      <button onclick="_mwFmt('underline')" title="밑줄" style="width:32px;height:32px;border:none;background:none;cursor:pointer;border-radius:6px;font-size:14px;color:#333;text-decoration:underline;font-family:serif;">U</button>
+      <div style="width:1px;height:18px;background:#e0e0e0;margin:0 3px;flex-shrink:0;"></div>
+      <!-- 리스트 -->
+      <button onclick="_mwFmt('insertUnorderedList')" title="목록" style="width:32px;height:32px;border:none;background:none;cursor:pointer;border-radius:6px;font-size:14px;color:#333;">•≡</button>
+      <button onclick="_mwFmt('insertOrderedList')" title="번호 목록" style="width:32px;height:32px;border:none;background:none;cursor:pointer;border-radius:6px;font-size:12px;color:#333;">1≡</button>
+      <div style="width:1px;height:18px;background:#e0e0e0;margin:0 3px;flex-shrink:0;"></div>
+      <!-- 블록 요소 -->
+      <button onclick="_mwInsertBlockquote()" title="인용구" style="width:32px;height:32px;border:none;background:none;cursor:pointer;border-radius:6px;font-size:16px;color:#888;">"</button>
+      <button onclick="_mwInsertCodeBlock()" title="코드 블록" style="width:32px;height:32px;border:none;background:none;cursor:pointer;border-radius:6px;font-size:12px;color:#555;font-family:monospace;">&lt;/&gt;</button>
+      <button onclick="_mwInsertHr()" title="구분선" style="width:32px;height:32px;border:none;background:none;cursor:pointer;border-radius:6px;font-size:14px;color:#aaa;">—</button>
+      <button onclick="_mwInsertLink()" title="링크 삽입" style="width:32px;height:32px;border:none;background:none;cursor:pointer;border-radius:6px;display:flex;align-items:center;justify-content:center;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      </button>
+      <div style="flex:1;min-width:4px;"></div>
+      <!-- 우측 고정 -->
+      <button onclick="_mwAtBtn()" title="@멘션" style="width:32px;height:32px;border:none;background:none;cursor:pointer;border-radius:6px;font-size:13px;font-weight:700;color:#5084ff;flex-shrink:0;">@</button>
+      <label title="이미지 추가" style="width:32px;height:32px;border:none;background:none;cursor:pointer;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <input type="file" accept="image/*" multiple id="meeting-image-input" style="display:none;" onchange="_meetingImagePreview(this)">
+      </label>
+    </div>
+
+    <!-- contenteditable 에디터 -->
+    <div style="position:relative;flex:1;min-height:240px;">
+      <div id="meeting-editor"
+        contenteditable="true"
+        spellcheck="false"
+        style="min-height:240px;padding:16px 20px 20px;font-size:16px;line-height:1.85;color:#222;font-family:var(--font);outline:none;word-break:break-word;"
+        oninput="_mwEditorInput()"
+        onkeydown="_mwEditorKeydown(event)">
+      </div>
+      <div id="meeting-editor-ph" style="position:absolute;top:16px;left:20px;font-size:16px;color:#bbb;pointer-events:none;line-height:1.85;">내용을 입력하세요. @이름 으로 멘션</div>
+      <!-- 멘션 드롭다운 -->
+      <div id="meeting-mention-dropdown" style="display:none;position:absolute;left:20px;right:20px;top:56px;background:#fff;border:1px solid #e1e5ef;border-radius:14px;box-shadow:0 6px 24px rgba(0,0,0,.12);z-index:20;max-height:200px;overflow-y:auto;"></div>
+    </div>
+
+    <!-- 이미지 미리보기 -->
+    <div id="meeting-images-preview" style="display:flex;gap:8px;flex-wrap:wrap;padding:0 20px 16px;"></div>
+
+    <!-- 하단 여백 (키보드 대응) -->
+    <div style="height:env(keyboard-inset-height,200px);min-height:100px;flex-shrink:0;"></div>
+  </div>
+</div>
+
+<!-- Meeting Detail Screen -->
+<div id="screen-meeting-detail" style="position:fixed;top:0;left:0;right:0;bottom:0;background:#fff;z-index:8500;transform:translateY(100%);transition:transform .35s cubic-bezier(.32,1,.64,1);display:flex;flex-direction:column;overflow:hidden;pointer-events:none;">
+  <!-- 상단 헤더: 뒤로 + ··· -->
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 10px 0;flex-shrink:0;">
+    <button class="back-btn" onclick="closeMeetingDetail()">
+      <svg class="icon" width="22" height="22" style="stroke-width:2.5"><use href="#icon-chevron-left"/></svg>
+    </button>
+    <button class="card-more-btn" onclick="_openMeetingMoreMenu()" style="font-size:20px;letter-spacing:1px;">···</button>
+  </div>
+  <!-- 스크롤 본문 (제목 포함) -->
+  <div id="meeting-detail-body" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:20px 20px 40px;"></div>
+</div>
+
+<!-- 기록 더보기 바텀시트 -->
+<div class="overlay" id="dlg-meeting-more" onclick="if(event.target===this)closeDialog('dlg-meeting-more')" style="z-index:9600;">
+  <div class="dialog" style="gap:0;padding:0;">
+    <div style="width:36px;height:4px;border-radius:4px;background:#e0e0e0;margin:14px auto 8px;"></div>
+    <button class="mobile-sheet-item" onclick="openEditMeeting();closeDialog('dlg-meeting-more');">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      수정
+    </button>
+    <button class="mobile-sheet-item" onclick="shareMeetingUrl();closeDialog('dlg-meeting-more');">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      공유
+    </button>
+    <button class="mobile-sheet-item danger" onclick="deleteMeeting();closeDialog('dlg-meeting-more');" style="color:#e53935;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e53935" stroke-width="2.2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+      삭제
+    </button>
+    <div style="height:env(safe-area-inset-bottom,0px);"></div>
+  </div>
+</div>
+
+<!-- ===== Anthropic API 키 입력 Bottom Sheet ===== -->
+<div class="overlay" id="dlg-anthropic-key" onclick="if(event.target===this)document.getElementById('dlg-anthropic-key').style.display='none'" style="display:none;z-index:9500;">
+  <div class="bottom-sheet" style="padding:24px 20px 32px;">
+    <div style="font-size:17px;font-weight:700;color:#111;margin-bottom:6px;">Anthropic API 키 입력</div>
+    <div style="font-size:13px;color:#888;margin-bottom:18px;line-height:1.6;">
+      <a href="https://console.anthropic.com" target="_blank" style="color:#5084ff;">console.anthropic.com</a> → API Keys → Create Key<br>
+      <span style="color:#aaa;">입력 후 기기에 저장됩니다 (1회만 입력)</span>
+    </div>
+    <input id="anthropic-key-input" type="password" placeholder="sk-ant-api03-..." style="width:100%;padding:12px 14px;border:1.5px solid #e8eaf0;border-radius:12px;font-size:14px;color:#111;background:#fafafa;box-sizing:border-box;outline:none;margin-bottom:14px;" onfocus="this.style.borderColor='#5084ff'" onblur="this.style.borderColor='#e8eaf0'">
+    <button onclick="_saveAnthropicKey()" style="width:100%;padding:14px;background:#5084ff;color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;">저장하고 계속</button>
+  </div>
+</div>
+
+<!-- ===== 블로그 SEO 미리보기 스크린 ===== -->
+<div id="screen-blog-preview" style="position:fixed;top:0;left:0;right:0;bottom:0;background:#f7f8fa;z-index:9000;transform:translateY(100%);transition:transform .35s cubic-bezier(.32,1,.64,1);display:flex;flex-direction:column;overflow:hidden;pointer-events:none;">
+  <div class="form-header">
+    <button class="back-btn" onclick="closeInblogPreview()">
+      <svg class="icon" width="22" height="22" style="stroke-width:2.5"><use href="#icon-chevron-left"/></svg>
+    </button>
+    <span style="flex:1;font-size:15px;font-weight:700;color:#111;">SEO 블로그 미리보기</span>
+    <button id="btn-confirm-publish" onclick="confirmPublishToInblog()" style="padding:7px 16px;border-radius:20px;background:#5084ff;color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;">발행하기</button>
+  </div>
+  <div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;">
+    <!-- 제목 -->
+    <div style="margin-bottom:10px;">
+      <div style="font-size:11px;color:#888;font-weight:600;margin-bottom:6px;letter-spacing:.3px;">SEO 제목 <span style="color:#aaa;font-weight:400;">(구글 검색 결과 제목)</span></div>
+      <input id="blog-preview-title-input" type="text" style="width:100%;padding:11px 14px;border:1.5px solid #e8eaf0;border-radius:12px;font-size:15px;font-weight:700;color:#111;background:#fff;box-sizing:border-box;outline:none;" onfocus="this.style.borderColor='#5084ff'" onblur="this.style.borderColor='#e8eaf0'">
+    </div>
+    <!-- 메타 설명 -->
+    <div style="margin-bottom:12px;">
+      <div style="font-size:11px;color:#888;font-weight:600;margin-bottom:6px;letter-spacing:.3px;">메타 설명 <span style="color:#aaa;font-weight:400;">(구글 검색 결과 요약 · 120자 이내)</span></div>
+      <textarea id="blog-preview-meta-desc" rows="2" style="width:100%;padding:10px 14px;border:1.5px solid #e8eaf0;border-radius:12px;font-size:13px;color:#333;background:#fff;box-sizing:border-box;outline:none;resize:none;line-height:1.6;font-family:var(--font);" onfocus="this.style.borderColor='#5084ff'" onblur="this.style.borderColor='#e8eaf0'" oninput="_updateMetaDescCounter(this)"></textarea>
+      <div id="meta-desc-counter" style="font-size:11px;color:#aaa;text-align:right;margin-top:2px;">0 / 120</div>
+    </div>
+    <!-- 감지된 SEO 키워드 뱃지 -->
+    <div id="blog-seo-keywords" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;min-height:0;"></div>
+    <!-- 내용 미리보기 / HTML 편집 토글 -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <div style="font-size:11px;color:#888;font-weight:600;letter-spacing:.3px;">본문 미리보기</div>
+      <button onclick="toggleBlogEditMode()" id="btn-toggle-edit" style="font-size:12px;color:#5084ff;background:none;border:none;cursor:pointer;padding:0;font-weight:600;">HTML 편집</button>
+    </div>
+    <div id="blog-preview-rendered" style="background:#fff;border-radius:12px;border:1px solid #e8eaf0;padding:18px;font-size:14px;line-height:1.9;color:#333;"></div>
+    <textarea id="blog-preview-html-input" style="display:none;width:100%;min-height:420px;padding:12px;border:1.5px solid #5084ff;border-radius:12px;font-size:12px;font-family:monospace;line-height:1.5;color:#333;background:#fff;box-sizing:border-box;resize:vertical;" oninput="document.getElementById('blog-preview-rendered').innerHTML=this.value"></textarea>
+    <div style="height:24px;"></div>
+  </div>
 </div>
 
 <!-- ===== 업체 상세 스크린 (슬라이드 업) ===== -->
@@ -3496,11 +3727,57 @@ button, input, textarea, select { font-family:var(--font); }
   </div>
   <div style="display:flex;background:#fff;border-bottom:1px solid #f0f2f5;flex-shrink:0;height:52px;">
     <button id="ptab-btn-info" onclick="switchProcDetailTab('info',this)" style="flex:1;background:none;border:none;border-bottom:2.5px solid var(--primary);font-size:15px;font-weight:600;color:#222;cursor:pointer;font-family:var(--font);padding:4px 0;">공정 상세 내역</button>
-    <button id="ptab-btn-tip" onclick="switchProcDetailTab('tip',this)" style="flex:1;background:none;border:none;border-bottom:2.5px solid transparent;font-size:15px;font-weight:500;color:#818590;cursor:pointer;font-family:var(--font);padding:4px 0;">공정팁</button>
+    <button id="ptab-btn-tip" onclick="switchProcDetailTab('tip',this)" style="flex:1;background:none;border:none;border-bottom:2.5px solid transparent;font-size:15px;font-weight:500;color:#818590;cursor:pointer;font-family:var(--font);padding:4px 0;">공정 기록</button>
   </div>
   <div id="ptab-info" class="screen-scroll" style="flex:1;background:#fff;"></div>
-  <div id="ptab-tip" class="screen-scroll" style="flex:1;display:none;background:#fff;"></div>
+  <div id="ptab-tip" class="screen-scroll" style="flex:1;display:none;background:#f7f8fa;position:relative;"></div>
 </div>
+<!-- ===== 공정 기록 작성/수정 전체화면 에디터 ===== -->
+<div id="screen-proc-record-write" style="position:fixed;top:0;left:0;right:0;bottom:0;background:#fff;z-index:8800;transform:translateY(100%);transition:transform .35s cubic-bezier(.32,1,.64,1);display:flex;flex-direction:column;overflow:hidden;pointer-events:none;">
+  <!-- 헤더 -->
+  <div class="form-header">
+    <button class="back-btn" onclick="closeProcRecord()">
+      <svg class="icon" width="22" height="22" style="stroke-width:2.5"><use href="#icon-chevron-left"/></svg>
+    </button>
+    <span id="proc-record-write-header" style="flex:1;font-size:16px;font-weight:700;color:#111;">공정 기록 작성</span>
+    <button onclick="saveProcRecord()" style="padding:8px 18px;background:#222;color:#fff;border:none;border-radius:20px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);">저장</button>
+  </div>
+  <!-- 스크롤 영역 -->
+  <div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;">
+    <!-- 툴바 -->
+    <div style="display:flex;align-items:center;gap:2px;padding:6px 12px;border-bottom:1px solid #f0f2f5;background:#fafbfc;position:sticky;top:0;z-index:5;flex-shrink:0;">
+      <button onclick="_prFmt('bold')" title="굵게" style="width:36px;height:36px;border:none;background:none;cursor:pointer;border-radius:8px;font-size:15px;font-weight:900;color:#333;font-family:serif;">B</button>
+      <button onclick="_prFmt('italic')" title="기울임" style="width:36px;height:36px;border:none;background:none;cursor:pointer;border-radius:8px;font-size:15px;font-style:italic;color:#333;font-family:serif;">I</button>
+      <button onclick="_prFmt('underline')" title="밑줄" style="width:36px;height:36px;border:none;background:none;cursor:pointer;border-radius:8px;font-size:14px;color:#333;text-decoration:underline;font-family:serif;">U</button>
+      <div style="width:1px;height:20px;background:#e0e0e0;margin:0 4px;"></div>
+      <button onclick="_prFmt('insertUnorderedList')" title="목록" style="width:36px;height:36px;border:none;background:none;cursor:pointer;border-radius:8px;font-size:16px;color:#333;">•≡</button>
+      <button onclick="_prFmt('insertOrderedList')" title="번호 목록" style="width:36px;height:36px;border:none;background:none;cursor:pointer;border-radius:8px;font-size:13px;color:#333;">1≡</button>
+      <button onclick="_prInsertHr()" title="구분선" style="width:36px;height:36px;border:none;background:none;cursor:pointer;border-radius:8px;font-size:16px;color:#aaa;">—</button>
+      <div style="flex:1;"></div>
+      <button onclick="_prAtBtn()" title="@멘션" style="width:36px;height:36px;border:none;background:none;cursor:pointer;border-radius:8px;font-size:13px;font-weight:700;color:#5084ff;">@</button>
+      <label title="이미지 추가" style="width:36px;height:36px;border:none;background:none;cursor:pointer;border-radius:8px;display:flex;align-items:center;justify-content:center;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <input type="file" accept="image/*" multiple id="proc-record-img-input" style="display:none;" onchange="_prImgPreview(this)">
+      </label>
+    </div>
+    <!-- contenteditable 에디터 -->
+    <div style="position:relative;flex:1;min-height:300px;">
+      <div id="proc-record-editor"
+        contenteditable="true" spellcheck="false"
+        oninput="_prEditorInput()"
+        onkeydown="_prEditorKeydown(event)"
+        style="min-height:300px;padding:16px 20px 20px;font-size:16px;line-height:1.85;color:#222;font-family:var(--font);outline:none;word-break:break-word;">
+      </div>
+      <div id="proc-record-editor-ph" style="position:absolute;top:16px;left:20px;font-size:16px;color:#bbb;pointer-events:none;line-height:1.85;">시공 과정, 특이사항, 체크포인트 등을 기록하세요</div>
+      <!-- @멘션 드롭다운 -->
+      <div id="proc-record-mention-dropdown" style="display:none;position:absolute;left:20px;right:20px;top:56px;background:#fff;border:1px solid #e1e5ef;border-radius:14px;box-shadow:0 6px 24px rgba(0,0,0,.12);z-index:20;max-height:200px;overflow-y:auto;"></div>
+    </div>
+    <!-- 이미지 미리보기 -->
+    <div id="proc-record-img-preview" style="display:flex;gap:8px;flex-wrap:wrap;padding:0 20px 16px;"></div>
+    <div style="height:env(keyboard-inset-height,200px);min-height:100px;flex-shrink:0;"></div>
+  </div>
+</div>
+
 <!-- ===== 주소 검색 인앱 오버레이 ===== -->
 <div id="addr-search-overlay" onclick="if(event.target===this)closeAddrSearch()"
   style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:99990;background:rgba(0,0,0,0.5);">
@@ -3583,7 +3860,10 @@ button, input, textarea, select { font-family:var(--font); }
 <!-- Add Detail -->
 <div class="overlay" id="dlg-add-detail">
   <div class="dialog">
-    <h3>상세내역 추가</h3>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+      <h3 style="margin:0;">상세내역 추가</h3>
+      <button onclick="closeDialog('dlg-add-detail')" style="background:none;border:none;cursor:pointer;padding:4px;color:#aaa;"><svg class="icon" width="18" height="18"><use href="#icon-x"/></svg></button>
+    </div>
     <input class="dialog-input" id="detail-desc" placeholder="작업내용 (예: 바닥철거)">
     <input class="dialog-input" id="detail-subdesc" placeholder="상세내용 (예: 폴리싱, 포세린타일)" style="margin-top:0;">
     <input class="dialog-input" id="detail-cost" type="number" placeholder="비용 (원)">
@@ -3603,7 +3883,10 @@ button, input, textarea, select { font-family:var(--font); }
 <!-- Edit Detail -->
 <div class="overlay" id="dlg-edit-detail">
   <div class="dialog">
-    <h3>상세내역 수정</h3>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+      <h3 style="margin:0;">상세내역 수정</h3>
+      <button onclick="closeDialog('dlg-edit-detail')" style="background:none;border:none;cursor:pointer;padding:4px;color:#aaa;"><svg class="icon" width="18" height="18"><use href="#icon-x"/></svg></button>
+    </div>
     <input class="dialog-input" id="edit-detail-desc" placeholder="작업내용">
     <input class="dialog-input" id="edit-detail-subdesc" placeholder="상세내용 (예: 폴리싱, 포세린타일)" style="margin-top:0;">
     <input class="dialog-input" id="edit-detail-cost" type="number" placeholder="비용 (원)">
@@ -3624,7 +3907,10 @@ button, input, textarea, select { font-family:var(--font); }
 <!-- Edit Field -->
 <div class="overlay" id="dlg-edit-field">
   <div class="dialog">
-    <h3 id="edit-field-title">편집</h3>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+      <h3 id="edit-field-title" style="margin:0;">편집</h3>
+      <button onclick="closeDialog('dlg-edit-field')" style="background:none;border:none;cursor:pointer;padding:4px;color:#aaa;"><svg class="icon" width="18" height="18"><use href="#icon-x"/></svg></button>
+    </div>
     <input class="dialog-input" id="edit-field-input">
     <div class="dialog-actions">
       <button class="btn-cancel" onclick="closeDialog('dlg-edit-field')">취소</button>
@@ -3636,8 +3922,9 @@ button, input, textarea, select { font-family:var(--font); }
 <!-- Schedule Picker -->
 <div class="overlay" id="dlg-schedule">
   <div class="dialog" style="gap:0;padding:0;max-height:92vh;overflow:hidden;display:flex;flex-direction:column;">
-    <div style="padding:20px 20px 12px;flex-shrink:0;">
-      <h3 id="dlg-schedule-title">시공일정 선택</h3>
+    <div style="padding:20px 20px 12px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
+      <h3 id="dlg-schedule-title" style="margin:0;">시공일정 선택</h3>
+      <button onclick="closeDialog('dlg-schedule')" style="background:none;border:none;cursor:pointer;padding:4px;color:#aaa;"><svg class="icon" width="18" height="18"><use href="#icon-x"/></svg></button>
     </div>
     <div style="flex:1;overflow-y:auto;padding:0 20px;min-height:0;-webkit-overflow-scrolling:touch;">
       <div id="dp-container"></div>
@@ -4017,23 +4304,163 @@ let calMonth = { year: new Date().getFullYear(), month: new Date().getMonth() };
 
 function getProject() { return state.projects.find(p => p.id === state.currentProjectId); }
 
+// ===== EXPERT ROLE =====
+function isExpert() {
+  return state.user?.email === 'wooonegun@gmail.com';
+}
+function canEdit() {
+  const proj = getProject();
+  if (!proj) return false;
+  const isOwner = !proj.myRole || proj.myRole === 'owner' || proj.owner?.email === state.user?.email;
+  return isOwner || isExpert();
+}
+
 let saveTimer = null;
 let _lastSaveTime = 0;
+// ── IndexedDB: 회의록 이미지 전용 저장소 (localStorage 5MB 한도 우회) ────────
+const _MIdb = (() => {
+  const DB = 'vb_meeting_imgs', STORE = 'imgs', VER = 1;
+  let _db = null;
+  function open() {
+    if (_db) return Promise.resolve(_db);
+    return new Promise((res, rej) => {
+      const r = indexedDB.open(DB, VER);
+      r.onupgradeneeded = e => e.target.result.createObjectStore(STORE);
+      r.onsuccess = e => { _db = e.target.result; res(_db); };
+      r.onerror = rej;
+    });
+  }
+  return {
+    async put(meetId, imgs) {
+      try {
+        const db = await open();
+        await new Promise((res, rej) => {
+          const tx = db.transaction(STORE, 'readwrite');
+          tx.objectStore(STORE).put(imgs, meetId);
+          tx.oncomplete = res; tx.onerror = rej;
+        });
+      } catch(e) { console.warn('[MIdb.put]', e); }
+    },
+    async get(meetId) {
+      try {
+        const db = await open();
+        return await new Promise(res => {
+          const r = db.transaction(STORE, 'readonly').objectStore(STORE).get(meetId);
+          r.onsuccess = e => res(Array.isArray(e.target.result) ? e.target.result : []);
+          r.onerror = () => res([]);
+        });
+      } catch(e) { return []; }
+    },
+    async del(meetId) {
+      try {
+        const db = await open();
+        const tx = db.transaction(STORE, 'readwrite');
+        tx.objectStore(STORE).delete(meetId);
+      } catch(e) {}
+    },
+    // 앱 시작 시 IDB base64 이미지를 state에 합산 (Firebase URL은 이미 state에 있음)
+    async loadAll() {
+      try {
+        const db = await open();
+        const keys = await new Promise(res => {
+          const r = db.transaction(STORE,'readonly').objectStore(STORE).getAllKeys();
+          r.onsuccess = e => res(e.target.result||[]);
+          r.onerror = () => res([]);
+        });
+        if (!keys.length) return;
+        for (const p of (state.projects||[])) {
+          for (const m of (p.meetings||[])) {
+            if (!keys.includes(m.id)) continue;
+            const idbImgs = await this.get(m.id);
+            // Firebase URL은 이미 m.images에 있음 → base64만 추가(합집합)
+            const existing = Array.isArray(m.images) ? m.images : [];
+            const newB64 = idbImgs.filter(img => img.startsWith('data:') && !existing.includes(img));
+            if (newB64.length) m.images = [...existing, ...newB64];
+          }
+        }
+      } catch(e) { console.warn('[MIdb.loadAll]', e); }
+    }
+  };
+})();
+
+// 구 localStorage vb_mi_* → IDB 마이그레이션 (1회)
+async function _migrateMeetingImgLS() {
+  for (const p of (state.projects||[])) {
+    for (const m of (p.meetings||[])) {
+      // 구 플레이스홀더
+      if (m.images === '__vb_mi__') {
+        try {
+          const raw = localStorage.getItem(`vb_mi_${p.id}_${m.id}`);
+          const imgs = raw ? JSON.parse(raw) : [];
+          m.images = imgs;
+          if (imgs.length) await _MIdb.put(m.id, imgs);
+          localStorage.removeItem(`vb_mi_${p.id}_${m.id}`);
+        } catch(_) { m.images = []; }
+      }
+    }
+  }
+}
+
+function _stripMeetingImages(projects) {
+  // localStorage JSON: Firebase URL은 보존 (다기기 공유), base64만 제거
+  (projects||[]).forEach(p => {
+    (p.meetings||[]).forEach(m => {
+      if (Array.isArray(m.images)) {
+        m.images = m.images.filter(img => img && !img.startsWith('data:'));
+      } else {
+        m.images = [];
+      }
+    });
+  });
+}
+
+function _saveFpImagesToLS(projects) {
+  // 도면 관련 base64 이미지를 모두 별도 키로 분리 → 메인 JSON 용량 절감
+  (projects || []).forEach(p => {
+    // ① floorplanImages 배열 → vb_fpi_*
+    const imgs = p.floorplanImages;
+    if (Array.isArray(imgs)) {
+      const hasB64 = imgs.some(img => img && img.startsWith('data:'));
+      if (hasB64) {
+        try {
+          localStorage.setItem(`vb_fpi_${p.id}`, JSON.stringify(imgs));
+          p.floorplanImages = '__vb_fpi__';
+        } catch(e) { console.warn('[vb_fpi]', e.message); }
+      }
+    }
+    // ② floorplanImage 단일 필드 → vb_fpi_*[0] 와 동일하므로 플레이스홀더 처리
+    if (p.floorplanImage && p.floorplanImage.startsWith('data:')) {
+      p.floorplanImage = '__vb_fl__';
+    }
+    // ③ floorplanEditedImage → vb_fp_* (QuotaExceeded 대기 말고 항상 분리)
+    if (p.floorplanEditedImage && p.floorplanEditedImage.startsWith('data:')) {
+      try {
+        localStorage.setItem(`vb_fp_${p.id}`, p.floorplanEditedImage);
+        p.floorplanEditedImage = '__vb_fp__';
+      } catch(e) { console.warn('[vb_fp]', e.message); }
+    }
+  });
+}
+
 function save() {
-  const json = JSON.stringify(state);
+  // 회의록 이미지 IDB, 도면 이미지 별도 키로 분리 → localStorage JSON 용량 절감
+  const lite = JSON.parse(JSON.stringify(state));
+  _stripMeetingImages(lite.projects);
+  _saveFpImagesToLS(lite.projects);
+  const json = JSON.stringify(lite);
   try {
     localStorage.setItem('vibespace', json);
   } catch(e) {
-    // QuotaExceededError — 대용량 이미지(data URL) 제거 후 재시도
+    // QuotaExceededError — 대용량 이미지(data URL) 추가 제거 후 재시도
     if (e.name === 'QuotaExceededError' || e.code === 22 || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
       console.warn('[save] localStorage 용량 초과 → 대용량 이미지 제외 후 재저장');
       try {
-        const lite = JSON.parse(json);
-        (lite.projects || []).forEach(p => {
+        const lite2 = JSON.parse(json);
+        (lite2.projects || []).forEach(p => {
           // floorplanEditedImage는 별도 키로 분리 저장
-          if (p.floorplanEditedImage) {
+          if (p.floorplanEditedImage && p.floorplanEditedImage !== '__vb_fp__') {
             try { localStorage.setItem(`vb_fp_${p.id}`, p.floorplanEditedImage); } catch(_) {}
-            p.floorplanEditedImage = '__vb_fp__'; // 플레이스홀더
+            p.floorplanEditedImage = '__vb_fp__';
           }
           // styleImages data URL만 제거 (Firebase URL은 보존)
           if (p.styleImages) {
@@ -4041,8 +4468,12 @@ function save() {
               p.styleImages[room] = (p.styleImages[room] || []).filter(u => !u.startsWith('data:'));
             });
           }
+          // 혹시 남은 회의록 이미지도 제거
+          (p.meetings || []).forEach(m => {
+            if (m.images && m.images !== '__vb_mi__') m.images = [];
+          });
         });
-        localStorage.setItem('vibespace', JSON.stringify(lite));
+        localStorage.setItem('vibespace', JSON.stringify(lite2));
       } catch(e2) { console.error('[save] 재저장 실패:', e2); }
     }
   }
@@ -4068,12 +4499,32 @@ function load() {
   const d = localStorage.getItem('vibespace');
   if (d) { try { state = JSON.parse(d); } catch(e) {} }
   if (!state.projects || !state.projects.length) initDefaultProject();
-  // 분리 저장된 floorplanEditedImage 복원
+  // 분리 저장된 floorplan 이미지 복원
   (state.projects || []).forEach(p => {
     if (p.floorplanEditedImage === '__vb_fp__') {
       const stored = localStorage.getItem(`vb_fp_${p.id}`);
       p.floorplanEditedImage = stored || null;
     }
+    // 도면 슬롯 이미지 복원 (vb_fpi_*)
+    if (p.floorplanImages === '__vb_fpi__') {
+      try {
+        const raw = localStorage.getItem(`vb_fpi_${p.id}`);
+        p.floorplanImages = raw ? JSON.parse(raw) : [null, null, null];
+      } catch(_) { p.floorplanImages = [null, null, null]; }
+    }
+    // floorplanImage 단일 필드 복원 → floorplanImages[0] 에서 재구성
+    if (p.floorplanImage === '__vb_fl__' || (!p.floorplanImage && Array.isArray(p.floorplanImages))) {
+      p.floorplanImage = (p.floorplanImages||[]).find(Boolean) || null;
+    }
+    // meeting.images: localStorage vb_mi_* 폴백 즉시 복원 (IDB는 _initMeetingImages에서 비동기)
+    (p.meetings || []).forEach(m => {
+      if (!Array.isArray(m.images) || !m.images.length) {
+        try {
+          const raw = localStorage.getItem(`vb_mi_${m.id}`);
+          if (raw) { const imgs = JSON.parse(raw); if (imgs.length) m.images = imgs; }
+        } catch(_) {}
+      }
+    });
   });
   // migrate old p.schedule strings
   state.projects && state.projects.forEach(proj => {
@@ -4582,9 +5033,24 @@ function updateLoginUI() {
   }
   // 프로필 아바타 버튼
   _renderProfileAvatar();
-  // Show/hide landing Google login button
-  const googleBtn = document.querySelector('.landing-btn-google');
-  if (googleBtn) googleBtn.style.display = state.loggedIn ? 'none' : '';
+  // 랜딩 버튼 상태 업데이트
+  const googleBtn = document.getElementById('landing-btn-google');
+  const newBtn    = document.getElementById('landing-btn-new');
+  const projCard  = document.getElementById('landing-proj-card-btn');
+  const projName  = document.getElementById('landing-proj-name');
+  if (state.loggedIn) {
+    // 로그인: 새 공사 버튼 + 프로젝트 있으면 바로가기 카드
+    if (googleBtn) googleBtn.style.display = 'none';
+    if (newBtn)    newBtn.style.display = '';
+    const proj = state.projects?.[0];
+    if (projCard) projCard.style.display = proj ? '' : 'none';
+    if (projName && proj) projName.textContent = proj.name || '내 프로젝트';
+  } else {
+    // 비로그인: 구글 로그인 버튼만
+    if (googleBtn) googleBtn.style.display = '';
+    if (newBtn)    newBtn.style.display = 'none';
+    if (projCard)  projCard.style.display = 'none';
+  }
   // Show/hide login gate on main screen
   const loginGate = document.getElementById('main-login-gate');
   if (loginGate) loginGate.style.display = state.loggedIn ? 'none' : 'flex';
@@ -4688,9 +5154,15 @@ function goTo(screen) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + screen).classList.add('active');
   closeAllMenus();
-  // 플로팅 버튼: 메인 화면에서만 표시
+  // 플로팅 버튼: 메인 화면에서만 표시 (다른 화면에서는 전체 숨김)
   const fab = document.getElementById('floating-add-process');
   if (fab) fab.style.display = screen === 'main' ? '' : 'none';
+  if (screen !== 'main') {
+    ['floating-add-meeting','floating-add-content'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+  }
   if (screen === 'main') renderAll();
   if (screen === 'form') {
     if (formMode === 'new') {
@@ -4810,6 +5282,21 @@ function updateSummary() {
     if (p.company) companies.add(p.company);
   });
   document.getElementById('sum-cost').textContent = totalCost > 0 ? '약 ' + formatNum(totalCost) + '원' : '0원';
+  // D-day 계산 (공사 시작일 기준)
+  const ddEl = document.getElementById('sum-dday');
+  if (ddEl) {
+    const startDate = proj.form?.startDate;
+    if (startDate) {
+      const today = new Date(); today.setHours(0,0,0,0);
+      const start = new Date(startDate + 'T00:00:00');
+      const diff = Math.round((start - today) / (1000*60*60*24));
+      if (diff > 0) ddEl.textContent = `D-${diff}일`;
+      else if (diff === 0) ddEl.textContent = 'D-Day';
+      else ddEl.textContent = `D+${Math.abs(diff)}일`;
+    } else {
+      ddEl.textContent = '';
+    }
+  }
   if (proj.form.startDate && proj.form.endDate) {
     const s = new Date(proj.form.startDate), e = new Date(proj.form.endDate);
     const months = Math.max(1, Math.round((e-s)/(1000*60*60*24*30)));
@@ -4837,11 +5324,15 @@ function switchMainTab(tab, btn) {
   document.getElementById('tab-calendar').style.display = tab === 'calendar' ? '' : 'none';
   document.getElementById('tab-style').style.display = tab === 'style' ? '' : 'none';
   document.getElementById('tab-content').style.display = tab === 'content' ? '' : 'none';
-  document.getElementById('floating-add-process').style.display = (tab === 'style' || tab === 'content') ? 'none' : '';
-  document.getElementById('floating-add-style').style.display = tab === 'style' ? '' : 'none';
+  document.getElementById('tab-meeting').style.display = tab === 'meeting' ? '' : 'none';
+  document.getElementById('floating-add-process').style.display = (tab === 'style' || tab === 'content' || tab === 'meeting') ? 'none' : (!canEdit() ? 'none' : '');
+  // floating-add-style 제거됨 (스타일 뷰어 헤더 + 버튼으로 대체)
+  document.getElementById('floating-add-meeting').style.display = tab === 'meeting' ? '' : 'none';
+  document.getElementById('floating-add-content').style.display = tab === 'content' ? '' : 'none';
   gtag('event', 'tab_view', { tab_name: tab });
   if (tab === 'style') { renderStyleTab(); _fetchStyleFromCloud(); }
   if (tab === 'content') { renderContentTab(); }
+  if (tab === 'meeting') { renderMeetingTab(); }
   if (tab === 'calendar') {
     const proj = getProject();
     if (proj) {
@@ -4890,7 +5381,10 @@ function _getContentLinks() {
 function renderContentTab() {
   const list = document.getElementById('content-list');
   if (!list) return;
-  const links = _getContentLinks();
+  const links = _getContentLinks().filter(item => {
+    const u = (item.url || '').toLowerCase();
+    return !u.includes('instagram.com') && !u.includes('instagr.am');
+  });
   if (!links.length) {
     list.innerHTML = `
       <div class="content-empty-state">
@@ -4969,6 +5463,17 @@ function _fetchMissingYTTitles() {
       renderContentTab();
     });
   });
+}
+
+function openAddContent() {
+  const input = document.getElementById('content-url-input');
+  if (input) input.value = '';
+  document.getElementById('dlg-content-add').style.display = 'flex';
+  setTimeout(() => input?.focus(), 300);
+}
+
+function closeAddContent() {
+  document.getElementById('dlg-content-add').style.display = 'none';
 }
 
 function _addContentLink() {
@@ -5347,6 +5852,12 @@ function addStyleImage(room, item) {
   const isOwner = !proj?.myRole || proj.myRole === 'owner' || proj?.owner?.email === state.user?.email;
   if (!isOwner && proj.isCloud && proj.cloudId) _syncStyleImagesToCloud(proj);
   renderStyleTab();
+  // 뷰어가 현재 같은 방으로 열려있으면 새 이미지로 이동하며 갱신
+  const svScreen = document.getElementById('style-viewer-screen');
+  if (svScreen && svScreen.style.display !== 'none' && styleViewerRoom === room) {
+    const newIdx = (proj.styleImages[room].length - 1);
+    openStyleViewer(room, newIdx);
+  }
 }
 
 let _svTouchX = null, _svTouchY = null;
@@ -5596,7 +6107,7 @@ function _formatMemoTime(ts) {
 function _svBuildMemosHtml(memos) {
   if (!memos?.length) return '';
   const myEmail = state.user?.email || '';
-  const _heartSvg = (on) => `<svg width="13" height="13" fill="${on?'#ff3b4e':'none'}" stroke="${on?'#ff3b4e':'#555'}" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`;
+  const _heartSvg = (on) => `<svg width="18" height="18" viewBox="0 0 32 37" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M23.8983 7.38503C20.594 4.72027 17.2151 7.38502 16 8.60992C14.7848 7.38502 11.406 4.72027 8.10169 7.38503C4.79734 10.0498 4.07919 15.5791 8.70925 20.2464C13.3393 24.9137 16 25.7585 16 25.7585C16 25.7585 18.6607 24.9137 23.2907 20.2464C27.9208 15.5791 27.2026 10.0498 23.8983 7.38503Z" stroke="${on?'#ff3b4e':'#333'}" stroke-width="3" fill="${on?'#ff3b4e':'none'}"/></svg>`;
 
   const items = memos.map(m => {
     const ini = (m.author?.name || m.author?.email || '?').charAt(0).toUpperCase();
@@ -5870,7 +6381,7 @@ function _svRenderProductList() {
   const memos = item?.memos || [];
   const memosHtml = _svBuildMemosHtml(memos);
   const empty = !memosHtml
-    ? `<div class="sv-pin-hint" style="padding-top:20px;">아직 메모가 없어요<br>✏️ 연필 버튼으로 첫 메모를 남겨보세요</div>`
+    ? `<div class="sv-pin-hint" style="padding-top:20px;">아직 메모가 없어요<br>연필 버튼으로 첫 메모를 남겨보세요</div>`
     : '';
   el.innerHTML = `<div style="padding-bottom:156px;">${memosHtml || empty}</div>`;
 }
@@ -5949,9 +6460,10 @@ function _savePinDlg() {
 }
 
 function openStyleAddFromViewer() {
-  const room = styleViewerRoom;
-  closeStyleViewer();
-  setTimeout(() => openStyleAddMenu(room), 160);
+  // 뷰어를 닫지 않고 파일 선택만 트리거
+  styleCurrentRoom = styleViewerRoom;
+  document.getElementById('style-file-input').value = '';
+  document.getElementById('style-file-input').click();
 }
 
 function deleteStyleImage() {
@@ -7094,9 +7606,7 @@ function switchProcDetailTab(tab, btn) {
   const a = document.getElementById(activeId);
   if (a) { a.style.borderBottomColor = 'var(--primary)'; a.style.color = '#222'; a.style.fontWeight = '600'; }
   if (tab === 'tip' && _currentProcDetailId) {
-    const proj = getProject();
-    const proc = proj?.processes.find(p => p.id === _currentProcDetailId);
-    if (proc) _loadProcTips(proc.type || proc.name, _currentProcDetailId);
+    _renderProcRecords(_currentProcDetailId);
   }
 }
 function _renderProcDetailContent(procId) {
@@ -7152,8 +7662,7 @@ function _renderProcDetailContent(procId) {
         </div>`).join('') : '<div class="detail-empty">+ 버튼으로 내역 추가</div>'}
       ${p.details.length ? '</div>' : ''}
     </div>`;
-  const tipHtml = _buildProcTipHtml(p.type || p.name);
-  document.getElementById('ptab-tip').innerHTML = tipHtml;
+  _renderProcRecords(procId);
 }
 function _refreshProcDetailIfOpen() {
   if (!_currentProcDetailId) return;
@@ -7169,6 +7678,262 @@ function _deleteProcFromDetail() {
   const id = _currentProcDetailId;
   setTimeout(() => { _closeProcDetailScreen(); setTimeout(() => deleteProcess(id), 380); }, 100);
 }
+// ───────────────────────────────────────────────────────────────────────────
+// 공정 기록 (process records)
+// ───────────────────────────────────────────────────────────────────────────
+let _prImages = [];
+let _prEditingId = null; // 수정 중인 record id
+
+function _renderProcRecords(procId) {
+  const el = document.getElementById('ptab-tip');
+  if (!el) return;
+  const proj = getProject();
+  const proc = proj?.processes.find(p => p.id === procId);
+  if (!proc) return;
+  const records = (proc.records || []).slice().sort((a, b) => (b.createdAt||0) - (a.createdAt||0));
+  const addBtn = `<div style="padding:16px 16px 0;"><button onclick="openProcRecord()" style="width:100%;padding:14px;background:#fff;border:1.5px dashed #d0d6e8;border-radius:14px;cursor:pointer;font-size:14px;font-weight:600;color:#5084ff;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:6px;">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 기록 추가
+  </button></div>`;
+  if (!records.length) {
+    el.innerHTML = `${addBtn}<div style="text-align:center;padding:48px 20px 20px;font-size:14px;color:#bbb;">아직 공정 기록이 없습니다</div>`;
+    return;
+  }
+  const listHtml = records.map(r => {
+    const d = new Date(r.createdAt||0);
+    const dateStr = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    const { decoded, type } = _normalizeMeetingContent(r.content||'');
+    const contentHtml = type === 'html' ? decoded
+      : esc(decoded).replace(/\n/g,'<br>');
+    const imgsHtml = (r.images||[]).map(src =>
+      `<img src="${src}" style="width:100%;border-radius:10px;margin-bottom:8px;display:block;cursor:zoom-in;" onclick="window.open(this.src)">`
+    ).join('');
+    return `<div style="background:#fff;border-radius:14px;margin:12px 16px 0;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.06);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <span style="font-size:12px;color:#bbb;">${dateStr} · ${esc(r.createdByName||r.createdBy||'')}</span>
+        <div style="display:flex;gap:4px;">
+          <button onclick="openProcRecord('${r.id}')" style="background:none;border:none;cursor:pointer;padding:4px;color:#aaa;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button onclick="_deleteProcRecord('${r.id}')" style="background:none;border:none;cursor:pointer;padding:4px;color:#e53935;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+          </button>
+        </div>
+      </div>
+      ${imgsHtml ? `<div style="margin-bottom:10px;">${imgsHtml}</div>` : ''}
+      <div style="font-size:14px;color:#333;line-height:1.8;word-break:break-word;">${contentHtml}</div>
+    </div>`;
+  }).join('');
+  el.innerHTML = `${addBtn}${listHtml}<div style="height:40px;"></div>`;
+}
+
+function _prFmt(cmd) {
+  document.getElementById('proc-record-editor').focus();
+  document.execCommand(cmd, false, null);
+}
+function _prInsertHr() {
+  document.getElementById('proc-record-editor').focus();
+  document.execCommand('insertHTML', false, '<hr style="border:none;border-top:1px solid #e8eaf0;margin:14px 0;">');
+}
+function _prAtBtn() {
+  document.getElementById('proc-record-editor').focus();
+  document.execCommand('insertText', false, '@');
+  _prEditorInput();
+}
+function _prEditorInput() {
+  _prUpdatePlaceholder();
+  const sel = window.getSelection();
+  if (!sel.rangeCount) return;
+  const range = sel.getRangeAt(0);
+  const node = range.startContainer;
+  const dropdown = document.getElementById('proc-record-mention-dropdown');
+  if (node.nodeType !== Node.TEXT_NODE) { dropdown.style.display='none'; return; }
+  const textBefore = node.textContent.slice(0, range.startOffset);
+  const atIdx = textBefore.lastIndexOf('@');
+  if (atIdx === -1 || textBefore.slice(atIdx).includes(' ')) { dropdown.style.display='none'; return; }
+  const query = textBefore.slice(atIdx+1).toLowerCase();
+  const proj = getProject();
+  const all = [
+    ...(proj?.collaborators||[]).map(c=>({email:c.email,name:c.name||c.email.split('@')[0]})),
+    proj?.owner ? {email:proj.owner.email,name:proj.owner.name||proj.owner.email.split('@')[0]} : null
+  ].filter(Boolean).filter(p=>p.email!==state.user?.email);
+  const matches = query ? all.filter(p=>p.name.toLowerCase().includes(query)||p.email.toLowerCase().includes(query)) : all;
+  if (!matches.length) { dropdown.style.display='none'; return; }
+  dropdown.style.display = 'block';
+  dropdown.innerHTML = matches.map(p=>`<div onmousedown="event.preventDefault();_prInsertMention('${p.email}','${esc(p.name)}')" ontouchstart="event.preventDefault();_prInsertMention('${p.email}','${esc(p.name)}')" style="padding:10px 14px;cursor:pointer;font-size:14px;border-bottom:1px solid #f5f7fa;"><span style="font-weight:600;">${esc(p.name)}</span> <span style="color:#aaa;font-size:12px;">${p.email}</span></div>`).join('');
+}
+function _prEditorKeydown(e) {
+  if (e.key === 'Escape') document.getElementById('proc-record-mention-dropdown').style.display='none';
+}
+function _prInsertMention(email, name) {
+  const sel = window.getSelection();
+  if (!sel.rangeCount) return;
+  const range = sel.getRangeAt(0);
+  const node = range.startContainer;
+  if (node.nodeType !== Node.TEXT_NODE) return;
+  const textBefore = node.textContent.slice(0, range.startOffset);
+  const atIdx = textBefore.lastIndexOf('@');
+  const delRange = document.createRange();
+  delRange.setStart(node, atIdx); delRange.setEnd(node, range.startOffset);
+  delRange.deleteContents();
+  const span = document.createElement('span');
+  span.style.cssText = 'color:#5084ff;font-weight:600;';
+  span.textContent = '@' + name;
+  span.contentEditable = 'false';
+  span.dataset.email = email;
+  delRange.insertNode(span);
+  const after = document.createRange();
+  after.setStartAfter(span); after.collapse(true);
+  sel.removeAllRanges(); sel.addRange(after);
+  document.execCommand('insertText', false, ' ');
+  document.getElementById('proc-record-mention-dropdown').style.display='none';
+}
+
+function openProcRecord(recordId) {
+  _prImages = [];
+  _prEditingId = recordId || null;
+  const editor = document.getElementById('proc-record-editor');
+  const imgPrev = document.getElementById('proc-record-img-preview');
+  const header = document.getElementById('proc-record-write-header');
+  editor.innerHTML = '';
+  imgPrev.innerHTML = '';
+  if (recordId) {
+    header.textContent = '공정 기록 수정';
+    const proj = getProject();
+    const proc = proj?.processes.find(p => p.id === _currentProcDetailId);
+    const rec = proc?.records?.find(r => r.id === recordId);
+    if (rec) {
+      const { decoded, type } = _normalizeMeetingContent(rec.content||'');
+      editor.innerHTML = type === 'html' ? decoded : esc(decoded).replace(/\n/g,'<br>');
+      _prImages = [...(rec.images||[])];
+      _prImages.forEach((src, idx) => {
+        const div = document.createElement('div');
+        div.style.cssText = 'position:relative;width:72px;height:72px;border-radius:10px;overflow:hidden;flex-shrink:0;';
+        div.innerHTML = `<img src="${src}" style="width:100%;height:100%;object-fit:cover;"><button onclick="_prRemoveImg(${idx},this.parentElement)" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.5);border:none;border-radius:50%;width:20px;height:20px;color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">×</button>`;
+        imgPrev.appendChild(div);
+      });
+    }
+  } else {
+    header.textContent = '공정 기록 작성';
+  }
+  _prUpdatePlaceholder();
+  const scr = document.getElementById('screen-proc-record-write');
+  scr.style.transform = 'translateY(0)';
+  scr.style.pointerEvents = 'all';
+  setTimeout(() => { editor.focus(); }, 380);
+}
+
+function closeProcRecord() {
+  const scr = document.getElementById('screen-proc-record-write');
+  scr.style.transform = 'translateY(100%)';
+  scr.style.pointerEvents = 'none';
+  _prEditingId = null;
+}
+
+function _prUpdatePlaceholder() {
+  const ed = document.getElementById('proc-record-editor');
+  const ph = document.getElementById('proc-record-editor-ph');
+  if (!ed || !ph) return;
+  ph.style.display = (ed.textContent.trim() === '' && ed.innerHTML.trim() === '') ? 'block' : 'none';
+}
+
+async function _prImgPreview(input) {
+  const preview = document.getElementById('proc-record-img-preview');
+  let added = 0;
+  for (const file of Array.from(input.files)) {
+    const raw = await new Promise(res => { const r = new FileReader(); r.onload = e => res(e.target.result); r.readAsDataURL(file); });
+    const compressed = await _compressMeetingImg(raw, 900, 0.75) || raw;
+    let finalSrc = compressed;
+    const fbUser = (typeof firebase !== 'undefined') ? firebase.auth().currentUser : null;
+    if (fbUser && typeof _fbStorage !== 'undefined' && _fbStorage) {
+      try {
+        const proj = getProject();
+        const projId = (proj?.cloudId || proj?.id || 'local').replace(/[^a-zA-Z0-9_-]/g,'_');
+        const ref = _fbStorage.ref(`styleImages/${projId}/prec_${Date.now()}_${Math.random().toString(36).slice(2,5)}.jpg`);
+        await ref.put(_dataUrlToBlob(compressed), { contentType:'image/jpeg' });
+        finalSrc = await ref.getDownloadURL();
+      } catch(e) { console.warn('[prImg]', e.message); }
+    }
+    _prImages.push(finalSrc);
+    added++;
+    const idx = _prImages.length - 1;
+    const div = document.createElement('div');
+    div.style.cssText = 'position:relative;width:72px;height:72px;border-radius:10px;overflow:hidden;flex-shrink:0;';
+    div.innerHTML = `<img src="${finalSrc}" style="width:100%;height:100%;object-fit:cover;"><button onclick="_prRemoveImg(${idx},this.parentElement)" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.5);border:none;border-radius:50%;width:20px;height:20px;color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">×</button>`;
+    preview.appendChild(div);
+  }
+  if (added > 0) showToastMessage(`✅ 사진 ${added > 1 ? added + '장' : ''}추가됐습니다`);
+}
+
+function _prRemoveImg(idx, el) { _prImages.splice(idx, 1); el.remove(); }
+
+function saveProcRecord() {
+  const editor = document.getElementById('proc-record-editor');
+  const content = editor?.innerHTML.trim() || '';
+  if (!content && !_prImages.length) { showToastMessage('⚠️ 내용 또는 사진을 추가해주세요'); return; }
+  // @멘션 추출 (data-email 스팬)
+  const mentionEmails = [];
+  editor?.querySelectorAll('[data-email]').forEach(span => {
+    const email = span.getAttribute('data-email');
+    if (email && !mentionEmails.includes(email)) mentionEmails.push(email);
+  });
+  const proj = getProject();
+  const proc = proj?.processes.find(p => p.id === _currentProcDetailId);
+  if (!proc) return;
+  if (!proc.records) proc.records = [];
+  if (_prEditingId) {
+    const idx = proc.records.findIndex(r => r.id === _prEditingId);
+    if (idx !== -1) {
+      proc.records[idx] = { ...proc.records[idx], content, images: [..._prImages], mentions: mentionEmails, updatedAt: Date.now() };
+    }
+    showToastMessage('✅ 기록이 수정됐습니다');
+  } else {
+    const record = {
+      id: 'prec_' + Date.now() + Math.random().toString(36).slice(2,5),
+      content, images: [..._prImages], mentions: mentionEmails,
+      createdAt: Date.now(),
+      createdBy: state.user?.email || '',
+      createdByName: state.user?.name || state.user?.email?.split('@')[0] || '',
+    };
+    proc.records.push(record);
+    // 새 기록에서만 멘션 알림 발송
+    if (mentionEmails.length) _sendProcRecordMentionNotifications(record, proc, mentionEmails, proj);
+    showToastMessage('✅ 기록이 저장됐습니다');
+  }
+  save();
+  closeProcRecord();
+  _renderProcRecords(_currentProcDetailId);
+}
+
+async function _sendProcRecordMentionNotifications(record, proc, emails, proj) {
+  const projName = proj.name || '시공 프로젝트';
+  const procName = proc.name || proc.type || '공정';
+  const sender = state.user?.name || state.user?.email?.split('@')[0] || '';
+  const snippet = (record.content||'').replace(/<[^>]+>/g,'').slice(0,100);
+  for (const email of emails) {
+    try {
+      await emailjs.send('service_elvk718', 'template_11ldrbw', {
+        to_email: email,
+        to_name: email.split('@')[0],
+        from_name: sender,
+        project_name: projName,
+        invite_link: location.href,
+        role: `[${procName}] 공정 기록에서 멘션됐습니다:\n${snippet}`,
+      });
+    } catch(e) { console.error('[prMentionNotify]', e); }
+  }
+}
+
+function _deleteProcRecord(recordId) {
+  if (!confirm('이 기록을 삭제하시겠습니까?')) return;
+  const proj = getProject();
+  const proc = proj?.processes.find(p => p.id === _currentProcDetailId);
+  if (!proc) return;
+  proc.records = (proc.records||[]).filter(r => r.id !== recordId);
+  save();
+  _renderProcRecords(_currentProcDetailId);
+  showToastMessage('🗑️ 기록이 삭제됐습니다');
+}
+
 function _buildProcTipHtml(typeName) {
   const detail = PROCESS_DETAIL[typeName] || null;
   if (!detail) return `<div style="text-align:center;padding:60px 20px;color:#bbb;font-size:14px;">이 공정의 공정팁이 준비 중입니다.</div>`;
@@ -8096,23 +8861,45 @@ function _loadInfoView() {
   const memoCard = document.getElementById('iv-memo-card');
   if (memoCard) memoCard.style.display = f.memo ? 'block' : 'none';
   // 도면 (다중 이미지)
-  const fpCard   = document.getElementById('iv-floorplan-card');
-  const fpScroll = document.getElementById('iv-floorplan-scroll');
+  const fpCard    = document.getElementById('iv-floorplan-card');
+  const fpScroll  = document.getElementById('iv-floorplan-scroll');
+  const fpAddBtn  = document.getElementById('iv-fp-add-btn');
+  const fpEditBtn = document.getElementById('iv-fp-edit-btn');
   if (fpCard && fpScroll) {
     const images = _getFpImages(proj);
     const editedSrc = proj.floorplanEditedImage;
-    // 편집 이미지가 있으면 슬롯 0 자리에 표시
     const displayImages = images.map((src, i) => (i === 0 && editedSrc) ? editedSrc : src);
     const validImgs = displayImages.filter(Boolean);
+    // 점선 + 버튼 (이미지 바로 옆 or 단독)
+    const addBtn = `<button onclick="_ivAddFloorplan()" style="flex-shrink:0;width:100px;height:180px;background:#f7f8fc;border:1.5px dashed #d0d6e8;border-radius:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;">
+      <svg width="22" height="22" fill="none" stroke="#bbc" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <span style="font-size:12px;color:#bbb;font-weight:500;">추가</span>
+    </button>`;
     if (validImgs.length) {
+      // 이미지 있음: 이미지들 + 점선 + 버튼 인라인
       fpScroll.innerHTML = validImgs.map((src, i) =>
         `<img src="${src}" alt="도면 ${i+1}" style="cursor:zoom-in;" onclick="openPhotoModalFp('${src}')">`
-      ).join('');
-      fpCard.style.display = 'block';
+      ).join('') + (validImgs.length < 3 ? addBtn : '');
+      if (fpEditBtn) { fpEditBtn.style.display = ''; }
     } else {
-      fpCard.style.display = 'none';
+      // 이미지 없음: 점선 + 버튼만 (전체 너비)
+      fpScroll.innerHTML = `<button onclick="_ivAddFloorplan()" style="width:100%;min-height:140px;background:#f7f8fc;border:1.5px dashed #d0d6e8;border-radius:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;">
+        <svg width="24" height="24" fill="none" stroke="#bbc" stroke-width="1.8" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span style="font-size:13px;color:#bbb;font-weight:500;">도면 이미지 추가</span>
+      </button>`;
+      if (fpEditBtn) { fpEditBtn.style.display = 'none'; }
     }
+    if (fpAddBtn) fpAddBtn.style.display = 'none'; // 헤더 + 버튼 미사용
   }
+}
+
+function _ivAddFloorplan() {
+  // 뷰 → 편집 모드로 전환 후 도면 섹션으로 스크롤
+  switchToFormEdit();
+  setTimeout(() => {
+    const el = document.getElementById('floorplan-group');
+    if (el) el.scrollIntoView({ behavior:'smooth', block:'center' });
+  }, 200);
 }
 
 function saveFormAndBack() {
@@ -9021,7 +9808,7 @@ function _genToken(len = 28) {
 }
 
 // ===== CLOUD MERGE HELPER =====
-// 클라우드 프로젝트를 로컬 프로젝트와 병합 — myRole과 styleImages 보존
+// 클라우드 프로젝트를 로컬 프로젝트와 병합
 function _mergeLocalPreserve(cp, localProjs) {
   const local = localProjs.find(lp => lp.cloudId === cp.cloudId);
   if (!local) return cp;
@@ -9032,7 +9819,7 @@ function _mergeLocalPreserve(cp, localProjs) {
   const cloudHasImages = cp.styleImages && Object.values(cp.styleImages).some(a => a?.length > 0);
   const localHasImages = local.styleImages && Object.values(local.styleImages).some(a => a?.length > 0);
   if (!cloudHasImages && localHasImages) merged.styleImages = local.styleImages;
-  // contentLinks: id 기준 합집합 병합 — 클라우드·로컬 양쪽 항목 모두 보존
+  // contentLinks: id 기준 합집합 병합
   const cpLinks = cp.contentLinks || [];
   const localLinks = local.contentLinks || [];
   if (localLinks.length) {
@@ -9042,10 +9829,23 @@ function _mergeLocalPreserve(cp, localProjs) {
       ? [...cpLinks, ...extra].sort((a, b) => (b.addedAt || 0) - (a.addedAt || 0))
       : cpLinks;
   }
-  // 도면(floorplanImage) 보존 — 로컬이 있으면 항상 로컬 우선 (사용자 직접 업로드가 최신)
+  // 도면 보존
   if (local.floorplanImage) merged.floorplanImage = local.floorplanImage;
-  // 편집 도면(floorplanEditedImage) 보존 — 로컬이 있으면 우선 (에디터 결과물)
   if (local.floorplanEditedImage) merged.floorplanEditedImage = local.floorplanEditedImage;
+  // ★ floorplanImages 배열 보존 — Firestore 1MB 제한으로 base64 업로드 실패 시 로컬 우선
+  if (Array.isArray(local.floorplanImages) && local.floorplanImages.some(Boolean)) {
+    merged.floorplanImages = local.floorplanImages;
+  }
+  // ★ meetings: id 기준 합집합 — 로컬 우선 (아직 sync 안 된 기록 보존)
+  const cpMeetings = cp.meetings || [];
+  const localMeetings = local.meetings || [];
+  if (localMeetings.length || cpMeetings.length) {
+    const map = new Map();
+    cpMeetings.forEach(m => map.set(m.id, m));       // 클라우드 기준
+    localMeetings.forEach(m => map.set(m.id, m));    // 로컬로 덮어쓰기 (최신)
+    merged.meetings = Array.from(map.values())
+      .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  }
   return merged;
 }
 
@@ -9152,17 +9952,17 @@ function _syncProjToCloud(proj) {
     const projData = JSON.parse(JSON.stringify(proj));
     delete projData.myRole;
     // 클라우드 contentLinks와 로컬 병합 (id 기준 합집합)
-    const cloudLinks = snap.data()?.projectData?.contentLinks || [];
-    const localLinks = projData.contentLinks || [];
-    if (cloudLinks.length) {
-      const localIds = new Set(localLinks.map(x => x.id));
-      const extra = cloudLinks.filter(x => !localIds.has(x.id));
-      if (extra.length) {
-        projData.contentLinks = [...localLinks, ...extra].sort((a,b)=>(b.addedAt||0)-(a.addedAt||0));
-        proj.contentLinks = projData.contentLinks; // 로컬도 갱신
-        localStorage.setItem('vibespace', JSON.stringify(state));
-      }
+    projData.contentLinks = proj.contentLinks || [];
+    // base64 이미지 모두 제거 → Firestore 1MB 제한 방지 (이미지는 localStorage/IDB에 저장)
+    (projData.meetings || []).forEach(m => {
+      if (Array.isArray(m.images)) m.images = m.images.filter(img => img && !img.startsWith('data:'));
+    });
+    // 도면 base64 제거 (floorplanImages, floorplanImage, floorplanEditedImage)
+    if (Array.isArray(projData.floorplanImages)) {
+      projData.floorplanImages = projData.floorplanImages.map(img => (img && img.startsWith('data:')) ? null : img);
     }
+    if (projData.floorplanImage && projData.floorplanImage.startsWith('data:')) delete projData.floorplanImage;
+    if (projData.floorplanEditedImage && projData.floorplanEditedImage.startsWith('data:')) delete projData.floorplanEditedImage;
     const payload = {
       projectData: projData,
       ownerEmail: state.user.email,
@@ -9235,8 +10035,8 @@ async function _syncStyleImagesToCloud(proj) {
 // contentLinks만 Firestore에 업데이트 — read-merge-write로 덮어쓰기 방지
 async function _syncContentLinksToCloud(proj) {
   if (!proj?.cloudId) return;
-  const isOwner = !proj.myRole || proj.myRole === 'owner' || proj.owner?.email === state.user?.email;
-  if (!isOwner) return; // 협업자는 쓰기 불가
+  const isOwner = !proj.myRole || proj.myRole === 'owner' || proj.owner?.email === state.user?.email || isExpert();
+  if (!isOwner) return;
   const ok = await _initFirebase();
   if (!ok || !_db) return;
   try {
@@ -9325,13 +10125,33 @@ function _startCollabListener(cloudId) {
     const localImages = proj.styleImages || {};
     const localFloorplan = proj.floorplanImage; // 도면 보존
     const localFloorplanEdited = proj.floorplanEditedImage; // 편집 도면 보존
+    const localFloorplanImages = Array.isArray(proj.floorplanImages) && proj.floorplanImages.some(Boolean) ? proj.floorplanImages : null;
     const localContentLinks = proj.contentLinks || []; // contentLinks 보존
+    // 기록(meetings) + 이미지 보존: 로컬 데이터 백업
+    const localMeetings = proj.meetings || [];
+    const localMeetingImgMap = {};
+    localMeetings.forEach(m => {
+      if (Array.isArray(m.images) && m.images.length) localMeetingImgMap[m.id] = m.images;
+    });
     // N 뱃지: merge 전에 새 항목 감지
     _markNewFromCollab(cloudId, proj, remote);
     Object.assign(proj, remote, { cloudId: proj.cloudId, myRole, collaborators: meta.collaborators || [] });
-    // 도면(floorplanImage) 보존 — 로컬이 있으면 항상 로컬 우선 (사용자 직접 업로드가 최신)
+    // 도면 보존
     if (localFloorplan) proj.floorplanImage = localFloorplan;
     if (localFloorplanEdited) proj.floorplanEditedImage = localFloorplanEdited;
+    if (localFloorplanImages) proj.floorplanImages = localFloorplanImages;
+    // ★ meetings: 로컬+클라우드 합집합 — 로컬 우선 (sync 안 된 기록 보존)
+    const remoteMeetings = remote.meetings || [];
+    const meetMap = new Map();
+    remoteMeetings.forEach(m => meetMap.set(m.id, m));
+    localMeetings.forEach(m => meetMap.set(m.id, m)); // 로컬로 덮어쓰기
+    proj.meetings = Array.from(meetMap.values())
+      .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+    // 기록 이미지 복원 (메모리 → IDB)
+    proj.meetings.forEach(m => {
+      if (localMeetingImgMap[m.id]) m.images = localMeetingImgMap[m.id];
+    });
+    _MIdb.loadAll().then(() => renderMeetingTab());
     // styleImages: 클라우드와 로컬 합집합 (로컬에만 있는 이미지 보존)
     const cloudImages = remote.styleImages || {};
     const merged = {};
@@ -9940,20 +10760,20 @@ function _fpSlotUpload(e, idx) {
   if (!file) return;
   if (file.size > 10 * 1024 * 1024) { alert('10MB 이하 이미지만 업로드 가능합니다.'); return; }
   const reader = new FileReader();
-  reader.onload = ev => {
+  reader.onload = async ev => {
+    // 압축 (1400px, 82% quality) — 용량 절감
+    const compressed = await _compressMeetingImg(ev.target.result, 1400, 0.82) || ev.target.result;
     const proj = getProject();
     if (proj) {
       if (!proj.floorplanImages) proj.floorplanImages = [null, null, null];
       while (proj.floorplanImages.length < 3) proj.floorplanImages.push(null);
-      proj.floorplanImages[idx] = ev.target.result;
+      proj.floorplanImages[idx] = compressed;
       // 슬롯 0의 이미지를 floorplanImage에도 동기화 (fp-editor 호환)
-      if (idx === 0) proj.floorplanImage = ev.target.result;
-      localStorage.setItem('vibespace', JSON.stringify(state));
-      _lastSaveTime = Date.now();
-      const isOwner = !proj.myRole || proj.myRole === 'owner' || proj.owner?.email === state.user?.email;
-      if (proj.isCloud && proj.cloudId && isOwner && typeof _db !== 'undefined' && _db) {
-        _syncProjToCloud(proj);
-      }
+      if (idx === 0) proj.floorplanImage = compressed;
+      // vb_fpi_* 직접 저장 (동기 보장) + save()
+      try { localStorage.setItem(`vb_fpi_${proj.id}`, JSON.stringify(proj.floorplanImages)); } catch(_) {}
+      save();
+      showToastMessage('✅ 도면 이미지가 저장됐습니다');
     }
     _renderFpSlots();
     if (e.target) e.target.value = '';
@@ -10192,6 +11012,13 @@ const _applyHeaderLogo = _applyBrandLogo;
 
 // ===== INIT =====
 load();
+// 회의록 이미지: localStorage 구 포맷 마이그레이션 후 IDB에서 복원
+async function _initMeetingImages() {
+  await _migrateMeetingImgLS(); // 구 vb_mi_* → IDB 1회 이전
+  await _MIdb.loadAll();        // IDB → state.meetings[].images
+  renderMeetingTab();           // 이미지 로드 후 탭 갱신
+}
+_initMeetingImages();
 initSession(); // 세션 만료 여부 즉시 확인 (load() 직후 실행)
 trackInit();
 goTo('landing');
@@ -10210,6 +11037,8 @@ window.addEventListener('load', () => {
   }
   // 공사계획 공유 링크 뷰어
   _checkExportOnLoad();
+  // 회의록 공유 URL 뷰어
+  _checkMeetingShareUrl();
   // 공동작업 초대 처리
   _checkInviteOnLoad();
   _loadBrandLogo(); // Firestore 최신 로고 적용
@@ -10410,6 +11239,891 @@ async function _checkExportOnLoad() {
     document.getElementById('export-view-content').innerHTML =
       '<div style="text-align:center;padding:60px;color:#e03535;font-size:14px;">불러오기 실패. 잠시 후 다시 시도해주세요.</div>';
     console.error('export view error:', e);
+  }
+}
+
+// ===== MEETING TAB =====
+let _meetingMentions = [];
+let _meetingImages = [];
+let _editingMeetingId = null; // null = 신규, id = 수정 모드
+
+function renderMeetingTab() {
+  const proj = getProject();
+  const list = document.getElementById('meeting-list');
+  if (!list) return;
+  const meetings = (proj?.meetings || []).slice().sort((a,b) => (b.createdAt||0)-(a.createdAt||0));
+  if (!meetings.length) {
+    list.innerHTML = `<div style="text-align:center;padding:60px 20px;font-size:14px;color:#aaa;">아직 기록이 없습니다</div>`;
+    return;
+  }
+  list.innerHTML = meetings.map(m => {
+    const d = new Date(m.createdAt||0);
+    const dateStr = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+    const imgThumb = m.images?.length ? `<div style="width:67px;height:67px;border-radius:10px;background:url('${m.images[0]}') center/cover;flex-shrink:0;"></div>` : '';
+    const mentionHtml = m.mentions?.length ? `<div style="margin-top:6px;font-size:12px;color:#5084ff;">${m.mentions.map(e=>'@'+e.split('@')[0]).join(' ')}</div>` : '';
+    const publishedBadge = m.inblogPostId ? `<span style="display:inline-flex;align-items:center;gap:3px;font-size:11px;color:#5084ff;background:#f0f5ff;border-radius:10px;padding:2px 7px;margin-left:6px;vertical-align:middle;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>발행됨</span>` : '';
+    return `<div onclick="openMeetingDetail('${m.id}')" style="background:#fff;border-radius:16px;border:1px solid #e8eaf0;padding:20px 24px;margin-bottom:10px;cursor:pointer;display:flex;gap:12px;align-items:flex-start;">
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:16px;font-weight:700;color:#111;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(m.title||'(제목 없음)')}${publishedBadge}</div>
+        <div style="font-size:15px;font-weight:400;color:#888;line-height:1.4;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;">${(()=>{const {decoded,type}=_normalizeMeetingContent(m.content||'');return type==='html'?esc(decoded.replace(/<br\s*\/?>/gi,'\n').replace(/<\/div>/gi,'\n').replace(/<[^>]+>/g,'').trim()):esc(decoded);})()}</div>
+        ${mentionHtml}
+        <div style="margin-top:6px;font-size:12px;color:#bbb;">${dateStr} · ${esc(m.createdByName||m.createdBy||'')}</div>
+      </div>
+      ${imgThumb}
+    </div>`;
+  }).join('');
+}
+
+// ── 회의록 에디터 화면 열기/닫기 ────────────────────────────────────────────
+function _openMeetingWrite(isEdit) {
+  document.getElementById('meeting-write-header').textContent = isEdit ? '기록 수정' : '기록 작성';
+  document.getElementById('btn-meeting-save').textContent = isEdit ? '수정' : '저장';
+  const scr = document.getElementById('screen-meeting-write');
+  scr.style.transform = 'translateY(0)';
+  scr.style.pointerEvents = 'all';
+  // 에디터 포커스
+  setTimeout(() => {
+    const ed = document.getElementById('meeting-editor');
+    if (ed && !isEdit) { ed.focus(); _mwUpdatePlaceholder(); }
+  }, 380);
+}
+
+function closeMeetingWrite() {
+  const scr = document.getElementById('screen-meeting-write');
+  scr.style.transform = 'translateY(100%)';
+  scr.style.pointerEvents = 'none';
+  _editingMeetingId = null;
+}
+// 하위호환: closeMeetingAdd → closeMeetingWrite
+function closeMeetingAdd() { closeMeetingWrite(); }
+
+function openAddMeeting() {
+  _editingMeetingId = null;
+  _meetingMentions = [];
+  _meetingImages = [];
+  document.getElementById('meeting-title-input').value = '';
+  document.getElementById('meeting-editor').innerHTML = '';
+  document.getElementById('meeting-images-preview').innerHTML = '';
+  document.getElementById('meeting-mention-chips').innerHTML = '';
+  _mwUpdatePlaceholder();
+  _openMeetingWrite(false);
+}
+
+function openEditMeeting() {
+  if (!_currentMeetingId) return;
+  const proj = getProject();
+  const m = (proj?.meetings||[]).find(x=>x.id===_currentMeetingId);
+  if (!m) return;
+  _editingMeetingId = m.id;
+  _meetingMentions = [...(m.mentions||[])];
+  _meetingImages = [...(m.images||[])];
+  // 제목
+  document.getElementById('meeting-title-input').value = m.title || '';
+  // 본문 (HTML or plain)
+  const { decoded: rawNorm, type: rawType } = _normalizeMeetingContent(m.content || '');
+  const editor = document.getElementById('meeting-editor');
+  if (rawType === 'html') {
+    editor.innerHTML = rawNorm; // 정상 HTML or 이중인코딩 디코딩 후 세팅
+  } else {
+    editor.innerHTML = esc(rawNorm).replace(/\n/g,'<br>');
+  }
+  _mwUpdatePlaceholder();
+  // 이미지 미리보기
+  const preview = document.getElementById('meeting-images-preview');
+  preview.innerHTML = '';
+  _meetingImages.forEach((src, idx) => {
+    const div = document.createElement('div');
+    div.style.cssText = 'position:relative;width:72px;height:72px;border-radius:10px;overflow:hidden;flex-shrink:0;';
+    div.innerHTML = `<img src="${src}" style="width:100%;height:100%;object-fit:cover;">
+      <button onclick="_removeMeetingImage(${idx},this.parentElement)" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.5);border:none;border-radius:50%;width:20px;height:20px;color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">×</button>`;
+    preview.appendChild(div);
+  });
+  // 멘션 칩
+  _mwRenderMentionChips();
+  _openMeetingWrite(true);
+}
+
+function deleteMeeting() {
+  if (!_currentMeetingId) return;
+  if (!confirm('이 기록을 삭제하시겠습니까?')) return;
+  const proj = getProject();
+  if (!proj) return;
+  const delId = _currentMeetingId;
+  proj.meetings = (proj.meetings||[]).filter(m => m.id !== delId);
+  _MIdb.del(delId); // IDB 이미지 삭제
+  try { localStorage.removeItem(`vb_mi_${delId}`); } catch(_) {} // localStorage 백업 삭제
+  save();
+  if (proj.cloudId) _syncMeetingsToCloud(proj);
+  closeMeetingDetail();
+  renderMeetingTab();
+  showToastMessage('🗑️ 기록이 삭제됐습니다');
+}
+
+// ── 에디터 툴바 포맷 ────────────────────────────────────────────────────────
+function _mwFmt(cmd) {
+  document.getElementById('meeting-editor').focus();
+  document.execCommand(cmd, false, null);
+}
+function _mwInsertHr() {
+  document.getElementById('meeting-editor').focus();
+  document.execCommand('insertHTML', false, '<hr style="border:none;border-top:1px solid #e8eaf0;margin:14px 0;">');
+}
+function _mwInsertHeading(level) {
+  document.getElementById('meeting-editor').focus();
+  const sel = window.getSelection();
+  const selectedText = sel && !sel.isCollapsed ? sel.toString() : '제목';
+  const sizes = { 2: '20px', 3: '17px' };
+  const weights = { 2: '800', 3: '700' };
+  const margins = { 2: '20px 0 6px', 3: '16px 0 4px' };
+  document.execCommand('insertHTML', false,
+    `<h${level} style="font-size:${sizes[level]};font-weight:${weights[level]};color:#111;margin:${margins[level]};line-height:1.4;">${selectedText}</h${level}><p><br></p>`);
+}
+function _mwInsertBlockquote() {
+  document.getElementById('meeting-editor').focus();
+  const sel = window.getSelection();
+  const selectedText = sel && !sel.isCollapsed ? sel.toString() : '인용할 내용을 입력하세요';
+  document.execCommand('insertHTML', false,
+    `<blockquote style="border-left:3px solid #5084ff;margin:12px 0;padding:10px 16px;background:#f4f7ff;color:#444;font-size:15px;border-radius:0 8px 8px 0;">${selectedText}</blockquote><p><br></p>`);
+}
+function _mwInsertCodeBlock() {
+  document.getElementById('meeting-editor').focus();
+  const sel = window.getSelection();
+  const selectedText = sel && !sel.isCollapsed ? sel.toString() : '코드를 입력하세요';
+  document.execCommand('insertHTML', false,
+    `<pre style="background:#f5f5f5;border-radius:8px;padding:12px 16px;font-size:13px;font-family:monospace;color:#333;overflow-x:auto;margin:10px 0;white-space:pre-wrap;">${selectedText}</pre><p><br></p>`);
+}
+function _mwInsertLink() {
+  document.getElementById('meeting-editor').focus();
+  const sel = window.getSelection();
+  const selectedText = sel && !sel.isCollapsed ? sel.toString() : '';
+  const url = prompt('링크 URL을 입력하세요:', 'https://');
+  if (!url || url === 'https://') return;
+  const label = selectedText || url;
+  document.execCommand('insertHTML', false,
+    `<a href="${url}" target="_blank" rel="noopener" style="color:#5084ff;text-decoration:underline;">${label}</a>`);
+}
+function _mwAtBtn() {
+  const ed = document.getElementById('meeting-editor');
+  ed.focus();
+  document.execCommand('insertText', false, '@');
+  _mwEditorInput();
+}
+
+// ── 플레이스홀더 표시/숨김 ──────────────────────────────────────────────────
+function _mwUpdatePlaceholder() {
+  const ed = document.getElementById('meeting-editor');
+  const ph = document.getElementById('meeting-editor-ph');
+  if (!ed || !ph) return;
+  ph.style.display = (ed.textContent.trim() === '' && ed.innerHTML.trim() === '') ? 'block' : 'none';
+}
+
+// ── @멘션 감지 (contenteditable) ────────────────────────────────────────────
+function _mwEditorInput() {
+  _mwUpdatePlaceholder();
+  const sel = window.getSelection();
+  if (!sel.rangeCount) return;
+  const range = sel.getRangeAt(0);
+  const node = range.startContainer;
+  if (node.nodeType !== Node.TEXT_NODE) { document.getElementById('meeting-mention-dropdown').style.display='none'; return; }
+  const textBefore = node.textContent.slice(0, range.startOffset);
+  const atIdx = textBefore.lastIndexOf('@');
+  const dropdown = document.getElementById('meeting-mention-dropdown');
+  if (atIdx === -1 || textBefore.slice(atIdx).includes(' ')) { dropdown.style.display='none'; return; }
+  const query = textBefore.slice(atIdx+1).toLowerCase();
+  const proj = getProject();
+  const all = [
+    ...(proj?.collaborators||[]).map(c=>({email:c.email,name:c.name||c.email.split('@')[0]})),
+    proj?.owner ? {email:proj.owner.email,name:proj.owner.name||proj.owner.email.split('@')[0]} : null
+  ].filter(Boolean).filter(p=>p.email!==state.user?.email);
+  const matches = query ? all.filter(p=>p.name.toLowerCase().includes(query)||p.email.toLowerCase().includes(query)) : all;
+  if (!matches.length) { dropdown.style.display='none'; return; }
+  dropdown.style.display = 'block';
+  // onmousedown + preventDefault: 클릭 시 에디터 포커스 유지 (getSelection 보존)
+  dropdown.innerHTML = matches.map(p=>`<div onmousedown="event.preventDefault();_mwInsertMention('${p.email}','${esc(p.name)}')" ontouchstart="event.preventDefault();_mwInsertMention('${p.email}','${esc(p.name)}')" style="padding:10px 14px;cursor:pointer;font-size:14px;border-bottom:1px solid #f5f7fa;"><span style="font-weight:600;">${esc(p.name)}</span> <span style="color:#aaa;font-size:12px;">${p.email}</span></div>`).join('');
+}
+
+function _mwEditorKeydown(e) {
+  if (e.key === 'Escape') document.getElementById('meeting-mention-dropdown').style.display='none';
+}
+
+function _mwInsertMention(email, name) {
+  const ed = document.getElementById('meeting-editor');
+  const sel = window.getSelection();
+  if (!sel.rangeCount) return;
+  const range = sel.getRangeAt(0);
+  const node = range.startContainer;
+  if (node.nodeType !== Node.TEXT_NODE) return;
+  const textBefore = node.textContent.slice(0, range.startOffset);
+  const atIdx = textBefore.lastIndexOf('@');
+  // @ 부터 커서까지 삭제
+  const delRange = document.createRange();
+  delRange.setStart(node, atIdx);
+  delRange.setEnd(node, range.startOffset);
+  delRange.deleteContents();
+  // 멘션 스팬 삽입
+  const span = document.createElement('span');
+  span.style.cssText = 'color:#5084ff;font-weight:600;';
+  span.textContent = '@' + name;
+  span.contentEditable = 'false';
+  span.dataset.email = email;
+  delRange.insertNode(span);
+  // 커서를 스팬 뒤로
+  const after = document.createRange();
+  after.setStartAfter(span); after.collapse(true);
+  sel.removeAllRanges(); sel.addRange(after);
+  document.execCommand('insertText', false, ' ');
+  document.getElementById('meeting-mention-dropdown').style.display='none';
+  if (!_meetingMentions.includes(email)) {
+    _meetingMentions.push(email);
+    _mwRenderMentionChips();
+  }
+}
+
+function _mwRenderMentionChips() {
+  const chips = document.getElementById('meeting-mention-chips');
+  chips.innerHTML = _meetingMentions.map(email => {
+    const name = email.split('@')[0];
+    return `<span style="display:inline-flex;align-items:center;gap:4px;background:#e8f0fe;color:#5084ff;border-radius:20px;padding:4px 10px;font-size:13px;font-weight:600;">@${name}<button onclick="this.parentElement.remove();_meetingMentions=_meetingMentions.filter(e=>e!=='${email}')" style="background:none;border:none;cursor:pointer;color:#5084ff;font-size:15px;padding:0;line-height:1;">×</button></span>`;
+  }).join('');
+}
+
+// 회의록 전용 이미지 압축 (dataUrl → dataUrl) — _compressImage(File)와 별도
+function _compressMeetingImg(dataUrl, maxW = 900, quality = 0.75) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      const ratio = Math.min(1, maxW / img.width);
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(img.width * ratio);
+      canvas.height = Math.round(img.height * ratio);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = () => resolve(null);
+    img.src = dataUrl;
+  });
+}
+
+async function _meetingImagePreview(input) {
+  const files = Array.from(input.files);
+  const preview = document.getElementById('meeting-images-preview');
+  let added = 0;
+  for (const file of files) {
+    const raw = await new Promise(res => {
+      const r = new FileReader(); r.onload = e => res(e.target.result); r.readAsDataURL(file);
+    });
+    const compressed = await _compressMeetingImg(raw);
+    if (!compressed) continue;
+    _meetingImages.push(compressed);
+    added++;
+    const idx = _meetingImages.length - 1;
+    const div = document.createElement('div');
+    div.style.cssText = 'position:relative;width:72px;height:72px;border-radius:10px;overflow:hidden;flex-shrink:0;';
+    div.innerHTML = `<img src="${compressed}" style="width:100%;height:100%;object-fit:cover;">
+      <button onclick="_removeMeetingImage(${idx},this.parentElement)" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.5);border:none;border-radius:50%;width:20px;height:20px;color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">×</button>`;
+    preview.appendChild(div);
+  }
+  if (added > 0) showToastMessage(`✅ 사진 ${added > 1 ? added + '장' : ''}추가됐습니다`);
+}
+
+function _removeMeetingImage(idx, el) {
+  _meetingImages.splice(idx, 1);
+  el.remove();
+}
+
+// _meetingMentionCheck / _insertMention — 구 textarea 기반 함수 (deprecated, 사용 안 함)
+// 새로운 contenteditable 에디터는 _mwEditorInput / _mwInsertMention 사용
+
+async function saveMeeting() {
+  const proj = getProject();
+  if (!proj) return;
+  const title = document.getElementById('meeting-title-input').value.trim();
+  // read content from contenteditable editor
+  const editorEl = document.getElementById('meeting-editor');
+  const content = editorEl ? editorEl.innerHTML.trim() : '';
+  if (!title) { showToastMessage('⚠️ 제목을 입력해주세요'); return; }
+  // extract @mentions from data-email spans in editor
+  const mentionEmails = [..._meetingMentions];
+  if (editorEl) {
+    editorEl.querySelectorAll('[data-email]').forEach(span => {
+      const email = span.getAttribute('data-email');
+      if (email && !mentionEmails.includes(email)) mentionEmails.push(email);
+    });
+  }
+  if (!proj.meetings) proj.meetings = [];
+
+  // base64 → Firebase Storage URL 변환 (Firebase Auth 확인 + styleImages/ 경로 사용)
+  let imgSnapshot = [..._meetingImages];
+  const fbUser = (typeof firebase !== 'undefined') ? firebase.auth().currentUser : null;
+  if (fbUser && typeof _fbStorage !== 'undefined' && _fbStorage) {
+    const proj0 = getProject();
+    const projId = (proj0?.cloudId || proj0?.id || 'local').replace(/[^a-zA-Z0-9_-]/g,'_');
+    imgSnapshot = await Promise.all(imgSnapshot.map(async img => {
+      if (!img.startsWith('data:')) return img;
+      try {
+        // styleImages/ 경로 사용 — 기존 Storage 규칙과 동일하게 적용됨
+        // _fetchStyleFromCloud는 prefixes(하위폴더)만 스캔하므로 루트 파일은 무시됨
+        const path = `styleImages/${projId}/mtg_${Date.now()}_${Math.random().toString(36).slice(2,5)}.jpg`;
+        const ref = _fbStorage.ref(path);
+        const uploadPromise = ref.put(_dataUrlToBlob(img), { contentType:'image/jpeg' })
+          .then(() => ref.getDownloadURL());
+        const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 10000));
+        return await Promise.race([uploadPromise, timeout]);
+      } catch(e) {
+        console.warn('[meetingImg] Firebase 업로드 실패, 로컬 저장:', e.message);
+        return img;
+      }
+    }));
+  }
+
+  // base64 이미지 로컬 저장 — IDB + localStorage vb_mi_* 동시 저장 (둘 다 보장)
+  // ★ _MIdb.put은 내부에서 에러를 삼키므로 catch 불가 → 항상 동시 저장
+  function _saveMeetingImgLocal(meetId, imgs) {
+    const b64 = imgs.filter(img => img && img.startsWith('data:'));
+    if (!b64.length) return;
+    _MIdb.put(meetId, b64); // IDB (비동기, fire-and-forget)
+    try {
+      localStorage.setItem(`vb_mi_${meetId}`, JSON.stringify(b64)); // 동기 보장
+    } catch(e) {
+      console.warn('[meetImg] localStorage vb_mi 저장 실패:', e.message);
+    }
+  }
+
+  if (_editingMeetingId) {
+    // ── 수정 모드 ──────────────────────────────
+    const idx = proj.meetings.findIndex(m => m.id === _editingMeetingId);
+    if (idx !== -1) {
+      proj.meetings[idx] = {
+        ...proj.meetings[idx],
+        title, content,
+        images: imgSnapshot,
+        mentions: mentionEmails,
+        updatedAt: Date.now(),
+      };
+      _saveMeetingImgLocal(_editingMeetingId, imgSnapshot);
+    }
+    _editingMeetingId = null;
+    save();
+    closeMeetingAdd();
+    renderMeetingTab();
+    if (_currentMeetingId) openMeetingDetail(_currentMeetingId);
+    showToastMessage('✅ 기록이 수정됐습니다');
+    if (proj.cloudId) _syncMeetingsToCloud(proj);
+  } else {
+    // ── 신규 생성 ──────────────────────────────
+    const meeting = {
+      id: 'meet_' + Date.now() + Math.random().toString(36).slice(2,6),
+      title, content,
+      images: imgSnapshot,
+      mentions: mentionEmails,
+      createdAt: Date.now(),
+      createdBy: state.user?.email || '',
+      createdByName: state.user?.name || state.user?.email?.split('@')[0] || '',
+    };
+    proj.meetings.push(meeting);
+    _saveMeetingImgLocal(meeting.id, imgSnapshot);
+    save();
+    closeMeetingAdd();
+    renderMeetingTab();
+    showToastMessage('✅ 기록이 저장됐습니다');
+    if (proj.cloudId) _syncMeetingsToCloud(proj);
+    if (mentionEmails.length) _sendMentionNotifications(meeting, mentionEmails, proj);
+  }
+}
+
+async function _syncMeetingsToCloud(proj) {
+  const ok = await _initFirebase();
+  if (!ok || !_db || !proj.cloudId) return;
+  try {
+    // base64 이미지는 localStorage에만 저장 → Firestore 1MB 제한 방지
+    const meetingsLite = (proj.meetings || []).map(m => ({
+      ...m,
+      images: Array.isArray(m.images)
+        ? m.images.filter(img => img && !img.startsWith('data:'))
+        : [],
+    }));
+    await _db.collection('vb_projects').doc(proj.cloudId).update({
+      'projectData.meetings': meetingsLite,
+      'meta.updatedAt': firebase.firestore.FieldValue.serverTimestamp(),
+      'meta.updatedBy': state.user?.email || '',
+    });
+  } catch(e) { console.error('[meetingSync]', e); }
+}
+
+async function _sendMentionNotifications(meeting, emails, proj) {
+  const projName = proj.name || '시공 프로젝트';
+  const sender = state.user?.name || state.user?.email?.split('@')[0] || '';
+  for (const email of emails) {
+    try {
+      await emailjs.send('service_elvk718', 'template_11ldrbw', {
+        to_email: email,
+        to_name: email.split('@')[0],
+        from_name: sender,
+        project_name: projName,
+        invite_link: location.href,
+        role: `회의록 "${meeting.title}"에서 멘션됐습니다:\n${meeting.content.slice(0,100)}`,
+      });
+    } catch(e) { console.error('[mentionNotify]', e); }
+  }
+}
+
+// ── InBlog 연동 ──────────────────────────────────────────────────────────────
+const INBLOG_API_KEY = '33f3a8e6ed9eb76f1504b662438cb072682ec383a0d9442eaefad375c1e9bb1b';
+const INBLOG_API_BASE = 'https://inblog.ai/api/v1';
+// Anthropic API 키 관리 (localStorage 저장, 코드에 직접 포함 금지)
+let _pendingPublishAfterKey = false;
+
+function _getAnthropicKey() {
+  return (localStorage.getItem('vs_anthropic_key') || '').trim();
+}
+
+function _saveAnthropicKey() {
+  const input = document.getElementById('anthropic-key-input');
+  const key = (input?.value || '').trim();
+  if (!key.startsWith('sk-ant')) {
+    showToastMessage('⚠️ 올바른 API 키 형식이 아닙니다 (sk-ant... 로 시작해야 함)');
+    return;
+  }
+  localStorage.setItem('vs_anthropic_key', key);
+  document.getElementById('dlg-anthropic-key').style.display = 'none';
+  if (_pendingPublishAfterKey) {
+    _pendingPublishAfterKey = false;
+    publishMeetingToInblog();
+  }
+}
+const SEO_KEYWORDS = ['반셀프 인테리어','턴키 인테리어','분당 구축 인테리어','분당 국평 인테리어','성남 인테리어','판교 인테리어','분당 인테리어','인테리어 공정 관리','시공 회의'];
+let _currentMeetingId = null;
+let _blogPreviewData = null;
+let _blogEditMode = false;
+
+// 회의록 content 정규화: 정상 HTML / 이중인코딩(&lt;div&gt;) / 플레인텍스트 자동 판별
+function _normalizeMeetingContent(raw) {
+  if (!raw) return { decoded: '', type: 'text' };
+  // 정상 HTML 태그
+  if (/<(div|br|p|ul|ol|li|span|hr|b|i|u|strong|em)\b/i.test(raw)) {
+    return { decoded: raw, type: 'html' };
+  }
+  // 이중 인코딩 (&lt;div&gt; → <div>) — 구버전 esc() 버그로 저장된 데이터
+  if (/&lt;(div|br|p|ul|ol|li)\b/i.test(raw)) {
+    const decoded = raw
+      .replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>')
+      .replace(/&quot;/g,'"').replace(/&#39;/g,"'");
+    return { decoded, type: 'html' };
+  }
+  // 플레인텍스트
+  return { decoded: raw, type: 'text' };
+}
+
+function openMeetingDetail(id) {
+  _currentMeetingId = id;
+  const proj = getProject();
+  const m = (proj?.meetings||[]).find(x=>x.id===id);
+  if (!m) return;
+  const d = new Date(m.createdAt||0);
+  const dateStr = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  const { decoded: rawContent, type: contentType } = _normalizeMeetingContent(m.content || '');
+  const contentHtml = contentType === 'html'
+    ? rawContent
+    : esc(rawContent).replace(/@([\w가-힣]+)/g, '<span style="color:#5084ff;font-weight:600;">@$1</span>').replace(/\n/g,'<br>');
+  const imgsHtml = (m.images||[]).map(src=>`<img src="${src}" style="width:100%;border-radius:12px;margin-bottom:8px;" onclick="window.open(this.src)">`).join('');
+  document.getElementById('meeting-detail-body').innerHTML = `
+    <h1 style="font-size:24px;font-weight:800;color:#111;line-height:1.35;margin:0 0 14px;word-break:keep-all;">${esc(m.title||'(제목 없음)')}</h1>
+    <div style="font-size:13px;color:#aaa;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #f0f2f5;">${esc(m.createdByName||m.createdBy||'')} · ${dateStr}</div>
+    ${imgsHtml ? `<div style="margin-bottom:16px;">${imgsHtml}</div>` : ''}
+    <div class="meeting-content-view" style="font-size:15px;color:#222;line-height:1.85;word-break:break-word;">${contentHtml}</div>
+  `;
+  const scr = document.getElementById('screen-meeting-detail');
+  scr.style.transform = 'translateY(0)';
+  scr.style.pointerEvents = 'all';
+}
+
+function _openMeetingMoreMenu() { openDialog('dlg-meeting-more'); }
+
+function closeMeetingDetail() {
+  const scr = document.getElementById('screen-meeting-detail');
+  scr.style.transform = 'translateY(100%)';
+  scr.style.pointerEvents = 'none';
+  _currentMeetingId = null;
+}
+
+// ── 회의록 URL 공유 ───────────────────────────────────────────────────────
+async function shareMeetingUrl() {
+  if (!_currentMeetingId) return;
+  const proj = getProject();
+  const m = (proj?.meetings||[]).find(x=>x.id===_currentMeetingId);
+  if (!m) return;
+  const btn = event?.currentTarget;
+  if (btn) { btn.disabled = true; }
+  showToastMessage('🔗 URL 생성 중...');
+  try {
+    const ok = await _initFirebase();
+    if (!ok || !_db) throw new Error('Firebase 연결 실패');
+    if (!firebase.auth().currentUser) {
+      try { await firebase.auth().signInAnonymously(); } catch(e) {}
+    }
+    const d = new Date(m.createdAt||0);
+    const dateStr = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+    const shareData = {
+      title: m.title || '(제목 없음)',
+      content: m.content || '',
+      images: (m.images||[]).filter(img => !img.startsWith('data:')), // base64 제외
+      createdAt: m.createdAt || 0,
+      createdByName: m.createdByName || m.createdBy || '',
+      projectName: proj.name || '',
+      dateStr,
+      sharedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    };
+    const docRef = await _db.collection('vb_meeting_shares').add(shareData);
+    const url = `${window.location.origin}${window.location.pathname}?meeting=${docRef.id}`;
+    if (navigator.clipboard) {
+      await navigator.clipboard.writeText(url);
+      showToastMessage('✅ URL이 클립보드에 복사됐습니다');
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = url; ta.style.cssText = 'position:fixed;top:-9999px;opacity:0;';
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      showToastMessage('✅ URL이 클립보드에 복사됐습니다');
+    }
+  } catch(e) {
+    showToastMessage('⚠️ URL 생성 실패: ' + e.message);
+  }
+  if (btn) { btn.disabled = false; }
+}
+
+// ── 회의록 공유 URL 진입 핸들러 (?meeting=SHARE_ID) ─────────────────────────
+async function _checkMeetingShareUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const shareId = params.get('meeting');
+  if (!shareId) return;
+  // URL은 유지 (SEO용 — history.replaceState 제거)
+  const screen = document.getElementById('screen-meeting-share-view');
+  const content = document.getElementById('meeting-share-view-content');
+  if (!screen || !content) return;
+  screen.style.display = 'block';
+  content.innerHTML = `<div style="text-align:center;padding:80px 20px;">
+    <div class="join-spinner" style="margin:0 auto 16px;width:32px;height:32px;border-width:3px;"></div>
+    <p style="color:#aaa;font-size:14px;">기록 불러오는 중...</p>
+  </div>`;
+  try {
+    const ok = await _initFirebase();
+    if (!ok || !_db) throw new Error('Firebase 연결 실패');
+    const doc = await _db.collection('vb_meeting_shares').doc(shareId).get();
+    if (!doc.exists) {
+      content.innerHTML = '<div style="text-align:center;padding:80px;color:#aaa;font-size:14px;">기록을 찾을 수 없거나 만료되었습니다.</div>';
+      return;
+    }
+    const d = doc.data();
+
+    // ── SEO: 동적 meta 태그 업데이트 ──────────────────────────────────────
+    const pageTitle = `${d.title||'인테리어 기록'} — ${d.projectName||'Vibespace'}`;
+    const plainText = (d.content||'').replace(/<[^>]*>/g,'').slice(0,160);
+    const pageDesc = plainText || `${d.dateStr||''} · ${d.createdByName||''} 작성`;
+    const firstImg = (d.images||[]).find(s => !s.startsWith('data:')) || 'https://vibespacekorea.com/og-image.png';
+    const pageUrl = `https://vibespacekorea.com/?meeting=${shareId}`;
+
+    document.title = pageTitle;
+    _setMeta('name','description', pageDesc);
+    _setMeta('property','og:title', pageTitle);
+    _setMeta('property','og:description', pageDesc);
+    _setMeta('property','og:url', pageUrl);
+    _setMeta('property','og:image', firstImg);
+    _setMeta('property','og:type', 'article');
+    _setMeta('name','twitter:title', pageTitle);
+    _setMeta('name','twitter:description', pageDesc);
+    _setMeta('name','twitter:image', firstImg);
+
+    // canonical 업데이트
+    let canonical = document.querySelector('link[rel="canonical"]');
+    if (canonical) canonical.href = pageUrl;
+
+    // ── JSON-LD 구조화 데이터 삽입 ────────────────────────────────────────
+    const existingLd = document.getElementById('ld-meeting-share');
+    if (existingLd) existingLd.remove();
+    const ldScript = document.createElement('script');
+    ldScript.id = 'ld-meeting-share';
+    ldScript.type = 'application/ld+json';
+    ldScript.textContent = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'BlogPosting',
+      'headline': d.title || '인테리어 기록',
+      'description': pageDesc,
+      'datePublished': d.createdAt ? new Date(d.createdAt).toISOString() : undefined,
+      'author': { '@type': 'Person', 'name': d.createdByName || d.createdBy || 'Vibespace 사용자' },
+      'publisher': { '@type': 'Organization', 'name': 'Vibespace', 'url': 'https://vibespacekorea.com' },
+      'url': pageUrl,
+      'image': firstImg,
+      'keywords': '반셀프 인테리어, 인테리어 공정, 시공 기록, 리모델링'
+    });
+    document.head.appendChild(ldScript);
+
+    // ── 콘텐츠 렌더링 ────────────────────────────────────────────────────
+    const { decoded: rawContent, type: contentType } = _normalizeMeetingContent(d.content||'');
+    const contentHtml = contentType === 'html'
+      ? rawContent
+      : esc(rawContent).replace(/@([\w가-힣]+)/g,'<span style="color:#5084ff;font-weight:600;">@$1</span>').replace(/\n/g,'<br>');
+    const imgsHtml = (d.images||[]).map(src=>`<img src="${src}" style="width:100%;border-radius:12px;margin-bottom:10px;display:block;" onclick="window.open(this.src)">`).join('');
+    content.innerHTML = `
+      <div style="font-size:13px;color:#aaa;margin-bottom:4px;">${esc(d.projectName||'')}</div>
+      <h1 style="font-size:22px;font-weight:800;color:#111;margin:0 0 10px;">${esc(d.title||'')}</h1>
+      <div style="font-size:13px;color:#bbb;margin-bottom:24px;">${esc(d.dateStr||'')} · ${esc(d.createdByName||'')}</div>
+      ${imgsHtml ? `<div style="margin-bottom:20px;">${imgsHtml}</div>` : ''}
+      <div style="font-size:16px;color:#222;line-height:1.85;word-break:break-word;">${contentHtml}</div>
+    `;
+  } catch(e) {
+    content.innerHTML = `<div style="text-align:center;padding:60px;color:#e03535;font-size:14px;">오류: ${esc(e.message)}</div>`;
+  }
+}
+
+function _setMeta(attr, key, value) {
+  let el = document.querySelector(`meta[${attr}="${key}"]`);
+  if (!el) { el = document.createElement('meta'); el.setAttribute(attr, key); document.head.appendChild(el); }
+  el.setAttribute('content', value);
+}
+
+// ── SEO 에이전트: Claude로 블로그 글 생성 → 미리보기 → 발행 ────────────────
+async function publishMeetingToInblog() {
+  if (!_currentMeetingId) return;
+  const proj = getProject();
+  const m = (proj?.meetings||[]).find(x=>x.id===_currentMeetingId);
+  if (!m) return;
+
+  // API 키 없으면 입력 Bottom Sheet 표시
+  if (!_getAnthropicKey()) {
+    _pendingPublishAfterKey = true;
+    document.getElementById('anthropic-key-input').value = '';
+    document.getElementById('dlg-anthropic-key').style.display = 'flex';
+    return;
+  }
+
+  const btn = document.getElementById('btn-publish-blog');
+  btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> AI 생성 중...`;
+  btn.style.opacity = '0.7';
+  btn.disabled = true;
+
+  try {
+    const generated = await _generateSEOPost(m, proj);
+    _blogPreviewData = { ...generated, meetingId: _currentMeetingId };
+
+    // 미리보기 화면 채우기
+    document.getElementById('blog-preview-title-input').value = generated.title;
+    const metaEl = document.getElementById('blog-preview-meta-desc');
+    if (metaEl) { metaEl.value = generated.metaDescription || ''; _updateMetaDescCounter(metaEl); }
+    document.getElementById('blog-preview-html-input').value = generated.html;
+    document.getElementById('blog-preview-rendered').innerHTML = generated.html;
+    _blogEditMode = false;
+    document.getElementById('blog-preview-html-input').style.display = 'none';
+    document.getElementById('blog-preview-rendered').style.display = 'block';
+    document.getElementById('btn-toggle-edit').textContent = 'HTML 편집';
+
+    // 감지된 SEO 키워드 뱃지
+    const allText = generated.html + generated.title + (generated.metaDescription||'');
+    const found = SEO_KEYWORDS.filter(kw => allText.includes(kw));
+    document.getElementById('blog-seo-keywords').innerHTML = found.length
+      ? found.map(kw=>`<span style="font-size:11px;background:#e8f0fe;color:#5084ff;padding:3px 9px;border-radius:10px;font-weight:600;">#${kw}</span>`).join('')
+      : '<span style="font-size:12px;color:#aaa;">키워드 미감지 — HTML 편집에서 직접 추가 가능</span>';
+
+    // 미리보기 스크린 열기
+    const scr = document.getElementById('screen-blog-preview');
+    scr.style.transform = 'translateY(0)';
+    scr.style.pointerEvents = 'all';
+
+  } catch(e) {
+    showToastMessage('AI 생성 실패: ' + e.message);
+  } finally {
+    btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> 블로그 발행`;
+    btn.style.opacity = '1';
+    btn.disabled = false;
+  }
+}
+
+async function _generateSEOPost(meeting, proj) {
+  const apiKey = _getAnthropicKey();
+  if (!apiKey) throw new Error('Anthropic API 키가 설정되지 않았습니다.');
+
+  const d = new Date(meeting.createdAt||0);
+  const dateStr = `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일`;
+  const imgsHtml = (meeting.images||[]).map(src=>`<p><img src="${src}" style="max-width:100%;border-radius:12px;" /></p>`).join('');
+
+  const systemPrompt = `당신은 인테리어 전문 블로그 에디터입니다. 시공 기록을 SEO 최적화된 블로그 포스팅으로 변환합니다.
+반드시 JSON 형식으로만 응답하세요. 코드블록(\`\`\`) 없이 순수 JSON만 반환.`;
+
+  const rawText = (meeting.content||'').replace(/<[^>]*>/g,'');
+
+  const userPrompt = `아래 인테리어 시공 기록을 SEO 최적화된 블로그 글로 작성해주세요.
+
+[기록 정보]
+프로젝트명: ${proj.name||''}
+제목: ${meeting.title||''}
+날짜: ${dateStr}
+작성자: ${meeting.createdByName||meeting.createdBy||''}
+내용:
+${rawText}
+
+[작성 규칙]
+1. 제목: SEO 키워드 1~2개를 자연스럽게 포함한 클릭 유도형 (30자 이내)
+2. metaDescription: 검색 결과에 표시될 요약 (80~120자, 핵심 키워드 포함)
+3. 본문 구성: h2 도입(공감/문제 제기) → h2 본론1 → h3 세부 → h2 본론2 → h2 마무리(CTA)
+4. 분량: 1200~1800자
+5. 키워드를 본문에 자연스럽게 5~7회 분산 삽입 (키워드 스터핑 금지)
+6. h2/h3 헤딩에 키워드 배치 (구글 크롤러 가중치 높음)
+7. 첫 단락 100자 안에 핵심 키워드 1개 이상 배치
+8. 마지막 h2: "Vibespace로 공정 관리 시작하기"
+   마지막 p: "Vibespace는 반셀프·턴키 인테리어 현장의 공정을 체계적으로 관리하는 무료 플랫폼입니다. 지금 바로 시작해보세요."
+9. HTML 태그만: h2, h3, p, ul, li, strong, em, blockquote (script/style 금지)
+10. slug: 영문 소문자+하이픈, 날짜 포함 (예: bundang-remodel-tile-2026-05)
+
+[SEO 핵심 키워드 (자연스럽게 삽입)]
+반셀프 인테리어, 턴키 인테리어, 분당 구축 인테리어, 분당 국평 인테리어,
+성남 인테리어, 판교 인테리어, 분당 인테리어, 인테리어 공정 관리, 시공 기록
+
+[응답 형식 - 순수 JSON만]
+{"title":"SEO 최적화 제목","slug":"english-slug","metaDescription":"검색 결과 요약","html":"<h2>...</h2><p>...</p>..."}`;
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-5',
+      max_tokens: 3500,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userPrompt }]
+    })
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(()=>({}));
+    throw new Error(err.error?.message || `Anthropic API 오류 ${res.status}`);
+  }
+
+  const data = await res.json();
+  const text = data.content?.[0]?.text || '';
+
+  // JSON 파싱 (마크다운 코드블록 제거 포함)
+  const jsonMatch = text.replace(/```json|```/g,'').match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error('AI 응답 파싱 실패');
+  const parsed = JSON.parse(jsonMatch[0]);
+
+  // 이미지 추가
+  if (imgsHtml) parsed.html += imgsHtml;
+
+  return parsed;
+}
+
+function _updateMetaDescCounter(el) {
+  const counter = document.getElementById('meta-desc-counter');
+  if (!counter) return;
+  const len = (el.value||'').length;
+  counter.textContent = `${len} / 120`;
+  counter.style.color = len > 120 ? '#e53935' : len > 100 ? '#f59e0b' : '#aaa';
+}
+
+function closeInblogPreview() {
+  const scr = document.getElementById('screen-blog-preview');
+  scr.style.transform = 'translateY(100%)';
+  scr.style.pointerEvents = 'none';
+  _blogPreviewData = null;
+  _blogEditMode = false;
+}
+
+function toggleBlogEditMode() {
+  _blogEditMode = !_blogEditMode;
+  const rendered = document.getElementById('blog-preview-rendered');
+  const textarea = document.getElementById('blog-preview-html-input');
+  const btn = document.getElementById('btn-toggle-edit');
+  if (_blogEditMode) {
+    rendered.style.display = 'none';
+    textarea.style.display = 'block';
+    btn.textContent = '미리보기';
+  } else {
+    rendered.innerHTML = textarea.value;
+    rendered.style.display = 'block';
+    textarea.style.display = 'none';
+    btn.textContent = 'HTML 편집';
+    // 키워드 뱃지 재검사
+    const html = textarea.value;
+    const found = SEO_KEYWORDS.filter(kw => html.includes(kw));
+    document.getElementById('blog-seo-keywords').innerHTML = found.length
+      ? found.map(kw=>`<span style="font-size:11px;background:#e8f0fe;color:#5084ff;padding:3px 9px;border-radius:10px;font-weight:600;">#${kw}</span>`).join('')
+      : '<span style="font-size:12px;color:#aaa;">키워드 없음</span>';
+  }
+}
+
+async function confirmPublishToInblog() {
+  if (!_blogPreviewData) return;
+  const btn = document.getElementById('btn-confirm-publish');
+  btn.textContent = '발행 중...';
+  btn.disabled = true;
+
+  const title = document.getElementById('blog-preview-title-input').value.trim() || '(제목 없음)';
+  const metaDesc = (document.getElementById('blog-preview-meta-desc')?.value || '').trim();
+  const html = document.getElementById('blog-preview-html-input').value;
+  const baseSlug = (_blogPreviewData.slug || 'meeting-post').replace(/[^a-z0-9-]/gi,'-').toLowerCase();
+
+  try {
+    const payload = {
+      data: {
+        type: 'posts',
+        attributes: {
+          title,
+          slug: baseSlug + '-' + Date.now().toString(36),
+          body: html,
+          ...(metaDesc ? { excerpt: metaDesc, meta_description: metaDesc } : {}),
+          published: true
+        }
+      }
+    };
+
+    const res = await fetch(`${INBLOG_API_BASE}/posts`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${INBLOG_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const json = await res.json();
+
+    if (res.ok && json.data?.id) {
+      const postId = json.data.id;
+      const postSlug = json.data.attributes?.slug || payload.data.attributes.slug;
+
+      // 미팅 데이터에 발행 정보 저장
+      const proj = getProject();
+      const idx = proj.meetings.findIndex(x=>x.id===_blogPreviewData.meetingId);
+      if (idx !== -1) {
+        proj.meetings[idx].inblogPostId = postId;
+        proj.meetings[idx].inblogSlug = postSlug;
+        proj.meetings[idx].inblogPublishedAt = new Date().toISOString();
+        saveState();
+        _syncMeetingsToCloud(proj.id, proj.meetings);
+      }
+
+      // 미팅 상세의 발행 버튼 상태 업데이트
+      const publishBtn = document.getElementById('btn-publish-blog');
+      if (publishBtn) {
+        publishBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> 발행됨`;
+        publishBtn.style.background = '#f0f5ff';
+        publishBtn.style.borderColor = '#c7d9ff';
+        publishBtn.disabled = false;
+        publishBtn.onclick = () => window.open(`https://vibespace.inblog.ai/${postSlug}`, '_blank');
+      }
+
+      closeInblogPreview();
+      showToastMessage('블로그에 발행되었습니다! 🎉');
+
+    } else {
+      throw new Error(json.errors?.[0]?.detail || `오류 ${res.status}`);
+    }
+  } catch(e) {
+    btn.textContent = '발행하기';
+    btn.disabled = false;
+    showToastMessage('발행 실패: ' + e.message);
   }
 }
 </script>
@@ -11217,6 +12931,18 @@ async function fpShareLink() {
 </script>
 
 <!-- ===== 공사계획 공유 뷰어 화면 ===== -->
+<!-- ===== 회의록 공유 뷰어 ===== -->
+<div id="screen-meeting-share-view" style="display:none;position:fixed;inset:0;background:#fff;z-index:99998;overflow-y:auto;">
+  <div style="position:sticky;top:0;background:#fff;border-bottom:1px solid #eef0f5;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;z-index:1;padding-top:max(env(safe-area-inset-top,0px),12px);">
+    <a href="https://vibespacekorea.com" style="display:flex;align-items:center;gap:8px;text-decoration:none;color:#111;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span style="font-size:15px;font-weight:700;">바이브스페이스</span>
+    </a>
+    <span style="font-size:13px;color:#bbb;font-weight:500;">기록</span>
+  </div>
+  <div id="meeting-share-view-content" style="max-width:680px;margin:0 auto;padding:24px 20px 60px;"></div>
+</div>
+
 <div id="screen-export-view" style="display:none;position:fixed;inset:0;background:#f0f2f7;z-index:99998;overflow-y:auto;">
   <!-- 뷰어 헤더 -->
   <div style="position:sticky;top:0;background:#fff;border-bottom:1px solid #eef0f5;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;z-index:1;padding-top:max(env(safe-area-inset-top,0px),12px);">
@@ -11264,11 +12990,11 @@ async function fpShareLink() {
     <div style="display:flex;align-items:center;gap:2px;">
       <!-- 추가 -->
       <button class="sv-icon-btn" onclick="openStyleAddFromViewer()" title="이미지 추가">
-        <svg width="20" height="20" fill="none" stroke="#333" stroke-width="2.2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <svg width="22" height="22" fill="none" stroke="#333" stroke-width="2.2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       </button>
       <!-- 삭제 -->
       <button class="sv-icon-btn" onclick="deleteStyleImage()" title="이미지 삭제">
-        <svg width="20" height="20" fill="none" stroke="#333" stroke-width="2.2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M4 5C4 4.44772 4.44772 4 5 4H19C19.5523 4 20 4.44772 20 5C20 5.55228 19.5523 6 19 6H5C4.44772 6 4 5.55228 4 5Z" fill="#333"/><path fill-rule="evenodd" clip-rule="evenodd" d="M8.77778 3.33333C8.77778 2.59695 9.37473 2 10.1111 2L13.8889 2C14.6253 2 15.2222 2.59695 15.2222 3.33333C15.2222 3.70152 15.5207 4 15.8889 4H16V6H15.8889C14.6463 6 13.6023 5.15015 13.3062 4L10.6938 4C10.3977 5.15015 9.35367 6 8.11111 6H8V4L8.11111 4C8.4793 4 8.77778 3.70152 8.77778 3.33333Z" fill="#333"/><path fill-rule="evenodd" clip-rule="evenodd" d="M5.91695 8.00345C6.46733 7.95758 6.95068 8.36657 6.99654 8.91695L7.7673 18.1661C7.85368 19.2027 8.72022 20 9.76039 20H14.2396C15.2798 20 16.1463 19.2027 16.2327 18.1661L17.0034 8.91695C17.0493 8.36657 17.5327 7.95758 18.083 8.00345C18.6334 8.04931 19.0424 8.53266 18.9965 9.08304L18.2258 18.3322C18.053 20.4053 16.32 22 14.2396 22H9.76039C7.68004 22 5.94697 20.4053 5.77421 18.3322L5.00345 9.08304C4.95758 8.53266 5.36657 8.04931 5.91695 8.00345Z" fill="#333"/></svg>
       </button>
     </div>
   </div>
@@ -11309,7 +13035,7 @@ async function fpShareLink() {
   <!-- 메모 플로팅 버튼 (우측 하단 독립) -->
   <div id="sv-memo-float" style="display:none;">
     <button class="sv-memo-float-btn" onclick="_svToggleMemoInput()" title="메모">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="#333"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+      <svg width="18" height="18" viewBox="0 0 32 37" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16 6.25H12.25C8.93629 6.25 6.25 8.93629 6.25 12.25V19.75C6.25 23.0637 8.93629 25.75 12.25 25.75H19.75C23.0637 25.75 25.75 23.0637 25.75 19.75V16M16.481 15.4534L24.896 7.03838" stroke="#333" stroke-width="3" stroke-linecap="round"/></svg>
     </button>
   </div>
 </div>
@@ -11573,7 +13299,7 @@ async function fpShareLink() {
         </div>
         <div class="fp-prop-group" style="margin-top:auto;padding-top:8px;">
           <button class="fp-hbtn danger" onclick="fpDeleteSelected()" style="width:100%;justify-content:center;">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M4 5C4 4.44772 4.44772 4 5 4H19C19.5523 4 20 4.44772 20 5C20 5.55228 19.5523 6 19 6H5C4.44772 6 4 5.55228 4 5Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M8.77778 3.33333C8.77778 2.59695 9.37473 2 10.1111 2L13.8889 2C14.6253 2 15.2222 2.59695 15.2222 3.33333C15.2222 3.70152 15.5207 4 15.8889 4H16V6H15.8889C14.6463 6 13.6023 5.15015 13.3062 4L10.6938 4C10.3977 5.15015 9.35367 6 8.11111 6H8V4L8.11111 4C8.4793 4 8.77778 3.70152 8.77778 3.33333Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M5.91695 8.00345C6.46733 7.95758 6.95068 8.36657 6.99654 8.91695L7.7673 18.1661C7.85368 19.2027 8.72022 20 9.76039 20H14.2396C15.2798 20 16.1463 19.2027 16.2327 18.1661L17.0034 8.91695C17.0493 8.36657 17.5327 7.95758 18.083 8.00345C18.6334 8.04931 19.0424 8.53266 18.9965 9.08304L18.2258 18.3322C18.053 20.4053 16.32 22 14.2396 22H9.76039C7.68004 22 5.94697 20.4053 5.77421 18.3322L5.00345 9.08304C4.95758 8.53266 5.36657 8.04931 5.91695 8.00345Z" fill="currentColor"/></svg>
             삭제
           </button>
         </div>
@@ -11607,7 +13333,7 @@ async function fpShareLink() {
     </button>
     <h2 id="cv-title" style="flex:1;font-size:16px;font-weight:700;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 6px;"></h2>
     <button class="sv-icon-btn" onclick="_deleteCvCurrent()" title="삭제">
-      <svg width="20" height="20" fill="none" stroke="#333" stroke-width="2.2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M4 5C4 4.44772 4.44772 4 5 4H19C19.5523 4 20 4.44772 20 5C20 5.55228 19.5523 6 19 6H5C4.44772 6 4 5.55228 4 5Z" fill="#333"/><path fill-rule="evenodd" clip-rule="evenodd" d="M8.77778 3.33333C8.77778 2.59695 9.37473 2 10.1111 2L13.8889 2C14.6253 2 15.2222 2.59695 15.2222 3.33333C15.2222 3.70152 15.5207 4 15.8889 4H16V6H15.8889C14.6463 6 13.6023 5.15015 13.3062 4L10.6938 4C10.3977 5.15015 9.35367 6 8.11111 6H8V4L8.11111 4C8.4793 4 8.77778 3.70152 8.77778 3.33333Z" fill="#333"/><path fill-rule="evenodd" clip-rule="evenodd" d="M5.91695 8.00345C6.46733 7.95758 6.95068 8.36657 6.99654 8.91695L7.7673 18.1661C7.85368 19.2027 8.72022 20 9.76039 20H14.2396C15.2798 20 16.1463 19.2027 16.2327 18.1661L17.0034 8.91695C17.0493 8.36657 17.5327 7.95758 18.083 8.00345C18.6334 8.04931 19.0424 8.53266 18.9965 9.08304L18.2258 18.3322C18.053 20.4053 16.32 22 14.2396 22H9.76039C7.68004 22 5.94697 20.4053 5.77421 18.3322L5.00345 9.08304C4.95758 8.53266 5.36657 8.04931 5.91695 8.00345Z" fill="#333"/></svg>
     </button>
   </div>
   <!-- scroll body: player + products -->
@@ -11619,7 +13345,7 @@ async function fpShareLink() {
   <!-- floating pencil button -->
   <div id="cv-product-float">
     <button class="sv-memo-float-btn" onclick="openCvProductSheet()" title="제품 추가">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="#333"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+      <svg width="18" height="18" viewBox="0 0 32 37" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16 6.25H12.25C8.93629 6.25 6.25 8.93629 6.25 12.25V19.75C6.25 23.0637 8.93629 25.75 12.25 25.75H19.75C23.0637 25.75 25.75 23.0637 25.75 19.75V16M16.481 15.4534L24.896 7.03838" stroke="#333" stroke-width="3" stroke-linecap="round"/></svg>
     </button>
   </div>
 </div>
