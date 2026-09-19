@@ -254,6 +254,12 @@ button, input, textarea, select { font-family:var(--font); }
 .header-home-btn:hover { background:var(--bg); color:#333; }
 .header-home-btn:active { background:#e8eaf0; }
 .header-actions { display:flex; align-items:center; gap:8px; flex-shrink:0; justify-self:end; }
+@media (min-width: 660px) {
+  .header {
+    padding-left: max(20px, calc((100% - 640px) / 2));
+    padding-right: max(20px, calc((100% - 640px) / 2));
+  }
+}
 .icon-btn {
   width:40px; height:40px; border-radius:10px; background:#fff;
   border:1px solid var(--border-light);
