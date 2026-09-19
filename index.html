@@ -254,12 +254,6 @@ button, input, textarea, select { font-family:var(--font); }
 .header-home-btn:hover { background:var(--bg); color:#333; }
 .header-home-btn:active { background:#e8eaf0; }
 .header-actions { display:flex; align-items:center; gap:8px; flex-shrink:0; justify-self:end; }
-@media (min-width: 660px) {
-  .header {
-    padding-left: max(20px, calc((100% - 640px) / 2));
-    padding-right: max(20px, calc((100% - 640px) / 2));
-  }
-}
 .icon-btn {
   width:40px; height:40px; border-radius:10px; background:#fff;
   border:1px solid var(--border-light);
@@ -2865,15 +2859,37 @@ button, input, textarea, select { font-family:var(--font); }
   .export-hdr-label { display:none; }
 }
 
-/* ===== PC 레이아웃: 640px 센터 컨테이너 (Threads.com 기준 ~620px) ===== */
+/* ===== PC 레이아웃 ===== */
 @media (min-width: 660px) {
   html, body { height: 100%; background: #fff; }
-  .app {
-    max-width: 640px;
-    margin: 0 auto;
-    /* 배경 흰색 — 경계선 없이 자연스럽게 */
-    box-shadow: none;
+  .app { max-width: 100%; margin: 0; box-shadow: none; }
+
+  /* 헤더: 풀 와이드, 내부 콘텐츠 최대 1200px 중앙 정렬 */
+  .header {
+    padding-left:  max(32px, calc((100% - 1200px) / 2 + 32px));
+    padding-right: max(32px, calc((100% - 1200px) / 2 + 32px));
   }
+
+  /* 탭/콘텐츠 영역: 최대 너비 제한으로 가독성 유지 */
+  .tab-section,
+  .plan-phase-bar,
+  #work-cards,
+  #calendar-container,
+  .summary-wrap,
+  #tab-style .style-tab-inner,
+  #tab-content .content-tab-inner,
+  #tab-meeting #meeting-list,
+  .spec-cat-bar,
+  #spec-grid {
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  /* 콘텐츠 그리드: PC에서 3열 */
+  #content-list { grid-template-columns: 1fr 1fr 1fr; }
+  /* 스펙북 그리드: PC에서 5열 */
+  #spec-grid { grid-template-columns: repeat(5, 1fr); }
+
   /* 갤러리: 좌우 패딩 늘려서 이미지가 엣지에 붙지 않게 */
   #sv-gallery-area { padding: 8px 12px 80px; }
   .sv-gallery-masonry { gap: 8px; }
